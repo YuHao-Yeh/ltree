@@ -1,10 +1,12 @@
 import argparse
 import sys
 
-from .core import list_dir, scan_tree
+from .core import scan_tree
 from .config import TreeConfig
-from .schema import Stats
-from .exporters import render_text, render_json, render_markdown, print_stats, render_markdown_as_block
+from .exporters import (
+    render_text, render_json, render_markdown, render_markdown_as_block,
+    print_stats
+)
 
 
 def parse_args():
@@ -61,29 +63,6 @@ def run(args: argparse):
         if is_console:
             print_stats(root)
 
-        """
-        stats = Stats()
-
-        list_dir(
-            start_path=args.start_path, 
-            file=output_file, 
-            is_console=is_console, 
-            stats=stats, 
-            use_color=(not args.no_color),
-            folders_only=args.folders_only,
-            dirs_first=args.dirs_first,
-            show_ellipsis=args.show_ellipsis,
-            max_depth=args.max_depth,
-            config=config,
-            is_root=True
-        )
-        if is_console:
-            total_dirs = stats.visible_dirs + stats.hidden_dirs
-            total_files = stats.visible_files + stats.hidden_files
-
-            print(f"\nVisible: {stats.visible_dirs:>3} dir(s), {stats.visible_files:>3} file(s)")
-            print(f"Total  : {total_dirs:>3} dir(s), {total_files:>3} file(s)")
-        """
     finally:
         if not is_console:
             output_file.close()

@@ -1,4 +1,6 @@
 import json
+from io import TextIOWrapper
+from typing import TextIO
 
 from .schema import TreeNode
 from .config import TreeConfig
@@ -7,8 +9,8 @@ from .utils import write_line
 
 
 def render_text(
-    node: TreeNode, 
-    file,
+    node: TreeNode,
+    file: TextIO | TextIOWrapper,
     config: TreeConfig,
     indent: str = "",
     is_last: bool = True,
@@ -67,7 +69,7 @@ def render_markdown(node, file, depth=0):
         render_markdown(child, file, depth + 1)
 
 def render_markdown_as_block(node, file, config: TreeConfig):
-    write_line(file, "```text")     # or use ```bash
+    write_line(file, "```text")                 # or use ```bash
     config.use_color = False
     render_text(node, file, config)
     write_line(file, "```")
