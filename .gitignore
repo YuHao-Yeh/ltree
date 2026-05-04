@@ -11,7 +11,7 @@ wheels/
 .venv
 
 # Test
-tree.txt
+output/
 
 # Other files
 legacy/

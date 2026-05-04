@@ -6,12 +6,14 @@ class TreeConfig:
         self.exclude_files: set = {'.DS_Store', 'error*', 'tree.txt'}
         self.exclude_exts: set = set()
         self.exclude_prefixes: set = set()
-
-        self._subtree_cache: dict = {}
-
-        # 
         self._exact_files = set()
         self._pattern_files = []
+
+        self._subtree_cache: dict = {}
+        self.folders_only: bool = False
+        self.dirs_first: bool = False
+        self.use_color: bool = False
+        self.show_ellipsis: bool = False
 
         self._prepare_patterns()
 
@@ -44,5 +46,10 @@ class TreeConfig:
             self.exclude_exts.add(dir)
         for dir in args.ex_prefix:
             self.exclude_prefixes.add(dir)
+        
+        self.folders_only = args.folders_only
+        self.dirs_first = args.dirs_first
+        self.use_color = not args.no_color
+        self.show_ellipsis = args.show_ellipsis
         
         self._prepare_patterns()

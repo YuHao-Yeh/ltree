@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class Stats:
@@ -6,3 +6,21 @@ class Stats:
     visible_files: int = 0
     hidden_dirs: int = 0
     hidden_files: int = 0
+
+    @property
+    def total_dirs(self):
+        return self.visible_dirs + self.hidden_dirs
+    
+    @property
+    def total_files(self):
+        return self.visible_files + self.hidden_files
+
+
+@dataclass
+class TreeNode:
+    name: str
+    is_dir: bool
+    path: str
+    children: list['TreeNode'] = field(default_factory=list)
+    stats: Stats = field(default_factory=Stats)
+    is_truncated: bool = False

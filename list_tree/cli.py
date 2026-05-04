@@ -1,15 +1,17 @@
 import argparse
 import sys
 
-from .core import list_dir
+from .core import list_dir, scan_tree
 from .config import TreeConfig
 from .schema import Stats
+from .exporters import render_text, render_json, render_markdown, print_stats, render_markdown_as_block
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="List directory structure as a tree.")
     parser.add_argument('start_path', nargs='?', default='.', help='Starting directory path (default: current directory)')
     parser.add_argument('-o', '--output', default='tree.txt', help='Output file name (default: tree.txt). Use "-" to print to stdout.')
+    parser.add_argument('-f', '--format', choices=['text', 'json', 'markdown', 'md', 'md_block'], default='text', help='Output format')
     parser.add_argument('--no-color', action='store_true', help='Disable color output even if printing to console', dest='no_color')
     parser.add_argument('--ex-dirs', '--exclude-dirs', action='append', default=[], help='Exclude certain directory', dest='ex_dirs')
     parser.add_argument('--ex-files', '--exclude-files', action='append', default=[], help='Exclude certain files', dest='ex_files')
@@ -29,7 +31,6 @@ def parse_args():
 def run(args: argparse):
     config = TreeConfig()
     config.apply_args(args)
-    stats = Stats()
 
     is_console = (args.output == '-')
     if is_console:
@@ -38,6 +39,31 @@ def run(args: argparse):
         output_file = open(args.output, 'w', encoding='utf-8')
   
     try:
+        root = scan_tree(
+            path=args.start_path,
+            config=config,
+            max_depth=args.max_depth,
+            folders_only=args.folders_only
+        )
+
+        match args.format:
+            case "json":
+                render_json(node=root, file=output_file)
+            case "markdown" | "md":
+                render_markdown(node=root, file=output_file)
+            case "md_block":
+                render_markdown_as_block(node=root, file=output_file, config=config)
+            case "text":
+                render_text(node=root, file=output_file, config=config)
+            case _:
+                print("Unsupport format")
+                return
+        if is_console:
+            print_stats(root)
+
+        """
+        stats = Stats()
+
         list_dir(
             start_path=args.start_path, 
             file=output_file, 
@@ -57,6 +83,7 @@ def run(args: argparse):
 
             print(f"\nVisible: {stats.visible_dirs:>3} dir(s), {stats.visible_files:>3} file(s)")
             print(f"Total  : {total_dirs:>3} dir(s), {total_files:>3} file(s)")
+        """
     finally:
         if not is_console:
             output_file.close()
