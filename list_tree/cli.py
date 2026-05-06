@@ -85,10 +85,10 @@ def run(args: argparse):
 
         match args.format:
             case "json":
-                render_json(node=root, file=output_file)
+                render_json(node=root, file=output_file, config=config)
             case "markdown" | "md":
-                render_markdown(node=root, file=output_file)
-            case "md_block":
+                render_markdown(node=root, file=output_file, config=config)
+            case "block":
                 render_markdown_as_block(node=root, file=output_file, config=config)
             case "text":
                 render_text(node=root, file=output_file, config=config)
@@ -96,7 +96,7 @@ def run(args: argparse):
                 print("Unsupport format")
                 return
         if is_console:
-            print_stats(root)
+            print_stats(root, config)
 
     finally:
         if not is_console:

@@ -8,6 +8,16 @@ from .constants import COLOR_DIR, COLOR_FILE, COLOR_RESET
 from .utils import write_line
 
 
+def format_size(size_bytes: float, human: bool = False):
+    if not human:
+        return f"{size_bytes:>8} B"
+    
+    for unit in ['B', 'K', 'M', 'G', 'T']:
+        if size_bytes < 1024:
+            return f"{size_bytes:>5.1f} {unit}"
+        size_bytes /= 1024
+    return f"{size_bytes:>5.1f} P"
+
 def render_text(
     node: TreeNode,
     file: TextIO | TextIOWrapper,
@@ -16,17 +26,22 @@ def render_text(
     is_last: bool = True,
     is_root: bool = True
 ):
-    use_color = config.use_color
-    display_name = node.name + ("/" if node.is_dir else "")
+    path_display = node.path.replace('\\', '/')
+    name = path_display if config.full_path and not is_root else node.name
+    display_name = name + ("/" if node.is_dir and not name.endswith("/") else "")
     
+    size_str = ""
+    if config.show_size:
+        size_str = f"[{format_size(node.size, config.human_readable)}] "
+
     if is_root:
-        write_line(file, display_name)
+        write_line(file, size_str + display_name)
     else:
         branch = '└── ' if is_last else '├── '
-        if use_color:
+        if config.use_color:
             color = COLOR_DIR if node.is_dir else COLOR_FILE
             display_name = f"{color}{display_name}{COLOR_RESET}"
-        write_line(file, indent + branch + display_name)
+        write_line(file, indent + branch + size_str + display_name)
 
     # Truncated
     if node.is_truncated and config.show_ellipsis:
@@ -43,15 +58,19 @@ def render_text(
     for i, child in enumerate(node.children):
         render_text(child, file, config, new_indent, i == len(node.children)-1, False)
 
-def render_json(node: TreeNode, file):
+def render_json(node: TreeNode, file, config: TreeConfig):
     def to_dict(n: TreeNode):
         d = {
             "name": n.name,
             "type": "directory" if n.is_dir else "file",
+            "size_bytes": n.size,
         }
+        if config.human_readable:
+            d["size_human"] = format_size(n.size, True).strip()
+
         if n.is_dir:
             d.update({
-                "content": {
+                "content_summary": {
                     "folders": n.stats.total_dirs,
                     "files": n.stats.total_files
                 },
@@ -60,22 +79,34 @@ def render_json(node: TreeNode, file):
         return d
     json.dump(to_dict(node), file, indent=4)
 
-def render_markdown(node, file, depth=0):
+def render_markdown(node, file, config: TreeConfig, depth=0):
     indent = "  " * depth
     icon = "📂" if node.is_dir else "📄"
-    name_display = f"`{node.name}/`" if node.is_dir else f"`{node.name}`"
-    write_line(file, f"{indent}- {icon} {name_display}")
+
+    size_str = ""
+    if config.show_size:
+        size_str = f"`{format_size(node.size, config.human_readable).strip()}` "
+
+    name_display = f"**{node.name}/**" if node.is_dir else f"`{node.name}`"
+    write_line(file, f"{indent}- {icon} {size_str}{name_display}")
+
     for child in node.children:
-        render_markdown(child, file, depth + 1)
+        render_markdown(child, file, config, depth + 1)
 
 def render_markdown_as_block(node, file, config: TreeConfig):
     write_line(file, "```text")                 # or use ```bash
-    config.use_color = False
-    render_text(node, file, config)
+    import copy
+    tmp_config = copy.copy(config)
+    tmp_config.use_color = False
+    render_text(node, file, tmp_config)
     write_line(file, "```")
 
-def print_stats(node: TreeNode):
+def print_stats(node: TreeNode, config: TreeConfig):
     s = node.stats
-    print(f"\nSummary:")
-    print(f"Visible: {s.visible_dirs:>3} dir(s), {s.visible_files:>3} file(s)")
-    print(f"Total  : {s.total_dirs:>3} dir(s), {s.total_files:>3} file(s)")
+    size_str = ""
+    if config.show_size:
+        size_str = f" ({format_size(node.size, config.human_readable).strip()})"
+
+    print(f"\nSummary{size_str}:")
+    print(f"Visible: {s.visible_dirs:>3} directories, {s.visible_files:>3} files")
+    print(f"Total  : {s.total_dirs:>3} directories, {s.total_files:>3} files")
