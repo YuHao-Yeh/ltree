@@ -15,10 +15,13 @@ class TreeConfig:
 
         self._subtree_cache: dict = {}
 
+        self.use_color: bool = False
+        self.show_size: bool = False
+        self.human_readable: bool = False
         self.show_all: bool = False
         self.folders_only: bool = False
+        self.full_path: bool = False
         self.dirs_first: bool = False
-        self.use_color: bool = False
         self.show_ellipsis: bool = False
 
         self._prepare_patterns()
@@ -58,10 +61,16 @@ class TreeConfig:
         for pre in args.ex_prefix:
             self.exclude_prefixes.add(pre)
         
+        if args.output != "-":
+            self.use_color = False
+        else:
+            self.use_color = args.color
+        self.show_size = args.show_size
+        self.human_readable = args.human_readable
         self.show_all = args.show_all
         self.folders_only = args.folders_only
+        self.full_path = args.full_path
         self.dirs_first = args.dirs_first
-        self.use_color = not args.no_color
         self.show_ellipsis = args.show_ellipsis
         
         self._prepare_patterns()
