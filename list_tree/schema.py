@@ -21,6 +21,7 @@ class TreeNode:
     name: str
     is_dir: bool
     path: str
+    size: int = 0
     children: list['TreeNode'] = field(default_factory=list)
     stats: Stats = field(default_factory=Stats)
     is_truncated: bool = False

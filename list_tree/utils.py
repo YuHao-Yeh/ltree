@@ -21,22 +21,31 @@ def is_excluded(item: str, is_dir: bool, config: TreeConfig):
     return False
 
 def count_subtree(path: str, config: TreeConfig):
-    if path in config._subtree_cache:
-        return config._subtree_cache[path]
+    if path in config.subtree_cache:
+        return config.subtree_cache[path]
     
     total_dirs = 0
     total_files = 0
+    total_size = 0
 
     for root, dirs, files in os.walk(path):
         dirs[:] = [d for d in dirs if not is_excluded(d, True, config)]
-        files = [f for f in files if not is_excluded(f, False, config)]
+
+        for f in files:
+            if not is_excluded(f, False, config):
+                total_files += 1
+                try:
+                    f_path = os.path.join(root, f)
+                    total_size += os.path.getsize(f_path)
+                except OSError:
+                    pass
 
         total_dirs += len(dirs)
-        total_files += len(files)
 
-    config._subtree_cache[path] = (total_dirs, total_files)
+    res = (total_dirs, total_files, total_size)
+    config._subtree_cache[path] = res
 
-    return total_dirs, total_files
+    return res
 
 def write_line(file, text):
     if file is None:
