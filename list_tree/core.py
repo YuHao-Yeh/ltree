@@ -10,9 +10,12 @@ def scan_tree(
     path: str,
     config: TreeConfig,
     max_depth: int = None,
-    curr_depth: int = 0,
-    folders_only: bool = False
+    curr_depth: int = 0
 ) -> TreeNode:
+    if not os.path.exists(path):
+        print(f"Error: Path '{path}' does not exist.", file=sys.stderr)
+        return None
+    
     is_dir = os.path.isdir(path)
     name = os.path.basename(os.path.abspath(path)) if curr_depth == 0 else os.path.basename(path)
     node = TreeNode(name=name, is_dir=is_dir, path=path)
@@ -33,13 +36,14 @@ def scan_tree(
                 if is_excluded(entry.name, entry.is_dir(), config):
                     continue
 
-                if folders_only and not entry.is_dir():
-                    continue
-
                 # visible file
                 if not entry.is_dir():
                     f_size = entry.stat().st_size
                     node.size += f_size
+
+                    if config.folders_only:
+                        node.stats.hidden_files += 1
+                        continue
 
                     node.stats.visible_files += 1
                     node.children.append(TreeNode(name=entry.name, is_dir=False, path=entry.path, size=f_size))
@@ -73,6 +77,7 @@ def scan_tree(
 
                         node.size += child.size
     except PermissionError:
+        print(f"Error: No permission for the path '{path}'", file=sys.stderr)
         return
 
     return node

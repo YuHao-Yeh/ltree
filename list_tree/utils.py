@@ -5,18 +5,37 @@ from .config import TreeConfig
 
 
 def is_excluded(item: str, is_dir: bool, config: TreeConfig):
+    # Priority 1
+    if item in config.added_items:
+        return False
+
+    # Priority 2
+    if is_dir:
+        if item in config.exclude_dirs:
+            return True
+    else:
+        if item in config.exclude_files:
+            return True
+        if any(item.endswith(ext) for ext in config.exclude_exts):
+            return True    
+
     if any(item.startswith(p) for p in config.exclude_prefixes):
         return True
     
-    if is_dir:
-        return item in config.exclude_dirs
-    else:
-        if item in config._exact_files:
-            return True
+    if not is_dir:
         if any(fnmatch.fnmatch(item, pattern) for pattern in config._pattern_files):
             return True
-        if any(item.endswith(ext) for ext in config.exclude_exts):
+
+    # Prioirty 3:
+    if not config.show_all:
+        if item.startswith(".") and item not in [".", "./"]:
             return True
+        # if is_dir and item in config.exclude_dirs:
+        #     return True
+        # if not is_dir and item in config._exact_files:
+        #     return True
+        # if any(fnmatch.fnmatch(item, pattern) for pattern in config._pattern_files):
+        #     return True
 
     return False
 
