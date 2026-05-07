@@ -4,10 +4,10 @@ import pytest
 import sys
 from unittest.mock import MagicMock, patch, mock_open
 
-from list_tree.cli import parse_args, run, main
+from ltree.cli import parse_args, run, main
 
 
-CLI_MODULE = "list_tree.cli"
+CLI_MODULE = "ltree.cli"
 
 @pytest.fixture
 def base_args():

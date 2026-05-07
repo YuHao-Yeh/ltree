@@ -1,8 +1,8 @@
 import io
 import json
-from list_tree.schema import TreeNode, Stats
-from list_tree.config import TreeConfig
-from list_tree.exporters import (
+from ltree.schema import TreeNode, Stats
+from ltree.config import TreeConfig
+from ltree.exporters import (
     format_size, render_text, render_json, render_markdown,
     render_markdown_as_block, print_stats
 )
