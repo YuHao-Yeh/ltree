@@ -1,4 +1,4 @@
-# Python-generated files
+# --- Python ---
 __pycache__/
 *.py[oc]
 *.pyc
@@ -8,12 +8,29 @@ wheels/
 *.egg-info
 .pytest_cache
 .coverage
+htmlcov/
+.venv/
+env/
+venv/
+ENV/
 
-# Virtual environments
+# --- Environments ---
+.env
 .venv
+pip-log.txt
 
-# Test
-output/
+# --- Editor / IDE ---
+.vscode
+.idea/
+*.swp
+*.swo
 
-# Other files
+# --- System ---
+.DS_Store
+Thumbs.db
+
+# --- Project Specific ---
 legacy/
+output/
+tree.txt
+*.log
