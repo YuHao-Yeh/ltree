@@ -10,8 +10,8 @@ class TreeConfig:
         self.exclude_exts: set = set()
         self.exclude_prefixes: set = set()
         self.added_items: set = set()
-        self._exact_files = set()
-        self._pattern_files = []
+        self._exact_files: set = set()
+        self._pattern_files: list = []
 
         self._subtree_cache: dict = {}
 
@@ -26,7 +26,7 @@ class TreeConfig:
 
         self._prepare_patterns()
 
-    def _prepare_patterns(self):
+    def _prepare_patterns(self) -> None:
         self._exact_files.clear()
         self._pattern_files.clear()
 

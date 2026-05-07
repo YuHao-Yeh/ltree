@@ -8,11 +8,11 @@ class Stats:
     hidden_files: int = 0
 
     @property
-    def total_dirs(self):
+    def total_dirs(self) -> int:
         return self.visible_dirs + self.hidden_dirs
     
     @property
-    def total_files(self):
+    def total_files(self) -> int:
         return self.visible_files + self.hidden_files
 
 

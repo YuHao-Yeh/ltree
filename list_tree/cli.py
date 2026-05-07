@@ -9,7 +9,7 @@ from .exporters import (
 )
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="list-tree-tool: A customizable directory tree viewer.",
         formatter_class=argparse.RawTextHelpFormatter
@@ -66,7 +66,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def run(args: argparse):
+def run(args: argparse) -> None:
     config = TreeConfig()
     config.apply_args(args)
 

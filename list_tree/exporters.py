@@ -8,7 +8,7 @@ from .constants import COLOR_DIR, COLOR_FILE, COLOR_RESET
 from .utils import write_line
 
 
-def format_size(size_bytes: float, human: bool = False):
+def format_size(size_bytes: float, human: bool = False) -> str:
     if not human:
         return f"{size_bytes:>8} B"
     
@@ -25,7 +25,7 @@ def render_text(
     indent: str = "",
     is_last: bool = True,
     is_root: bool = True
-):
+) -> None:
     path_display = node.path.replace('\\', '/')
     name = path_display if config.full_path and not is_root else node.name
     display_name = name + ("/" if node.is_dir and not name.endswith("/") else "")
@@ -58,7 +58,7 @@ def render_text(
     for i, child in enumerate(node.children):
         render_text(child, file, config, new_indent, i == len(node.children)-1, False)
 
-def render_json(node: TreeNode, file, config: TreeConfig):
+def render_json(node: TreeNode, file, config: TreeConfig) -> None:
     def to_dict(n: TreeNode):
         d = {
             "name": n.name,
@@ -79,7 +79,7 @@ def render_json(node: TreeNode, file, config: TreeConfig):
         return d
     json.dump(to_dict(node), file, indent=4)
 
-def render_markdown(node, file, config: TreeConfig, depth=0):
+def render_markdown(node: TreeNode, file, config: TreeConfig, depth: int = 0) -> None:
     indent = "  " * depth
     icon = "📂" if node.is_dir else "📄"
 
@@ -93,7 +93,7 @@ def render_markdown(node, file, config: TreeConfig, depth=0):
     for child in node.children:
         render_markdown(child, file, config, depth + 1)
 
-def render_markdown_as_block(node, file, config: TreeConfig):
+def render_markdown_as_block(node: TreeNode, file, config: TreeConfig) -> None:
     write_line(file, "```text")                 # or use ```bash
     import copy
     tmp_config = copy.copy(config)
@@ -101,7 +101,7 @@ def render_markdown_as_block(node, file, config: TreeConfig):
     render_text(node, file, tmp_config)
     write_line(file, "```")
 
-def print_stats(node: TreeNode, config: TreeConfig):
+def print_stats(node: TreeNode, config: TreeConfig) -> None:
     s = node.stats
     size_str = ""
     if config.show_size:

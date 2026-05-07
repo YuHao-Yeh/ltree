@@ -1,10 +1,12 @@
 import os
 import fnmatch
+from io import TextIOWrapper
+from typing import TextIO
 
 from .config import TreeConfig
 
 
-def is_excluded(item: str, is_dir: bool, config: TreeConfig):
+def is_excluded(item: str, is_dir: bool, config: TreeConfig) -> bool:
     # Priority 1
     if item in config.added_items:
         return False
@@ -39,7 +41,7 @@ def is_excluded(item: str, is_dir: bool, config: TreeConfig):
 
     return False
 
-def count_subtree(path: str, config: TreeConfig):
+def count_subtree(path: str, config: TreeConfig) -> tuple[int, int, int]:
     if path in config.subtree_cache:
         return config.subtree_cache[path]
     
@@ -66,7 +68,7 @@ def count_subtree(path: str, config: TreeConfig):
 
     return res
 
-def write_line(file, text):
+def write_line(file: TextIO | TextIOWrapper = None, text: str = "") -> None:
     if file is None:
         return
     file.write(text + '\n')
