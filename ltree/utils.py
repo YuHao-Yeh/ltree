@@ -6,12 +6,24 @@ from typing import TextIO
 from .config import TreeConfig
 
 
-def is_excluded(item: str, is_dir: bool, config: TreeConfig) -> bool:
+def is_excluded(item: str, is_dir: bool, config: TreeConfig, rel_path: str) -> bool:
     # Priority 1
     if item in config.added_items:
         return False
+    
+    # Priority 2 - gitignore
+    if config.gitignore_spec:
+        path_for_git = rel_path + '/' if is_dir else rel_path
+        if config.gitignore_spec.match_file(path_for_git):
+            return True
+    
+    # Priority 3 - regex
+    if config.regex_exclude_patterns:
+        for regex in config.regex_exclude_patterns:
+            if regex.search(rel_path):
+                return True
 
-    # Priority 2
+    # Priority 4
     if is_dir:
         if item in config.exclude_dirs:
             return True
@@ -28,16 +40,10 @@ def is_excluded(item: str, is_dir: bool, config: TreeConfig) -> bool:
         if any(fnmatch.fnmatch(item, pattern) for pattern in config._pattern_files):
             return True
 
-    # Prioirty 3:
+    # Prioirty 5 - hidden files
     if not config.show_all:
         if item.startswith(".") and item not in [".", "./"]:
             return True
-        # if is_dir and item in config.exclude_dirs:
-        #     return True
-        # if not is_dir and item in config._exact_files:
-        #     return True
-        # if any(fnmatch.fnmatch(item, pattern) for pattern in config._pattern_files):
-        #     return True
 
     return False
 
@@ -49,11 +55,25 @@ def count_subtree(path: str, config: TreeConfig) -> tuple[int, int, int]:
     total_files = 0
     total_size = 0
 
-    for root, dirs, files in os.walk(path):
-        dirs[:] = [d for d in dirs if not is_excluded(d, True, config)]
+    base_path = config.root_path
 
+    for root, dirs, files in os.walk(path):
+        rel_root = get_rel_path(root, base_path)
+        # --- directories ---
+        keep_dirs = []
+        for d in dirs:
+            rel_dir_path = d if rel_root == "." else os.path.join(rel_root, d)
+
+            if not is_excluded(d, True, config, rel_dir_path):
+                total_dirs += 1
+                keep_dirs.append(d)
+        dirs[:] = keep_dirs
+
+        # --- files ---
         for f in files:
-            if not is_excluded(f, False, config):
+            rel_file_path = f if rel_root == "." else os.path.join(rel_root, f)
+
+            if not is_excluded(f, False, config, rel_file_path):
                 total_files += 1
                 try:
                     f_path = os.path.join(root, f)
@@ -61,14 +81,20 @@ def count_subtree(path: str, config: TreeConfig) -> tuple[int, int, int]:
                 except OSError:
                     pass
 
-        total_dirs += len(dirs)
-
     res = (total_dirs, total_files, total_size)
     config._subtree_cache[path] = res
 
     return res
 
-def write_line(file: TextIO | TextIOWrapper = None, text: str = "") -> None:
+def get_rel_path(full_path: str, base_path: str):
+    if full_path == base_path:
+        return "."
+    
+    rel = full_path[len(base_path):].lstrip(os.sep)
+
+    return rel.lstrip("/\\")
+
+def write_line(file: TextIO | TextIOWrapper | None = None, text: str = "") -> None:
     if file is None:
         return
     file.write(text + '\n')

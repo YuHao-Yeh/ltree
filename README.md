@@ -99,6 +99,7 @@ ltree --help
 - **Markdown Block:** `ltree -F block -o report.md`
 - **Limit Depth:** `ltree -L 2 --show-ellipsis`
 - **Filter by Extension:** `ltree --ex-ext .log --ex-ext .tmp`
+- **Filter by Regex**: `ltree --re-ex "test_.*\.py"`
 - **Only Directories**: `ltree -d --dirs-first`
 - **Show Sizes**: `ltree -s -H`
 </details>
@@ -135,6 +136,8 @@ ltree --help
 | `--ex-files` | `-I` | Exclude files (supports wildcards like `*.log`). |
 | `--ex-ext` | | Exclude by file extension (e.g., `.log`). |
 | `--ex-prefix` | | Exclude items by prefix. |
+| `--re-ex` | | Exclude paths matching a regular expression.
+| `--no-ignore` | | Disable automatic exclusion based on .gitignore (enabled by default).
 | `--add-dirs` | | Re-include specific directories previously excluded. |
 | `--add-files` | | Re-include specific files previously excluded. |
 
