@@ -1,6 +1,7 @@
 import argparse
 import os
 import pathspec
+import re
 
 
 class TreeConfig:
@@ -19,6 +20,7 @@ class TreeConfig:
 
         self.use_gitignore: bool = True
         self.gitignore_spec: pathspec.PathSpec | None = None
+        self.regex_exclude_patterns: list = []
 
         self._subtree_cache: dict = {}
 
@@ -50,6 +52,13 @@ class TreeConfig:
     def apply_args(self, args: argparse.Namespace) -> None:
         # gitignore
         self.use_gitignore = not args.no_ignore
+
+        # regex
+        for pattern in args.regex_exclude:
+            try:
+                self.regex_exclude_patterns.append(re.compile(pattern))
+            except re.error as e:
+                print(f"Warning: Invalid regex '{pattern}': {e}")
 
         # include
         for dir in args.add_dirs:

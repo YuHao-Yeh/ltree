@@ -10,14 +10,20 @@ def is_excluded(item: str, is_dir: bool, config: TreeConfig, rel_path: str) -> b
     # Priority 1
     if item in config.added_items:
         return False
-
+    
+    # Priority 2 - gitignore
     if config.gitignore_spec:
         path_for_git = rel_path + '/' if is_dir else rel_path
         if config.gitignore_spec.match_file(path_for_git):
             return True
+    
+    # Priority 3 - regex
+    if config.regex_exclude_patterns:
+        for regex in config.regex_exclude_patterns:
+            if regex.search(rel_path):
+                return True
 
-
-    # Priority 2
+    # Priority 4
     if is_dir:
         if item in config.exclude_dirs:
             return True
@@ -34,16 +40,10 @@ def is_excluded(item: str, is_dir: bool, config: TreeConfig, rel_path: str) -> b
         if any(fnmatch.fnmatch(item, pattern) for pattern in config._pattern_files):
             return True
 
-    # Prioirty 3:
+    # Prioirty 5 - hidden files
     if not config.show_all:
         if item.startswith(".") and item not in [".", "./"]:
             return True
-        # if is_dir and item in config.exclude_dirs:
-        #     return True
-        # if not is_dir and item in config._exact_files:
-        #     return True
-        # if any(fnmatch.fnmatch(item, pattern) for pattern in config._pattern_files):
-        #     return True
 
     return False
 

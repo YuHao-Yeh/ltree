@@ -54,7 +54,8 @@ def parse_args() -> argparse.Namespace:
                            help='Re-include specific files.', dest='add_files')
     filtering.add_argument('--no-ignore', action='store_true', dest='no_ignore',
                            help='Do not exclude files/directories matched by .gitignore.')
-
+    filtering.add_argument('--re-ex', action='append', default=[], dest='regex_exclude',
+                           help='Exclude paths matching regex pattern.', metavar='REGEX')
     # --- Display Options ---
     display = parser.add_argument_group('Display Options')
     display.add_argument('-L', '--max-depth', type=int, default=None, 
@@ -68,7 +69,7 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
-def run(args: argparse) -> None:
+def run(args: argparse.Namespace) -> None:
     config = TreeConfig()
     config.apply_args(args)
 
