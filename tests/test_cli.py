@@ -7,6 +7,9 @@ from unittest.mock import MagicMock, patch, mock_open
 from ltree.cli import parse_args, run, main
 
 
+#=======================================================================#
+# Fixture
+#=======================================================================#
 CLI_MODULE = "ltree.cli"
 
 @pytest.fixture
@@ -21,6 +24,8 @@ def base_args():
         human_readable=False,
         show_all=False,
         folders_only=False,
+        no_ignore=True,
+        regex_exclude=[],
         dirs_first=False,
         show_ellipsis=False,
         ex_dirs=[], ex_files=[], ex_ext=[], ex_prefix=[],
@@ -113,6 +118,12 @@ def test_run_unsupported_format(mock_scan, capsys, base_args):
     run(base_args)
     captured = capsys.readouterr()
     assert "Unsupport format" in captured.out
+
+@patch(f'{CLI_MODULE}.scan_tree')
+def test_run_no_exist_path(mock_scan, base_args):
+    mock_scan.return_value = None
+    
+    assert run(base_args) is None
 
 #=======================================================================#
 # Test: main entry point

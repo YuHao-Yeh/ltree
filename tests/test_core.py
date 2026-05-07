@@ -5,6 +5,9 @@ from unittest.mock import patch
 from ltree.core import scan_tree
 from ltree.config import TreeConfig
 
+
+#=======================================================================#
+# Fixture
 #=======================================================================#
 # tmp_path/
 # ├── __pycache__/      (dir)

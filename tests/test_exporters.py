@@ -96,7 +96,7 @@ def test_render_text_truncated_indentation():
     assert "    └── ... (1 dirs)" in result
 
 #=======================================================================#
-# render_json
+# Test: render_json
 #=======================================================================#
 def test_render_json():
     root = TreeNode(name="root", is_dir=True, path="root", size=0)
@@ -127,7 +127,7 @@ def test_render_json():
     assert data["size_human"] == "1.5 K"
 
 #=======================================================================#
-# render_markdown
+# Test: render_markdown
 #=======================================================================#
 def test_render_markdown():
     root = TreeNode(name="root", is_dir=True, path="root")
@@ -165,7 +165,7 @@ def test_render_markdown():
     assert "📄 `3.0 K` `file.py`" in result
 
 #=======================================================================#
-# render_markdown
+# Test: render_markdown
 #=======================================================================#
 def test_render_markdown_as_block():
     root = TreeNode(name="root", is_dir=True, path="root")
@@ -181,7 +181,7 @@ def test_render_markdown_as_block():
     assert "file.py" in result
 
 #=======================================================================#
-# print stats
+# Test: print stats
 #=======================================================================#
 def test_print_stats(capsys):
     root = TreeNode(name="root", is_dir=True, path="root")

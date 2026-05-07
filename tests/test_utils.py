@@ -1,64 +1,11 @@
+import argparse
 import io
+import os
 import pytest
 from unittest.mock import patch
-from ltree.utils import is_excluded, count_subtree, write_line
+from ltree.utils import is_excluded, count_subtree, write_line, get_rel_path
 from ltree.config import TreeConfig
 
-#=======================================================================#
-# Test: is_excluded
-#=======================================================================#
-def test_is_excluded_priority_1():
-    config = TreeConfig()
-    config.added_items.add(".gitignore")
-    assert is_excluded(".gitignore", is_dir=False, config=config) is False
-
-def test_is_excluded_priority_2():
-    config = TreeConfig()
-    
-    # default
-    assert is_excluded("__pycache__", True, config)
-    assert is_excluded("errors", True, config) is False
-    assert is_excluded("main.py", False, config) is False
-    assert is_excluded(".DS_store", False, config)
-    assert is_excluded("error.log", False, config)
-
-    # file
-    config.exclude_files.add("id_rsa")
-    assert is_excluded("id_rsa", is_dir=False, config=config)
-
-    # ext
-    config.exclude_exts.add(".png")
-    assert is_excluded("out.txt", False, config) is False
-    assert is_excluded("flow.png", False, config)
-    assert is_excluded("flow.jpg", False, config) is False
-
-    # prefix
-    config.exclude_prefixes.add("tmp")
-    assert is_excluded("tmp_data", True, config)
-    assert is_excluded("tmpfile.py", False, config)
-
-    # pattern
-    config.exclude_files.add("*log")
-    config._prepare_patterns()
-    assert is_excluded("logging.txt", False, config) is False
-    assert is_excluded("record.log", False, config)
-
-def test_is_excluded_priority_3():
-    config = TreeConfig()
-    config.show_all = False
-
-    # Case A：show_all=False
-    config.show_all = False
-    assert is_excluded(".env", is_dir=False, config=config)
-    assert is_excluded(".github", is_dir=True, config=config)
-
-    # special case: current dir (".", "./")
-    assert is_excluded(".", True, config) is False
-    assert is_excluded("./", True, config) is False
-
-    # Case B：show_all=True
-    config.show_all = True
-    assert is_excluded(".env", is_dir=False, config=config) is False
 
 #=======================================================================#
 # Fixture
@@ -85,6 +32,105 @@ def setup_subtree(tmp_path):
     pycache.mkdir()
     (pycache / "cache.pyc").write_text("a" * 100)           # 100 bytes
 
+@pytest.fixture
+def base_args():
+    return argparse.Namespace(
+        output="-",
+        ex_dirs=[],
+        ex_files=[],
+        ex_ext=[],
+        ex_prefix=[],
+        add_dirs=[],
+        add_files=[],
+        color=False,
+        show_size=False,
+        full_path=False,
+        human_readable=False,
+        show_all=False,
+        folders_only=False,
+        no_ignore=True,
+        regex_exclude=[],
+        dirs_first=False,
+        show_ellipsis=False
+    )
+
+#=======================================================================#
+# Test: is_excluded
+#=======================================================================#
+def test_is_excluded_priority_1():
+    config = TreeConfig()
+    config.added_items.add(".gitignore")
+    assert is_excluded(".gitignore", is_dir=False, config=config, rel_path=".") is False
+
+def test_is_excluded_priority_2(tmp_path):
+    gitignore = tmp_path / ".gitignore"
+    gitignore.write_text("*.log\nnode_modules/")
+    
+    config = TreeConfig()
+    config.load_gitignore(str(tmp_path))
+    
+    assert is_excluded("test.log", False, config, "test.log")
+    assert is_excluded("node_modules", True, config, "node_modules")
+    assert is_excluded("src", True, config, "src") is False
+
+def test_is_excluded_priority_3(base_args):
+    config = TreeConfig()
+    base_args.regex_exclude = [r"temp_\d+"]
+    base_args.no_ignore = False
+    config.apply_args(base_args)
+    
+    assert is_excluded("temp_123", True, config, "temp_123")
+    assert is_excluded("temp_abc", True, config, "temp_abc") is False
+
+def test_is_excluded_priority_4():
+    config = TreeConfig()
+    rel_path = "."
+
+    # default
+    assert is_excluded("__pycache__", True, config, rel_path)
+    assert is_excluded("errors", True, config, rel_path) is False
+    assert is_excluded("main.py", False, config, rel_path) is False
+    assert is_excluded(".DS_store", False, config, rel_path)
+    assert is_excluded("error.log", False, config, rel_path)
+
+    # file
+    config.exclude_files.add("id_rsa")
+    assert is_excluded("id_rsa", is_dir=False, config=config, rel_path=rel_path)
+
+    # ext
+    config.exclude_exts.add(".png")
+    assert is_excluded("out.txt", False, config, rel_path) is False
+    assert is_excluded("flow.png", False, config, rel_path)
+    assert is_excluded("flow.jpg", False, config, rel_path) is False
+
+    # prefix
+    config.exclude_prefixes.add("tmp")
+    assert is_excluded("tmp_data", True, config, rel_path)
+    assert is_excluded("tmpfile.py", False, config, rel_path)
+
+    # pattern
+    config.exclude_files.add("*log")
+    config._prepare_patterns()
+    assert is_excluded("logging.txt", False, config, rel_path) is False
+    assert is_excluded("record.log", False, config, rel_path)
+
+def test_is_excluded_priority_5():
+    config = TreeConfig()
+    config.show_all = False
+    rel_path = "."
+
+    # Case A：show_all=False
+    config.show_all = False
+    assert is_excluded(".env", is_dir=False, config=config, rel_path=rel_path)
+    assert is_excluded(".github", is_dir=True, config=config, rel_path=rel_path)
+
+    # special case: current dir (".", "./")
+    assert is_excluded(".", True, config, rel_path) is False
+    assert is_excluded("./", True, config, rel_path) is False
+
+    # Case B：show_all=True
+    config.show_all = True
+    assert is_excluded(".env", is_dir=False, config=config, rel_path=rel_path) is False
 
 #=======================================================================#
 # Test: count_subtree
@@ -131,6 +177,31 @@ def test_count_subtree_permission_error(tmp_path, setup_subtree):
         assert size == 0
         assert dirs == 1
         assert files == 2
+
+#=======================================================================#
+# Test: get_rel_path
+#=======================================================================#
+def test_get_rel_path_logic():
+    base = os.sep + os.path.join("Users", "user", "project")
+    src = os.sep + os.path.join("Users", "user", "project", "src")
+    fp = os.sep + os.path.join("Users", "user", "project", "src", "utils", "helper.py")
+    
+    # Case A: same path
+    assert get_rel_path(base, base) == "."
+    
+    # Case B: sub-directories
+    assert get_rel_path(src, base) == "src"
+    
+    # Case C: deep archives
+    assert get_rel_path(fp, base) == f"src{os.sep}utils{os.sep}helper.py"
+
+def test_get_rel_path_with_trailing_sep():
+    base = os.path.join("home", "user", "project")
+    full = os.path.join("home", "user", "project", "data", "db.sqlite")
+    
+    res = get_rel_path(full, base)
+    assert res == os.path.join("data", "db.sqlite")
+    assert not res.startswith(os.sep)
 
 #=======================================================================#
 # Test: write_line

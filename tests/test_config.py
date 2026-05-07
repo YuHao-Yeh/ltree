@@ -1,8 +1,14 @@
 import argparse
 import pytest
+import re
+from unittest.mock import patch
 
 from ltree.config import TreeConfig
 
+
+#=======================================================================#
+# Fixture
+#=======================================================================#
 @pytest.fixture
 def base_args():
     return argparse.Namespace(
@@ -19,10 +25,11 @@ def base_args():
         human_readable=False,
         show_all=False,
         folders_only=False,
+        no_ignore=True,
+        regex_exclude=[],
         dirs_first=False,
         show_ellipsis=False
     )
-
 
 #=======================================================================#
 # Test: TreeConfig.apply_args()
@@ -103,3 +110,93 @@ def test_config_flag_sync(base_args):
     assert config.folders_only is True
     assert config.full_path is True
     assert config.dirs_first is True
+
+def test_config_regex_compilation(base_args):
+    config = TreeConfig()
+    
+    base_args.regex_exclude = [r"temp_\d+", r".*\.tmp$"]
+        
+    config.apply_args(base_args)
+    
+    assert len(config.regex_exclude_patterns) == 2
+    assert isinstance(config.regex_exclude_patterns[0], re.Pattern)
+    
+    pattern = config.regex_exclude_patterns[0]
+    assert pattern.search("temp_123") is not None
+    assert pattern.search("temp_abc") is None
+
+def test_config_invalid_regex_handling(base_args, capsys):
+    config = TreeConfig()
+
+    base_args.regex_exclude = [r"[0-9+"]
+    
+    config.apply_args(base_args)
+    
+    captured = capsys.readouterr()
+    assert "Warning: Invalid regex" in captured.out
+    assert len(config.regex_exclude_patterns) == 0
+
+#=======================================================================#
+# Test: TreeConfig.load_gitignore
+#=======================================================================#
+def test_load_gitignore_success(tmp_path):
+    gitignore_file = tmp_path / ".gitignore"
+    gitignore_file.write_text("*.log\nnode_modules/\n!important.log")
+    
+    config = TreeConfig()
+    config.use_gitignore = True
+    config.load_gitignore(str(tmp_path))
+    
+    assert config.gitignore_spec is not None
+    
+    # exclude .log
+    assert config.gitignore_spec.match_file("error.log") is True
+    # include important.log
+    assert config.gitignore_spec.match_file("important.log") is False
+    # exclude node_modules dirs
+    assert config.gitignore_spec.match_file("node_modules/index.js") is True
+
+def test_load_gitignore_not_found():
+    config = TreeConfig()
+
+    config.load_gitignore("/non/existent/path")
+    
+    assert config.gitignore_spec is None
+
+def test_disable_gitignore(tmp_path):
+    gitignore_file = tmp_path / ".gitignore"
+    gitignore_file.write_text("secret.txt")
+    
+    config = TreeConfig()
+    config.use_gitignore = False
+    config.load_gitignore(str(tmp_path))
+    
+    assert config.gitignore_spec is None
+
+def test_load_gitignore_open_error(capsys):
+    config = TreeConfig()
+    
+    with patch("os.path.exists", return_value=True):
+        with patch("builtins.open", side_effect=PermissionError("Permission denied")):
+            config.load_gitignore("/dummy/path")
+    
+    captured = capsys.readouterr()
+    
+    assert "Warning: Could not load .gitignore: Permission denied" in captured.out
+    assert config.gitignore_spec is None
+
+
+def test_load_gitignore_parse_error(tmp_path, capsys):
+    gitignore = tmp_path / ".gitignore"
+    gitignore.write_text("*.log")
+
+    config = TreeConfig()
+    
+    with patch("pathspec.PathSpec.from_lines", side_effect=Exception("Unexpected Parser Error")):
+        config.load_gitignore(str(tmp_path))
+    
+    captured = capsys.readouterr()
+    
+    assert "Warning: Could not load .gitignore: Unexpected Parser Error" in captured.out
+    assert config.gitignore_spec is None
+
