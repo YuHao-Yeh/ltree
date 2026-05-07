@@ -1,8 +1,8 @@
 import io
 import pytest
 from unittest.mock import patch
-from list_tree.utils import is_excluded, count_subtree, write_line
-from list_tree.config import TreeConfig
+from ltree.utils import is_excluded, count_subtree, write_line
+from ltree.config import TreeConfig
 
 #=======================================================================#
 # Test: is_excluded

@@ -1,7 +1,7 @@
 import argparse
 import pytest
 
-from list_tree.config import TreeConfig
+from ltree.config import TreeConfig
 
 @pytest.fixture
 def base_args():

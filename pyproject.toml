@@ -1,5 +1,5 @@
 [project]
-name = "list-tree-tool"
+name = "ltree"
 version = "0.1.0"
 description = "A customizable tree-like directory viewer with filtering, depth control, and statistics"
 readme = "README.md"
@@ -14,6 +14,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Environment :: Console",
@@ -32,7 +33,7 @@ dev = [
 # Execution Scripts
 # =====================================================================
 [project.scripts]
-list-tree = "list_tree.cli:main"
+ltree = "ltree.cli:main"
 
 # =====================================================================
 # Build System Configuration
@@ -45,7 +46,7 @@ build-backend = "setuptools.build_meta"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["list_tree*"]
+include = ["ltree*"]
 
 
 # =====================================================================
@@ -53,10 +54,10 @@ include = ["list_tree*"]
 # =====================================================================
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q --cov-branch --cov=list_tree --cov-report=term-missing"
+addopts = "-q --cov-branch --cov=ltree --cov-report=term-missing"
 
 [tool.coverage.run]
-source = ["list_tree/"]
+source = ["ltree/"]
 branch = true
 
 [tool.coverage.report]

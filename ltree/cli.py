@@ -11,7 +11,7 @@ from .exporters import (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="list-tree-tool: A customizable directory tree viewer.",
+        description="ltree: A customizable directory tree viewer.",
         formatter_class=argparse.RawTextHelpFormatter
     )
 
