@@ -42,7 +42,7 @@ list-tree . -o -
 | Option              | Description                        |
 | ------------------- | ---------------------------------- |
 | `-o`, `--output`    | Output file (use `-` for stdout)   |
-| `--no-color`        | Disable colored output             |
+| `--color`           | Enable colored output              |
 | `--ex-dirs`         | Exclude directories                |
 | `--ex-files`        | Exclude files (supports wildcard)  |
 | `--add-dirs`        | Re-include directories             |

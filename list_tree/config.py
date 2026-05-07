@@ -2,22 +2,31 @@ import argparse
 
 class TreeConfig:
     def __init__(self):
-        self.exclude_dirs: set = {'__pycache__', '.git', '.venv', 'env', 'venv', '.idea', '.mypy_cache', 'python', 'media'}
-        self.exclude_files: set = {'.DS_Store', 'error*', 'tree.txt'}
+        self.exclude_dirs: set = {
+            '__pycache__', '.git', '.venv', 'env', 'venv', '.idea', 
+            '.mypy_cache', 'python', 'media'
+        }
+        self.exclude_files: set = {'.DS_Store', 'error*'}
         self.exclude_exts: set = set()
         self.exclude_prefixes: set = set()
-        self._exact_files = set()
-        self._pattern_files = []
+        self.added_items: set = set()
+        self._exact_files: set = set()
+        self._pattern_files: list = []
 
         self._subtree_cache: dict = {}
-        self.folders_only: bool = False
-        self.dirs_first: bool = False
+
         self.use_color: bool = False
+        self.show_size: bool = False
+        self.human_readable: bool = False
+        self.show_all: bool = False
+        self.folders_only: bool = False
+        self.full_path: bool = False
+        self.dirs_first: bool = False
         self.show_ellipsis: bool = False
 
         self._prepare_patterns()
 
-    def _prepare_patterns(self):
+    def _prepare_patterns(self) -> None:
         self._exact_files.clear()
         self._pattern_files.clear()
 
@@ -32,24 +41,36 @@ class TreeConfig:
         return self._subtree_cache
     
     def apply_args(self, args: argparse) -> None:
+        # include
+        for dir in args.add_dirs:
+            self.exclude_dirs.discard(dir)
+            self.added_items.add(dir)
+        for file in args.add_files:
+            self.exclude_files.discard(file)
+            self.added_items.add(file)
+
+        # exclude
         for dir in args.ex_dirs:
             self.exclude_dirs.add(dir)
         for file in args.ex_files:
             self.exclude_files.add(file)
+                
+        # prefix, ext
+        for ext in args.ex_ext:
+            self.exclude_exts.add(ext)
+        for pre in args.ex_prefix:
+            self.exclude_prefixes.add(pre)
         
-        for dir in args.add_dirs:
-            self.exclude_dirs.discard(dir)
-        for file in args.add_files:
-            self.exclude_files.discard(file)
-        
-        for dir in args.ex_ext:
-            self.exclude_exts.add(dir)
-        for dir in args.ex_prefix:
-            self.exclude_prefixes.add(dir)
-        
+        if args.output != "-":
+            self.use_color = False
+        else:
+            self.use_color = args.color
+        self.show_size = args.show_size
+        self.human_readable = args.human_readable
+        self.show_all = args.show_all
         self.folders_only = args.folders_only
+        self.full_path = args.full_path
         self.dirs_first = args.dirs_first
-        self.use_color = not args.no_color
         self.show_ellipsis = args.show_ellipsis
         
         self._prepare_patterns()

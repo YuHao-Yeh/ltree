@@ -8,11 +8,11 @@ class Stats:
     hidden_files: int = 0
 
     @property
-    def total_dirs(self):
+    def total_dirs(self) -> int:
         return self.visible_dirs + self.hidden_dirs
     
     @property
-    def total_files(self):
+    def total_files(self) -> int:
         return self.visible_files + self.hidden_files
 
 
@@ -21,6 +21,7 @@ class TreeNode:
     name: str
     is_dir: bool
     path: str
+    size: int = 0
     children: list['TreeNode'] = field(default_factory=list)
     stats: Stats = field(default_factory=Stats)
     is_truncated: bool = False
