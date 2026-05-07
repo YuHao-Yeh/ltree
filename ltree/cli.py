@@ -52,6 +52,8 @@ def parse_args() -> argparse.Namespace:
                            help='Re-include specific directories.', dest='add_dirs')
     filtering.add_argument('--add-files', action='append', default=[], 
                            help='Re-include specific files.', dest='add_files')
+    filtering.add_argument('--no-ignore', action='store_true', dest='no_ignore',
+                           help='Do not exclude files/directories matched by .gitignore.')
 
     # --- Display Options ---
     display = parser.add_argument_group('Display Options')

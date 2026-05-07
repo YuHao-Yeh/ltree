@@ -11,6 +11,12 @@ def is_excluded(item: str, is_dir: bool, config: TreeConfig, rel_path: str) -> b
     if item in config.added_items:
         return False
 
+    if config.gitignore_spec:
+        path_for_git = rel_path + '/' if is_dir else rel_path
+        if config.gitignore_spec.match_file(path_for_git):
+            return True
+
+
     # Priority 2
     if is_dir:
         if item in config.exclude_dirs:

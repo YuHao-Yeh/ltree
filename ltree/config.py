@@ -1,4 +1,7 @@
 import argparse
+import os
+import pathspec
+
 
 class TreeConfig:
     def __init__(self):
@@ -13,6 +16,9 @@ class TreeConfig:
         self.added_items: set = set()
         self._exact_files: set = set()
         self._pattern_files: list = []
+
+        self.use_gitignore: bool = True
+        self.gitignore_spec: pathspec.PathSpec | None = None
 
         self._subtree_cache: dict = {}
 
@@ -41,7 +47,10 @@ class TreeConfig:
     def subtree_cache(self) -> dict:
         return self._subtree_cache
     
-    def apply_args(self, args: argparse) -> None:
+    def apply_args(self, args: argparse.Namespace) -> None:
+        # gitignore
+        self.use_gitignore = not args.no_ignore
+
         # include
         for dir in args.add_dirs:
             self.exclude_dirs.discard(dir)
@@ -75,3 +84,17 @@ class TreeConfig:
         self.show_ellipsis = args.show_ellipsis
         
         self._prepare_patterns()
+
+    def load_gitignore(self, root_path: str):
+        if not self.use_gitignore:
+            return
+
+        gitignore_path = os.path.join(root_path, '.gitignore')
+        if os.path.exists(gitignore_path):
+            try:
+                with open(gitignore_path, 'r', encoding='utf-8') as f:
+                    self.gitignore_spec = pathspec.PathSpec.from_lines(
+                        'gitignore', f.readlines()
+                )
+            except Exception as e:
+                print(f"Warning: Could not load .gitignore: {e}")
