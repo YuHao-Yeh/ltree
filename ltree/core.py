@@ -3,18 +3,24 @@ import os
 
 from .config import TreeConfig
 from .schema import TreeNode
-from .utils import is_excluded, count_subtree
+from .utils import is_excluded, count_subtree, get_rel_path
 
 
 def scan_tree(
     path: str,
     config: TreeConfig,
-    max_depth: int = None,
-    curr_depth: int = 0
-) -> TreeNode:
+    max_depth: int | None = None,
+    curr_depth: int = 0,
+    rel_path: str = ".",
+) -> TreeNode | None:
     if not os.path.exists(path):
         print(f"Error: Path '{path}' does not exist.", file=sys.stderr)
         return None
+    
+    if curr_depth == 0:
+        config.root_path = os.path.abspath(path)
+        config.load_gitignore(config.root_path)
+        rel_path = "."
     
     is_dir = os.path.isdir(path)
     name = os.path.basename(os.path.abspath(path)) if curr_depth == 0 else os.path.basename(path)
@@ -33,7 +39,8 @@ def scan_tree(
             entries.sort(key=lambda e: (not e.is_dir() if config.dirs_first else False, e.name.lower()))
 
             for entry in entries:
-                if is_excluded(entry.name, entry.is_dir(), config):
+                entry_rel_path = entry.name if rel_path == "." else os.path.join(rel_path, entry.name)
+                if is_excluded(entry.name, entry.is_dir(), config, entry_rel_path):
                     continue
 
                 # visible file
@@ -66,7 +73,7 @@ def scan_tree(
                     node.stats.hidden_dirs += h_dirs
                     node.stats.hidden_files += h_files
                 else:
-                    child = scan_tree(entry.path, config, max_depth, curr_depth + 1)
+                    child = scan_tree(entry.path, config, max_depth, curr_depth + 1, entry_rel_path)
                     if child:
                         node.children.append(child)
 

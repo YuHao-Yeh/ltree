@@ -83,6 +83,9 @@ def run(args: argparse) -> None:
             max_depth=args.max_depth
         )
 
+        if not root:
+            return
+        
         match args.format:
             case "json":
                 render_json(node=root, file=output_file, config=config)

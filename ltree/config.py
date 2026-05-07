@@ -2,6 +2,7 @@ import argparse
 
 class TreeConfig:
     def __init__(self):
+        self.root_path: str = ""
         self.exclude_dirs: set = {
             '__pycache__', '.git', '.venv', 'env', 'venv', '.idea', 
             '.mypy_cache', 'python', 'media'
