@@ -100,7 +100,7 @@ def test_count_subtree_logic(tmp_path, setup_subtree):
     assert size == 30   # 10 + 20
 
     # Case B: show_all = True
-    config = TreeConfig()
+    config.subtree_cache.clear()
     config.show_all = True
     config.added_items.add("__pycache__")
 
