@@ -3,31 +3,67 @@ name = "list-tree-tool"
 version = "0.1.0"
 description = "A customizable tree-like directory viewer with filtering, depth control, and statistics"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 keywords = ["tree", "cli", "filesystem", "directory"]
 authors = [
     {name = "Yu-Hao Yeh"}
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Environment :: Console",
+    "Topic :: Utilities",
 ]
+
 dependencies = []
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+]
 
+# =====================================================================
+# Execution Scripts
+# =====================================================================
 [project.scripts]
 list-tree = "list_tree.cli:main"
 
-
+# =====================================================================
+# Build System Configuration
+# =====================================================================
 [build-system]
 requires = ["setuptools>=61.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["list_tree*"]
 
 
-[tool.setuptools]
-include-package-data = true
+# =====================================================================
+# Testing & Quality Control (Pytest & Coverage)
+# =====================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --cov-branch --cov=list_tree --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["list_tree/"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
+exclude_lines = [
+    "if __name__ == '__main__'",
+    "pragma: no cover",
+    "raise NotImplementedError"
+]
