@@ -25,6 +25,12 @@ pip-log.txt
 *.swp
 *.swo
 
+# --- VSCode Extension (ltree-vscode) ---
+ltree-vscode/out/
+ltree-vscode/node_modules/
+*.vsix
+.vscode-test/
+
 # --- System ---
 .DS_Store
 Thumbs.db
