@@ -1,0 +1,86 @@
+{
+  "name": "ltree-vscode",
+  "displayName": "ltree-vscode",
+  "description": "ltree plugin: Quickly generate directory tree with right-click.",
+  "version": "0.1.0",
+  "publisher": "AlexYeh",
+  "engines": {
+    "vscode": "^1.118.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ltree.copyTree",
+        "title": "ltree: Copy as Text"
+      },
+      {
+        "command": "ltree.copyTreeJson",
+        "title": "ltree: Copy as JSON"
+      },
+      {
+        "command": "ltree.copyTreeMarkdown",
+        "title": "ltree: Copy as Markdown List"
+      },
+      {
+        "command": "ltree.copyTreeMarkdownBlock",
+        "title": "ltree: Copy as Markdown Block"
+      },
+      {
+        "command": "ltree.copyTreeCustom",
+        "title": "ltree: Copy with Custom Arguments..."
+      }
+    ],
+    "submenus": [
+      {
+        "id": "ltree.menu",
+        "label": "ltree: Generate Tree"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "submenu": "ltree.menu",
+          "group": "navigation"
+        }
+      ],
+      "ltree.menu":[
+        { "command": "ltree.copyTree", "group": "1_main"},
+        { "command": "ltree.copyTreeJson", "group": "2_json"},
+        { "command": "ltree.copyTreeMarkdown", "group": "3_markdown"},
+        { "command": "ltree.copyTreeMarkdownBlock", "group": "4_block"},
+        { "command": "ltree.copyTreeCustom", "group": "5_custom" }
+      ]
+    }
+  },
+  "configuration": {
+    "title": "ltree Configuration",
+    "properties": {
+      "ltree.pythonPath": {
+        "type": "string",
+        "default": "python",
+        "description": "Path to Python executable"
+      },
+      "ltree.args": {
+        "type": "string",
+        "default": "",
+        "description": "Default arguments for ltree"
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.x",
+    "@types/vscode": "^1.118.0",
+    "typescript": "^5.x",
+    "typescript-eslint": "^8.56.1"
+  }
+}

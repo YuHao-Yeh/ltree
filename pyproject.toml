@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A customizable tree-like directory viewer with filtering, depth control, and statistics"
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = ["tree", "cli", "filesystem", "directory"]
+keywords = ["tree", "cli", "filesystem", "directory", "vscode"]
 authors = [
     {name = "Yu-Hao Yeh"}
 ]
@@ -25,6 +25,11 @@ dependencies = [
     "pathspec>=1.1.1",
 ]
 
+[project.urls]
+Homepage = "https://github.com/YuHao-Yeh/ltree"
+Repository = "https://github.com/YuHao-Yeh/ltree"
+Issues = "https://github.com/YuHao-Yeh/ltree/issues"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=9.0.3",
@@ -41,7 +46,7 @@ ltree = "ltree.cli:main"
 # Build System Configuration
 # =====================================================================
 [build-system]
-requires = ["setuptools>=61.0", "setuptools-scm"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -49,7 +54,7 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["ltree*"]
-
+exclude = ["ltree-vscode*", "tests*", "docs*"] 
 
 # =====================================================================
 # Testing & Quality Control (Pytest & Coverage)
