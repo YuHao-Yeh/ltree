@@ -69,6 +69,18 @@ pip install -e .
 
 ---
 
+## VS Code Extension
+
+**ltree** now comes with an official VS Code companion! 
+
+- **Quick Action**: Right-click any file or folder in the Explorer to generate a tree.
+- **Multiple Formats**: Copy as Text, JSON, or Markdown Blocks (perfect for AI prompts).
+- **Customizable**: Pass any CLI arguments directly from VS Code.
+
+To use it, check the [ltree-vscode](./ltree-vscode) directory for installation instructions.
+
+---
+
 ## Usage
 
 ```bash
@@ -136,8 +148,8 @@ ltree --help
 | `--ex-files` | `-I` | Exclude files (supports wildcards like `*.log`). |
 | `--ex-ext` | | Exclude by file extension (e.g., `.log`). |
 | `--ex-prefix` | | Exclude items by prefix. |
-| `--re-ex` | | Exclude paths matching a regular expression.
-| `--no-ignore` | | Disable automatic exclusion based on .gitignore (enabled by default).
+| `--re-ex` | | Exclude paths matching a regular expression. |
+| `--no-ignore` | | Disable automatic exclusion based on .gitignore (enabled by default). |
 | `--add-dirs` | | Re-include specific directories previously excluded. |
 | `--add-files` | | Re-include specific files previously excluded. |
 
