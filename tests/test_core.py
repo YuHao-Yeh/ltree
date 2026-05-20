@@ -2,8 +2,8 @@ import os
 import pytest
 from unittest.mock import patch
 
-from ltree.core import scan_tree
-from ltree.config import TreeConfig
+from ltree.core.scanner import scan_tree
+from ltree.core.config import TreeConfig
 
 
 #=======================================================================#

@@ -3,8 +3,8 @@ import io
 import os
 import pytest
 from unittest.mock import patch
-from ltree.utils import is_excluded, count_subtree, write_line, get_rel_path
-from ltree.config import TreeConfig
+from ltree.core.utils import is_excluded, count_subtree, write_line, get_rel_path
+from ltree.core.config import TreeConfig
 
 
 #=======================================================================#

@@ -1,9 +1,9 @@
 import argparse
 import sys
 
-from .core import scan_tree
-from .config import TreeConfig
-from .exporters import (
+from .core.scanner import scan_tree
+from .core.config import TreeConfig
+from .renderers.exporters import (
     render_text, render_json, render_markdown, render_markdown_as_block,
     print_stats
 )

@@ -2,10 +2,10 @@ import json
 from io import TextIOWrapper
 from typing import TextIO
 
-from .schema import TreeNode
-from .config import TreeConfig
-from .constants import COLOR_DIR, COLOR_FILE, COLOR_RESET
-from .utils import write_line
+from ..core.models import TreeNode
+from ..core.config import TreeConfig
+from ..constants import COLOR_DIR, COLOR_FILE, COLOR_RESET
+from ..core.utils import write_line
 
 
 def format_size(size_bytes: float, human: bool = False) -> str:

@@ -3,7 +3,7 @@ import pytest
 import re
 from unittest.mock import patch
 
-from ltree.config import TreeConfig
+from ltree.core.config import TreeConfig
 
 
 #=======================================================================#
