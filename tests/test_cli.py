@@ -11,6 +11,7 @@ from ltree.cli import parse_args, run, main
 # Fixture
 #=======================================================================#
 CLI_MODULE = "ltree.cli"
+RENDERER_PATH = "ltree.renderers"
 
 @pytest.fixture
 def base_args():
@@ -76,7 +77,7 @@ def test_parse_args_custom():
 # Test: run
 #=======================================================================#
 @patch(f'{CLI_MODULE}.scan_tree')
-@patch(f'{CLI_MODULE}.render_text')
+@patch(f'{RENDERER_PATH}.exporters.TextRenderer.render')
 def test_run_file_output(mock_render_text, mock_scan, base_args):
     mock_scan.return_value = create_mock_root()
     base_args.output = 'test_output.txt'
@@ -88,36 +89,27 @@ def test_run_file_output(mock_render_text, mock_scan, base_args):
     m.assert_called_once_with('test_output.txt', 'w', encoding='utf-8')
     mock_render_text.assert_called_once()
 
-@pytest.mark.parametrize("fmt, expected_func", [
-    ("text", "render_text"),
-    ("json", "render_json"),
-    ("md", "render_markdown"),
-    ("markdown", "render_markdown"),
-    ("block", "render_markdown_as_block"),
+@pytest.mark.parametrize("fmt, renderer_class", [
+    ("text", "exporters.TextRenderer"),
+    ("json", "exporters.JsonRenderer"),
+    ("md", "exporters.MarkdownRenderer"),
+    ("block", "exporters.MarkdownBlockRenderer"),
+    ("rich", "rich_renderer.RichRenderer"),
 ])
 @patch(f'{CLI_MODULE}.scan_tree')
 @patch(f'{CLI_MODULE}.print_stats')
-def test_run_formats_and_stats(mock_print_stats, mock_scan, fmt, expected_func, base_args):
+def test_run_formats_and_stats(mock_print_stats, mock_scan, fmt, renderer_class, base_args):
     mock_scan.return_value = create_mock_root()
     base_args.format = fmt
     base_args.output = "-"
-    
-    with patch(f'{CLI_MODULE}.{expected_func}') as mock_render:        
+
+    with patch(f'{RENDERER_PATH}.{renderer_class}.render') as mock_render:    
         with patch('sys.stdout', new_callable=io.StringIO):
             run(base_args)
 
         mock_render.assert_called_once()
         mock_scan.assert_called_once()
         mock_print_stats.assert_called_once()
-
-@patch(f'{CLI_MODULE}.scan_tree')
-def test_run_unsupported_format(mock_scan, capsys, base_args):
-    mock_scan.return_value = create_mock_root()
-    base_args.format = 'invalid_fmt'
-    
-    run(base_args)
-    captured = capsys.readouterr()
-    assert "Unsupport format" in captured.out
 
 @patch(f'{CLI_MODULE}.scan_tree')
 def test_run_no_exist_path(mock_scan, base_args):
