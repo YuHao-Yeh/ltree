@@ -44,10 +44,6 @@ class TreeConfig:
                 self._pattern_files.append(pattern)
             else:
                 self._exact_files.add(pattern)
-        
-    @property
-    def subtree_cache(self) -> dict:
-        return self._subtree_cache
     
     def apply_args(self, args: argparse.Namespace) -> None:
         # gitignore
