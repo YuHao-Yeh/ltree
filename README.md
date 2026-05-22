@@ -15,38 +15,57 @@
   </p>
 </div>
 
-**ltree** is a fast, customizable CLI tool to visualize directory structures in tree diagram. It supports multiple output formats and provides detailed statistics.
+**ltree** is a fast, customizable CLI tool to visualize directory structures in a tree diagram. It features beautiful *Rich UI* rendering, *Nerd Font/Emoji* icon support, detailed statistics, and multiple export formats.
 
 ```bash
 >>> ltree .
-ltree/
-├── ltree/
-│   ├── __init__.py
-│   ├── cli.py
-│   ├── config.py
-│   ├── constants.py
-│   ├── core.py
-│   ├── exporters.py
-│   ├── schema.py
-│   └── utils.py
-├── output/
-│   ├── tree.json
-│   ├── tree.md
-│   └── tree.txt
-├── pyproject.toml
-├── README.md
-├── tests/
-│   ├── __init__.py
-│   ├── test_cli.py
-│   ├── test_config.py
-│   ├── test_core.py
-│   ├── test_exporters.py
-│   └── test_utils.py
-└── uv.lock
+📂 ltree/
+├── ⚖️ LICENSE
+├── 📂 ltree/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 cli.py
+│   ├── 🐍 constants.py
+│   ├── 📂 core/
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 config.py
+│   │   ├── 🐍 models.py
+│   │   ├── 🐍 scanner.py
+│   │   └── 🐍 utils.py
+│   ├── 📂 renderers/
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 base.py
+│   │   ├── 🐍 exporters.py
+│   │   └── 🐍 rich_renderer.py
+│   └── 📂 themes/
+│       ├── 🐍 __init__.py
+│       ├── 🐍 emoji.py
+│       ├── 🐍 icons.py
+│       └── 🐍 nerd.py
+├── 📂 ltree-vscode/
+│   ├── 📝 CHANGELOG.md
+│   ├── 📄 eslint.config.mjs
+│   ├── ⚙️ package-lock.json
+│   ├── ⚙️ package.json
+│   ├── 📖 README.md
+│   ├── 📦 src/
+│   │   └── 🟦 extension.ts
+│   └── ⚙️ tsconfig.json
+├── ⚙️ pyproject.toml
+├── 📖 README.md
+├── 🧪 tests/
+│   ├── 🐍 __init__.py
+│   ├── 🐍 test_cli.py
+│   ├── 🐍 test_config.py
+│   ├── 🐍 test_core.py
+│   ├── 🐍 test_exporters.py
+│   ├── 🐍 test_icons.py
+│   ├── 🐍 test_rich_renderer.py
+│   └── 🐍 test_utils.py
+└── 🔒 uv.lock
 
 Summary:
-Visible:   3 directories,  20 files
-Total  :   3 directories,  20 files
+Visible:   7 directories,  35 files
+Total  :   7 directories,  35 files
 ```
 
 ---
@@ -114,6 +133,7 @@ ltree --help
 - **Filter by Regex**: `ltree --re-ex "test_.*\.py"`
 - **Only Directories**: `ltree -d --dirs-first`
 - **Show Sizes**: `ltree -s -H`
+- **Nerd Fonts and Rich UI**: `ltree . -F rich --theme nerd`
 </details>
 
 ---
@@ -131,10 +151,11 @@ ltree --help
 | `start_path` | | `.` | Starting directory path. |
 | `--output` | `-o` | `-` | Output file name. Use `-` for stdout. |
 
-### Output Formatting
+### Output Formatting & Display
 | Argument | Short | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `--format` | `-F` | `text` | Choices: `text`, `json`, `md`, `markdown`, `block`. |
+| `--format` | `-F` | `text` | Choices: `text`, `json`, `md`, `markdown`, `block`, `rich`. |
+| `--theme` | | emoji |	Icon theme to use. Choices: emoji, nerd, none. |
 | `--color` | `-c` | | Enable colored output. |
 | `--size` | `-s` | | Show file/directory sizes. |
 | `--human` | `-H` | | Show size in human-readable format (e.g., 1K, 2M). |
@@ -181,13 +202,23 @@ Visible:   2 directories,   3 files
 Total  :   2 directories,   3 files
 ```
 
+### Rich UI & Nerd Fonts (`-F rich --theme nerd`)
+```Text
+ ltree/
+├──  ltree/
+│   ├──  core.py
+│   └──  exporters.py
+├──  tests/
+└──  README.md
+```
+
 ### Markdown Mode (`-F md`)
 
 - 📂 **ltree/**
-  - 📄 `core.py`
-  - 📄 `exporters.py`
+  - 🐍 `core.py`
+  - 🐍 `exporters.py`
 - 📂 **tests/**
-- 📄 `README.md`
+- 📖 `README.md`
 ---
 
 ## License
