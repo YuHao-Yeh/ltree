@@ -39,19 +39,20 @@ class TextRenderer(BaseRenderer):
         path_display = node.path.replace("/", os.sep)
         name = path_display if self.config.full_path and not is_root else node.name
         display_name = name + (os.sep if node.is_dir and not name.endswith(os.sep) else "")
-        
+        icon = self.icon_provider.get_icon(node.name, node.is_dir)
+
         size_str = ""
         if self.config.show_size:
             size_str = f"[{format_size_classic(node.size, self.config.human_readable)}] "
 
         if is_root:
-            write_line(file, size_str + display_name)
+            write_line(file, size_str + icon + display_name)
         else:
             branch = '└── ' if is_last else '├── '
             if self.config.use_color:
                 color = ANSI_COLOR_DIR if node.is_dir else ANSI_COLOR_FILE
                 display_name = f"{color}{display_name}{ANSI_COLOR_RESET}"
-            write_line(file, indent + branch + size_str + display_name)
+            write_line(file, indent + branch + size_str + icon + display_name)
 
         # Truncated
         if node.is_truncated and self.config.show_ellipsis:

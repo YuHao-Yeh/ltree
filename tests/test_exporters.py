@@ -22,6 +22,7 @@ def test_render_text_path_normalization():
     config = TreeConfig()
     config.full_path = True
     config.use_color = False
+    config.theme = "none"
     
     output = io.StringIO()
     TextRenderer(config).render(root, output)
