@@ -3,7 +3,9 @@ import io
 import os
 import pytest
 from unittest.mock import patch
-from ltree.core.utils import is_excluded, count_subtree, write_line, get_rel_path
+from ltree.core.utils import (
+    is_excluded, count_subtree, write_line, get_rel_path, format_size_classic
+)
 from ltree.core.config import TreeConfig
 
 
@@ -51,7 +53,8 @@ def base_args():
         no_ignore=True,
         regex_exclude=[],
         dirs_first=False,
-        show_ellipsis=False
+        show_ellipsis=False,
+        theme='none'
     )
 
 #=======================================================================#
@@ -227,3 +230,17 @@ def test_write_line_multiple_calls():
     write_line(mock_file, "Line 2")
     
     assert mock_file.getvalue() == "Line 1\nLine 2\n"
+
+#=======================================================================#
+# Test: format_size_classic
+#=======================================================================#
+def test_format_size_classic():
+    # Raw Bytes
+    assert format_size_classic(100, human=False) == "     100 B"
+    assert format_size_classic(1024, human=False) == "    1024 B"
+    
+    # Human Readable
+    assert format_size_classic(500, human=True) == "500.0 B"
+    assert format_size_classic(1024, human=True) == "  1.0 K"
+    assert format_size_classic(1024**2 * 1.5, human=True) == "  1.5 M"
+    assert format_size_classic(1024**5 * 1.5, human=True) == "  1.5 P"

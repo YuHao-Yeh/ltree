@@ -5,23 +5,9 @@ from ltree.core.models import TreeNode, Stats
 from ltree.core.config import TreeConfig
 from ltree.renderers.exporters import (
     TextRenderer, JsonRenderer, MarkdownRenderer, MarkdownBlockRenderer,
-    format_size, print_stats,
+    print_stats,
 )
 
-
-#=======================================================================#
-# Test: format_size
-#=======================================================================#
-def test_format_size():
-    # Raw Bytes
-    assert format_size(100, human=False) == "     100 B"
-    assert format_size(1024, human=False) == "    1024 B"
-    
-    # Human Readable
-    assert format_size(500, human=True) == "500.0 B"
-    assert format_size(1024, human=True) == "  1.0 K"
-    assert format_size(1024**2 * 1.5, human=True) == "  1.5 M"
-    assert format_size(1024**5 * 1.5, human=True) == "  1.5 P"
 
 #=======================================================================#
 # Test: render_text
@@ -165,7 +151,7 @@ def test_render_markdown():
     result = output.getvalue()
     
     assert "📂 **root/**" in result
-    assert "📄 `file.py`" in result
+    assert "🐍 `file.py`" in result
 
     # show size
     config.show_size = True
@@ -174,7 +160,7 @@ def test_render_markdown():
     result = output.getvalue()
 
     assert "📂 `3072 B` **root/**" in result
-    assert "📄 `3072 B` `file.py`" in result
+    assert "🐍 `3072 B` `file.py`" in result
 
     # show size - human readable
     config.human_readable = True
@@ -183,7 +169,7 @@ def test_render_markdown():
     result = output.getvalue()
 
     assert "📂 `3.0 K` **root/**" in result
-    assert "📄 `3.0 K` `file.py`" in result
+    assert "🐍 `3.0 K` `file.py`" in result
 
 def test_markdown_renderer_truncation():
     root = TreeNode(name="root", is_dir=True, path="project/root")
@@ -258,3 +244,24 @@ def test_print_stats(capsys):
 
     captured = capsys.readouterr()
     assert "0 B" in captured.out
+
+def test_print_stats_rich(capsys):
+    root = TreeNode(name="root", is_dir=True, path="root")
+    root.stats = Stats(visible_dirs=1, visible_files=2, hidden_dirs=0, hidden_files=0)
+    
+    # normal
+    config = TreeConfig()
+    print_stats(root, config, fmt="rich")
+    
+    captured = capsys.readouterr()
+    assert "Summary" in captured.out
+    assert "1 directories" in captured.out
+    assert "2 files" in captured.out
+
+    # show size
+    config.show_size = True
+    print_stats(root, config, fmt="rich")
+
+    captured = capsys.readouterr()
+    assert "0 bytes" in captured.out
+
