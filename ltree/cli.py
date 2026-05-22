@@ -71,6 +71,98 @@ def parse_args() -> argparse.Namespace:
     
     return parser.parse_args()
 
+def validate_args(args: argparse.Namespace) -> None:
+    ignored_flags = []
+
+    # --- 1. JSON ---
+    if args.format == 'json':
+        if args.color:
+            ignored_flags.append('--color')
+        if args.full_path:
+            ignored_flags.append('--full-path')
+        if args.show_ellipsis:
+            ignored_flags.append('--show-ellipsis')
+        if args.theme != 'none':
+            ignored_flags.append(f'--theme {args.theme}')
+            
+        if ignored_flags:
+            flags_str = ", ".join(ignored_flags)
+            print(f"Warning: Display flags ({flags_str}) are ignored in JSON format.", file=sys.stderr)
+        
+        if args.show_size and not args.human_readable:
+            print(
+                "Warning: --size (-s) is redundant in JSON format. "
+                "The raw file size ('size_bytes') is always included in the JSON output.\n"
+                "         Use --human (-H) if you want to include formatted human-readable sizes ('size_human').",
+                file=sys.stderr
+            )
+
+    # --- 2. Markdown ---
+    elif args.format in ['md', 'markdown']:
+        if args.color:
+            ignored_flags.append('--color')
+        if args.full_path:
+            ignored_flags.append('--full-path')
+            
+        if ignored_flags:
+            flags_str = ", ".join(ignored_flags)
+            print(f"Warning: Display flags ({flags_str}) are ignored in Markdown format.", file=sys.stderr)
+
+    # --- 3. Block ---
+    elif args.format == 'block':
+        if args.color:
+            ignored_flags.append('--color')
+            
+        if ignored_flags:
+            flags_str = ", ".join(ignored_flags)
+            print(f"Warning: Display flags ({flags_str}) are ignored in Markdown block format.", file=sys.stderr)
+
+    # --- 4. Rich ---
+    elif args.format == 'rich':
+        if args.full_path:
+            print("Warning: --full-path might break the visual structure in 'rich' format.", file=sys.stderr)
+    
+    # --- 5. Global Mutually Exclusive Checks ---
+    if (args.output != "-") and args.color:
+        print(f"Warning: --color (-c) has no effect when saving output to a file '{args.output}'. Color is disabled.", file=sys.stderr)
+
+    if args.folders_only:
+        file_filters = []
+        if args.ex_files:
+            file_filters.append('--ex-files (-I)')
+        if args.ex_ext:
+            file_filters.append('--ex-ext')
+        if args.add_files:
+            file_filters.append('--add-files')
+            
+        if file_filters:
+            filters_str = ", ".join(file_filters)
+            print(
+                f"Warning: File filter flags ({filters_str}) have no effect when --dirs-only (-d) is active.", 
+                file=sys.stderr
+            )
+
+        if args.dirs_first:
+            print("Warning: --dirs-first has no effect when --dirs-only (-d) is active.", file=sys.stderr)
+
+    if args.format != 'json' and args.human_readable and not args.show_size:
+        print(
+            "Warning: --human (-H) has no effect unless --size (-s) is also specified.", 
+            file=sys.stderr
+        )
+    
+    if args.max_depth is not None and args.max_depth < 0:
+        print(f"Warning: --max-depth (-L) cannot be negative ({args.max_depth}). It will be treated as 0 (no recursion).", file=sys.stderr)
+        args.max_depth = 0
+
+    conflicting_dirs = set(args.ex_dirs) & set(args.add_dirs)
+    if conflicting_dirs:
+        print(f"Warning: Directories {list(conflicting_dirs)} are specified in both exclusion and inclusion arguments. Inclusion takes priority.", file=sys.stderr)
+        
+    conflicting_files = set(args.ex_files) & set(args.add_files)
+    if conflicting_files:
+        print(f"Warning: Files {list(conflicting_files)} are specified in both exclusion and inclusion arguments. Inclusion takes priority.", file=sys.stderr)
+
 def get_renderer_class(args: argparse.Namespace):
     renderers = {
         "text": TextRenderer,
@@ -84,6 +176,8 @@ def get_renderer_class(args: argparse.Namespace):
 
 
 def run(args: argparse.Namespace) -> None:
+    validate_args(args)
+
     config = TreeConfig()
     config.apply_args(args)
 

@@ -1,10 +1,11 @@
 import argparse
+import copy
 import io
 import pytest
 import sys
 from unittest.mock import MagicMock, patch, mock_open
 
-from ltree.cli import parse_args, run, main
+from ltree.cli import parse_args, validate_args, run, main
 
 
 #=======================================================================#
@@ -20,7 +21,7 @@ def base_args():
         output='-',
         format='text',
         max_depth=None,
-        color=True,
+        color=False,
         show_size=False,
         human_readable=False,
         show_all=False,
@@ -75,11 +76,145 @@ def test_parse_args_custom():
         assert args.dirs_first is True
 
 #=======================================================================#
+# Test: validate_args (Warnings and Errors)
+#=======================================================================#
+# 1.JSON
+def test_validate_args_json_ignored_flags(capsys, base_args):
+    args = copy.copy(base_args)
+    args.format = 'json'
+    args.color = True
+    args.full_path = True
+    args.show_ellipsis = True
+    args.theme = 'emoji'
+
+    validate_args(args)
+    captured = capsys.readouterr()
+    assert "Warning: Display flags" in captured.err
+    assert "--color" in captured.err
+    assert "--full-path" in captured.err
+    assert "--show-ellipsis" in captured.err
+    assert "--theme emoji" in captured.err
+
+def test_validate_args_json_size_redundant(capsys, base_args):
+    args = base_args
+    args.format = 'json'
+    args.show_size = True
+    args.human_readable = False
+
+    validate_args(args)
+    captured = capsys.readouterr()
+    assert "redundant in JSON format" in captured.err
+
+# 2. Markdown
+def test_validate_args_markdown_ignored_flags(capsys, base_args):
+    args = copy.copy(base_args)
+    args.format = 'md'
+    args.color = True
+    args.full_path = True
+
+    validate_args(args)
+    captured = capsys.readouterr()
+    assert "Warning: Display flags" in captured.err
+    assert "ignored in Markdown format" in captured.err
+
+# 3. Block
+def test_validate_args_block_ignored_flags(capsys, base_args):
+    args = copy.copy(base_args)
+    args.format = 'block'
+    args.color = True
+
+    validate_args(args)
+    captured = capsys.readouterr()
+    assert "Warning: Display flags" in captured.err
+    assert "ignored in Markdown block format" in captured.err
+
+# 4. Rich
+def test_validate_args_rich_ignored_flags(capsys, base_args):
+    args = copy.copy(base_args)
+    args.format = 'rich'
+    args.full_path = True
+
+    validate_args(args)
+    captured = capsys.readouterr()
+    assert "might break the visual structure" in captured.err
+
+# 5. Global
+def test_validate_args_file_output_with_color(capsys, base_args):
+    args = copy.copy(base_args)
+    args.output = 'out.txt'
+    args.color = True
+
+    validate_args(args)
+    captured = capsys.readouterr()
+    assert "has no effect when saving output to a file" in captured.err
+
+def test_validate_args_folders_only_redundancies(capsys, base_args):
+    args = copy.copy(base_args)
+    args.folders_only = True
+    args.ex_files = ['*.log']
+    args.ex_ext = ['.tmp']
+    args.add_files = ['keep.txt']
+    args.dirs_first = True
+
+    validate_args(args)
+    captured = capsys.readouterr().err
+    assert "File filter flags" in captured
+    assert "--ex-files (-I)" in captured
+    assert "--ex-ext" in captured
+    assert "--add-files" in captured
+    assert "--dirs-first has no effect" in captured
+
+def test_validate_args_folders_only_no_filters(capsys, base_args):
+    args = copy.copy(base_args)
+    args.folders_only = True
+    args.ex_files = []
+    args.ex_ext = []
+    args.add_files = []
+    args.dirs_first = False
+
+    validate_args(args)
+    captured = capsys.readouterr().err
+    assert "File filter flags" not in captured
+    assert "--dirs-first has no effect" not in captured
+
+def test_validate_args_human_without_size(capsys, base_args):
+    args = copy.copy(base_args)
+    args.format = 'text'
+    args.human_readable = True
+    args.show_size = False
+
+    validate_args(args)
+    captured = capsys.readouterr()
+    assert "unless --size (-s) is also specified" in captured.err
+
+def test_validate_args_negative_max_depth(capsys, base_args):
+    args = copy.copy(base_args)
+    args.max_depth = -3
+
+    validate_args(args)
+    captured = capsys.readouterr()
+    assert "cannot be negative" in captured.err
+    assert args.max_depth == 0
+
+def test_validate_args_direct_conflicts(capsys, base_args):
+    args = copy.copy(base_args)
+    args.ex_dirs = ['src']
+    args.add_dirs = ['src']
+    args.ex_files = ['main.py']
+    args.add_files = ['main.py']
+
+    validate_args(args)
+    captured = capsys.readouterr()
+    assert "Directories ['src'] are specified in both" in captured.err
+    assert "Files ['main.py'] are specified in both" in captured.err
+
+
+#=======================================================================#
 # Test: run
 #=======================================================================#
 @patch(f'{CLI_MODULE}.scan_tree')
 @patch(f'{RENDERER_PATH}.exporters.TextRenderer.render')
-def test_run_file_output(mock_render_text, mock_scan, base_args):
+def test_run_file_output(mock_render_text, mock_scan, base_args, capsys):
     mock_scan.return_value = create_mock_root()
     base_args.output = 'test_output.txt'
 
@@ -89,6 +224,9 @@ def test_run_file_output(mock_render_text, mock_scan, base_args):
     
     m.assert_called_once_with('test_output.txt', 'w', encoding='utf-8')
     mock_render_text.assert_called_once()
+
+    captured = capsys.readouterr()
+    assert "Directory tree written to test_output.txt" in captured.out
 
 @pytest.mark.parametrize("fmt, renderer_class", [
     ("text", "exporters.TextRenderer"),
