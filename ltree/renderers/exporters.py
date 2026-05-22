@@ -104,14 +104,14 @@ class MarkdownRenderer(BaseRenderer):
 
     def _render_recursive(self, node: TreeNode, file: TextIO, depth: int = 0) -> None:
         indent = "  " * depth
-        icon = "📂" if node.is_dir else "📄"
+        icon = self.icon_provider.get_icon(node.name, node.is_dir)
 
         size_str = ""
         if self.config.show_size:
             size_str = f"`{format_size_classic(node.size, self.config.human_readable).strip()}` "
 
         name_display = f"**{node.name}/**" if node.is_dir else f"`{node.name}`"
-        write_line(file, f"{indent}- {icon} {size_str}{name_display}")
+        write_line(file, f"{indent}- {icon}{size_str}{name_display}")
 
         # Truncated
         if node.is_truncated and self.config.show_ellipsis:

@@ -2,13 +2,11 @@ import os
 import sys
 from rich.tree import Tree
 from rich.console import Console
-from rich.filesize import decimal as format_size # Rich 內建的檔案大小格式化
+from rich.filesize import decimal as format_size
 from typing import TextIO
 
 from .base import BaseRenderer
-# from .exporters import format_size
 from ..core.models import TreeNode
-from ltree.themes.vscode_icons import get_icon
 from ..constants import RICH_COLOR_DIR, RICH_COLOR_FILE
 
 
@@ -30,7 +28,7 @@ class RichRenderer(BaseRenderer):
         console.print(rich_tree)
     
     def _build_node_label(self, node: TreeNode, is_root: bool = False) -> str:
-        icon = get_icon(node.name, node.is_dir)
+        icon = self.icon_provider.get_icon(node.name, node.is_dir)
         path_display = node.path.replace('/', os.sep)
         display_name = path_display if (self.config.full_path and not is_root) else node.name
         
@@ -39,10 +37,9 @@ class RichRenderer(BaseRenderer):
         else:
             name_label = f"{RICH_COLOR_FILE}{display_name}[/]"
             
-        label = f"{icon} {name_label}"
+        label = f"{icon}{name_label}"
 
         if self.config.show_size:
-            # size_str = format_size(node.size, self.config.human_readable)
             size_str = format_size(node.size)
             label += f" [dim]({size_str.strip()})[/]"
             

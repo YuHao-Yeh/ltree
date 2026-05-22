@@ -32,6 +32,7 @@ class TreeConfig:
         self.full_path: bool = False
         self.dirs_first: bool = False
         self.show_ellipsis: bool = False
+        self.theme: str = "emoji"
 
         self._prepare_patterns()
 
@@ -87,6 +88,7 @@ class TreeConfig:
         self.full_path = args.full_path
         self.dirs_first = args.dirs_first
         self.show_ellipsis = args.show_ellipsis
+        self.theme = args.theme
         
         self._prepare_patterns()
 

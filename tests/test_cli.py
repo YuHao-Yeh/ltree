@@ -31,7 +31,8 @@ def base_args():
         show_ellipsis=False,
         ex_dirs=[], ex_files=[], ex_ext=[], ex_prefix=[],
         add_dirs=[], add_files=[],
-        full_path=False
+        full_path=False,
+        theme='none'
     )
 
 def create_mock_root(size=1024):
@@ -109,7 +110,8 @@ def test_run_formats_and_stats(mock_print_stats, mock_scan, fmt, renderer_class,
 
         mock_render.assert_called_once()
         mock_scan.assert_called_once()
-        mock_print_stats.assert_called_once()
+        if fmt != 'json':
+            mock_print_stats.assert_called_once()
 
 @patch(f'{CLI_MODULE}.scan_tree')
 def test_run_no_exist_path(mock_scan, base_args):

@@ -66,7 +66,9 @@ def parse_args() -> argparse.Namespace:
                          help='List directories before files.', dest='dirs_first')
     display.add_argument('--show-ellipsis', action='store_true', 
                          help='Show "..." when depth is truncated.', dest='show_ellipsis')
-
+    display.add_argument('--theme', choices=['emoji', 'nerd', 'none'], default='emoji',
+                         help='Icon theme (default: emoji).', dest='theme')
+    
     return parser.parse_args()
 
 def get_renderer_class(args: argparse.Namespace):
@@ -105,24 +107,8 @@ def run(args: argparse.Namespace) -> None:
         renderer = RendererClass(config)
         renderer.render(root, output_file)
 
-        # if args.rich:
-        #     renderer = RichRenderer(config)
-        #     renderer.render(root)
-        # else:
-        #     match args.format:
-        #         case "json":
-        #             render_json(node=root, file=output_file, config=config)
-        #         case "markdown" | "md":
-        #             render_markdown(node=root, file=output_file, config=config)
-        #         case "block":
-        #             render_markdown_as_block(node=root, file=output_file, config=config)
-        #         case "text":
-        #             render_text(node=root, file=output_file, config=config)
-        #         case _:
-        #             print("Unsupport format")
-        #             return
-        if is_console:
-            print_stats(root, config)
+        if is_console and args.format != "json":
+            print_stats(root, config, args.format)
 
     finally:
         if not is_console:

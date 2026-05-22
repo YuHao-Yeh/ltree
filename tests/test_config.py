@@ -28,7 +28,8 @@ def base_args():
         no_ignore=True,
         regex_exclude=[],
         dirs_first=False,
-        show_ellipsis=False
+        show_ellipsis=False,
+        theme='none',
     )
 
 #=======================================================================#
