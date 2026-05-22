@@ -7,20 +7,22 @@ from .config import TreeConfig
 
 
 def is_excluded(item: str, is_dir: bool, config: TreeConfig, rel_path: str) -> bool:
+    normalized_rel_path = rel_path.replace('\\', '/')
+
     # Priority 1
     if item in config.added_items:
         return False
     
     # Priority 2 - gitignore
     if config.gitignore_spec:
-        path_for_git = rel_path + '/' if is_dir else rel_path
+        path_for_git = normalized_rel_path + '/' if is_dir else normalized_rel_path
         if config.gitignore_spec.match_file(path_for_git):
             return True
     
     # Priority 3 - regex
     if config.regex_exclude_patterns:
         for regex in config.regex_exclude_patterns:
-            if regex.search(rel_path):
+            if regex.search(normalized_rel_path):
                 return True
 
     # Priority 4
@@ -48,8 +50,8 @@ def is_excluded(item: str, is_dir: bool, config: TreeConfig, rel_path: str) -> b
     return False
 
 def count_subtree(path: str, config: TreeConfig) -> tuple[int, int, int]:
-    if path in config.subtree_cache:
-        return config.subtree_cache[path]
+    if path in config._subtree_cache:
+        return config._subtree_cache[path]
     
     total_dirs = 0
     total_files = 0
@@ -62,7 +64,7 @@ def count_subtree(path: str, config: TreeConfig) -> tuple[int, int, int]:
         # --- directories ---
         keep_dirs = []
         for d in dirs:
-            rel_dir_path = d if rel_root == "." else os.path.join(rel_root, d)
+            rel_dir_path = d if rel_root == "." else f"{rel_root}/{d}"
 
             if not is_excluded(d, True, config, rel_dir_path):
                 total_dirs += 1
@@ -71,7 +73,7 @@ def count_subtree(path: str, config: TreeConfig) -> tuple[int, int, int]:
 
         # --- files ---
         for f in files:
-            rel_file_path = f if rel_root == "." else os.path.join(rel_root, f)
+            rel_file_path = f if rel_root == "." else f"{rel_root}/{f}"
 
             if not is_excluded(f, False, config, rel_file_path):
                 total_files += 1
@@ -86,15 +88,28 @@ def count_subtree(path: str, config: TreeConfig) -> tuple[int, int, int]:
 
     return res
 
-def get_rel_path(full_path: str, base_path: str):
-    if full_path == base_path:
+def get_rel_path(target_path: str, base_path: str):
+    abs_target = os.path.abspath(target_path)
+    abs_base = os.path.abspath(base_path)
+    
+    if abs_target == abs_base:
         return "."
     
-    rel = full_path[len(base_path):].lstrip(os.sep)
+    rel = os.path.relpath(abs_target, abs_base)
 
-    return rel.lstrip("/\\")
+    return rel.replace("\\", "/")
 
 def write_line(file: TextIO | TextIOWrapper | None = None, text: str = "") -> None:
     if file is None:
         return
     file.write(text + '\n')
+
+def format_size_classic(size_bytes: float, human: bool = False) -> str:
+    if not human:
+        return f"{size_bytes:>8} B"
+    
+    for unit in ['B', 'K', 'M', 'G', 'T']:
+        if size_bytes < 1024:
+            return f"{size_bytes:>5.1f} {unit}"
+        size_bytes /= 1024
+    return f"{size_bytes:>5.1f} P"

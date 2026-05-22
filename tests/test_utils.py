@@ -3,8 +3,10 @@ import io
 import os
 import pytest
 from unittest.mock import patch
-from ltree.utils import is_excluded, count_subtree, write_line, get_rel_path
-from ltree.config import TreeConfig
+from ltree.core.utils import (
+    is_excluded, count_subtree, write_line, get_rel_path, format_size_classic
+)
+from ltree.core.config import TreeConfig
 
 
 #=======================================================================#
@@ -51,7 +53,8 @@ def base_args():
         no_ignore=True,
         regex_exclude=[],
         dirs_first=False,
-        show_ellipsis=False
+        show_ellipsis=False,
+        theme='none'
     )
 
 #=======================================================================#
@@ -146,7 +149,7 @@ def test_count_subtree_logic(tmp_path, setup_subtree):
     assert size == 30   # 10 + 20
 
     # Case B: show_all = True
-    config.subtree_cache.clear()
+    config._subtree_cache.clear()
     config.show_all = True
     config.added_items.add("__pycache__")
 
@@ -193,14 +196,14 @@ def test_get_rel_path_logic():
     assert get_rel_path(src, base) == "src"
     
     # Case C: deep archives
-    assert get_rel_path(fp, base) == f"src{os.sep}utils{os.sep}helper.py"
+    assert get_rel_path(fp, base) == f"src/utils/helper.py"
 
 def test_get_rel_path_with_trailing_sep():
     base = os.path.join("home", "user", "project")
     full = os.path.join("home", "user", "project", "data", "db.sqlite")
     
     res = get_rel_path(full, base)
-    assert res == os.path.join("data", "db.sqlite")
+    assert res == "data/db.sqlite"
     assert not res.startswith(os.sep)
 
 #=======================================================================#
@@ -227,3 +230,17 @@ def test_write_line_multiple_calls():
     write_line(mock_file, "Line 2")
     
     assert mock_file.getvalue() == "Line 1\nLine 2\n"
+
+#=======================================================================#
+# Test: format_size_classic
+#=======================================================================#
+def test_format_size_classic():
+    # Raw Bytes
+    assert format_size_classic(100, human=False) == "     100 B"
+    assert format_size_classic(1024, human=False) == "    1024 B"
+    
+    # Human Readable
+    assert format_size_classic(500, human=True) == "500.0 B"
+    assert format_size_classic(1024, human=True) == "  1.0 K"
+    assert format_size_classic(1024**2 * 1.5, human=True) == "  1.5 M"
+    assert format_size_classic(1024**5 * 1.5, human=True) == "  1.5 P"

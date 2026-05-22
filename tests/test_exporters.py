@@ -1,26 +1,13 @@
 import io
 import json
-from ltree.schema import TreeNode, Stats
-from ltree.config import TreeConfig
-from ltree.exporters import (
-    format_size, render_text, render_json, render_markdown,
-    render_markdown_as_block, print_stats
+import os
+from ltree.core.models import TreeNode, Stats
+from ltree.core.config import TreeConfig
+from ltree.renderers.exporters import (
+    TextRenderer, JsonRenderer, MarkdownRenderer, MarkdownBlockRenderer,
+    print_stats,
 )
 
-
-#=======================================================================#
-# Test: format_size
-#=======================================================================#
-def test_format_size():
-    # Raw Bytes
-    assert format_size(100, human=False) == "     100 B"
-    assert format_size(1024, human=False) == "    1024 B"
-    
-    # Human Readable
-    assert format_size(500, human=True) == "500.0 B"
-    assert format_size(1024, human=True) == "  1.0 K"
-    assert format_size(1024**2 * 1.5, human=True) == "  1.5 M"
-    assert format_size(1024**5 * 1.5, human=True) == "  1.5 P"
 
 #=======================================================================#
 # Test: render_text
@@ -37,11 +24,11 @@ def test_render_text_path_normalization():
     config.use_color = False
     
     output = io.StringIO()
-    render_text(root, output, config)
+    TextRenderer(config).render(root, output)
     result = output.getvalue()
     
-    assert "root/" in result
-    assert "└── root/child.txt" in result
+    assert f"root{os.sep}" in result
+    assert f"└── root{os.sep}child.txt" in result
     assert "\033[97m" not in result
 
 def test_render_text_with_size_and_path():
@@ -57,11 +44,11 @@ def test_render_text_with_size_and_path():
     config.full_path = True
     
     output = io.StringIO()
-    render_text(root, output, config)
+    TextRenderer(config).render(root, output)
     result = output.getvalue()
     
     assert "[     100 B]" in result
-    assert "root/child.txt" in result
+    assert f"root{os.sep}child.txt" in result
     assert "\033[97m" in result
 
 def test_render_text_truncated_indentation():
@@ -82,7 +69,7 @@ def test_render_text_truncated_indentation():
     
     # normal
     output = io.StringIO()
-    render_text(root, output, config)
+    TextRenderer(config).render(root, output)
     result = output.getvalue()
     
     assert "│   └── ... (1 dirs, 1 files)" in result
@@ -91,7 +78,7 @@ def test_render_text_truncated_indentation():
     config.folders_only = True
     root.children.remove(other)
     output = io.StringIO()
-    render_text(root, output, config)
+    TextRenderer(config).render(root, output)
     result = output.getvalue()
     assert "    └── ... (1 dirs)" in result
 
@@ -109,7 +96,7 @@ def test_render_json():
 
     # Raw bytes
     output = io.StringIO()
-    render_json(root, output, config)
+    JsonRenderer(config).render(root, output)
     
     data = json.loads(output.getvalue())
     assert data["name"] == "root"
@@ -121,10 +108,30 @@ def test_render_json():
     config.human_readable = True
     output = io.StringIO()
 
-    render_json(root, output, config)
+    JsonRenderer(config).render(root, output)
     data = json.loads(output.getvalue())
     assert data["size_bytes"] == 1536
     assert data["size_human"] == "1.5 K"
+
+def test_render_json_truncated():
+    root = TreeNode(name="root", is_dir=True, path="project/root")
+    root.is_truncated = True
+    root.size = 5000
+    root.stats.hidden_dirs = 5
+    root.stats.hidden_files = 12
+
+    config = TreeConfig()
+    output = io.StringIO()
+    JsonRenderer(config).render(root, output)
+    
+    data = json.loads(output.getvalue())
+    
+    assert data["is_truncated"] is True
+    assert "hidden_summary" in data
+    assert data["hidden_summary"]["hidden_folders"] == 5
+    assert data["hidden_summary"]["hidden_files"] == 12
+    
+    assert "children" not in data
 
 #=======================================================================#
 # Test: render_markdown
@@ -140,29 +147,64 @@ def test_render_markdown():
 
     # normal
     output = io.StringIO()
-    render_markdown(root, output, config)
+    MarkdownRenderer(config).render(root, output)
     result = output.getvalue()
     
     assert "📂 **root/**" in result
-    assert "📄 `file.py`" in result
+    assert "🐍 `file.py`" in result
 
     # show size
     config.show_size = True
     output.flush()
-    render_markdown(root, output, config)
+    MarkdownRenderer(config).render(root, output)
     result = output.getvalue()
 
     assert "📂 `3072 B` **root/**" in result
-    assert "📄 `3072 B` `file.py`" in result
+    assert "🐍 `3072 B` `file.py`" in result
 
     # show size - human readable
     config.human_readable = True
     output.flush()
-    render_markdown(root, output, config)
+    MarkdownRenderer(config).render(root, output)
     result = output.getvalue()
 
     assert "📂 `3.0 K` **root/**" in result
-    assert "📄 `3.0 K` `file.py`" in result
+    assert "🐍 `3.0 K` `file.py`" in result
+
+def test_markdown_renderer_truncation():
+    root = TreeNode(name="root", is_dir=True, path="project/root")
+    root.is_truncated = True
+    root.size = 5000
+    root.stats.hidden_dirs = 5
+    root.stats.hidden_files = 12
+
+    # 1. dirs + files
+    config = TreeConfig()
+    config.show_ellipsis = True
+    output = io.StringIO()
+    MarkdownRenderer(config).render(root, output)
+    
+    content = output.getvalue()
+    assert "  - ... (5 dirs, 12 files)" in content
+
+    # 2. folders_only
+    config.folders_only = True
+    output = io.StringIO()
+    
+    MarkdownRenderer(config).render(root, output)
+    
+    content = output.getvalue()
+    assert "  - ... (5 dirs)" in content
+    assert "files" not in content
+
+    # 3. show_ellipsis = False
+    config.show_ellipsis = False
+    output = io.StringIO()
+    
+    MarkdownRenderer(config).render(root, output)
+    
+    content = output.getvalue()
+    assert "..." not in content
 
 #=======================================================================#
 # Test: render_markdown
@@ -174,10 +216,10 @@ def test_render_markdown_as_block():
     
     config = TreeConfig()
     output = io.StringIO()
-    render_markdown_as_block(root, output, config)
+    MarkdownBlockRenderer(config).render(root, output)
     result = output.getvalue()
     
-    assert "root/" in result
+    assert f"root{os.sep}" in result
     assert "file.py" in result
 
 #=======================================================================#
@@ -202,3 +244,24 @@ def test_print_stats(capsys):
 
     captured = capsys.readouterr()
     assert "0 B" in captured.out
+
+def test_print_stats_rich(capsys):
+    root = TreeNode(name="root", is_dir=True, path="root")
+    root.stats = Stats(visible_dirs=1, visible_files=2, hidden_dirs=0, hidden_files=0)
+    
+    # normal
+    config = TreeConfig()
+    print_stats(root, config, fmt="rich")
+    
+    captured = capsys.readouterr()
+    assert "Summary" in captured.out
+    assert "1 directories" in captured.out
+    assert "2 files" in captured.out
+
+    # show size
+    config.show_size = True
+    print_stats(root, config, fmt="rich")
+
+    captured = capsys.readouterr()
+    assert "0 bytes" in captured.out
+

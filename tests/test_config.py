@@ -3,7 +3,7 @@ import pytest
 import re
 from unittest.mock import patch
 
-from ltree.config import TreeConfig
+from ltree.core.config import TreeConfig
 
 
 #=======================================================================#
@@ -28,7 +28,8 @@ def base_args():
         no_ignore=True,
         regex_exclude=[],
         dirs_first=False,
-        show_ellipsis=False
+        show_ellipsis=False,
+        theme='none',
     )
 
 #=======================================================================#

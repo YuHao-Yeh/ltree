@@ -1,12 +1,12 @@
 import argparse
 import sys
 
-from .core import scan_tree
-from .config import TreeConfig
-from .exporters import (
-    render_text, render_json, render_markdown, render_markdown_as_block,
-    print_stats
+from .core.scanner import scan_tree
+from .core.config import TreeConfig
+from .renderers.exporters import (
+    TextRenderer, JsonRenderer, MarkdownRenderer, MarkdownBlockRenderer, print_stats
 )
+from .renderers.rich_renderer import RichRenderer
 
 
 def parse_args() -> argparse.Namespace:
@@ -25,10 +25,10 @@ def parse_args() -> argparse.Namespace:
     # --- Output Format ---
     output = parser.add_argument_group('Output Formatting')
     output.add_argument('-F', '--format', dest='format',
-                        choices=['text', 'json', 'md', 'markdown', 'block'],
+                        choices=['text', 'json', 'md', 'markdown', 'block', 'rich'],
                         default='text', help='Output format (default: text).')
     output.add_argument('-c', '--color', action='store_true', 
-                        help='Enable colored output.', dest='color')
+                        help='Enable colored output (Ignore in JSON/Markdown).', dest='color')
     output.add_argument('-s', '--size', action='store_true', 
                         help='Show file size.', dest='show_size') # reserved func
     output.add_argument('-H', '--human', action='store_true', dest='human_readable',
@@ -61,13 +61,27 @@ def parse_args() -> argparse.Namespace:
     display.add_argument('-L', '--max-depth', type=int, default=None, 
                          help='Limit directory depth.', dest='max_depth')
     display.add_argument('-f', '--full-path', action='store_true', dest='full_path',
-                         help='Print the full path prefix for every file.')
+                         help='Print the full path prefix (Text format only).')
     display.add_argument('--dirs-first', action='store_true', 
                          help='List directories before files.', dest='dirs_first')
     display.add_argument('--show-ellipsis', action='store_true', 
                          help='Show "..." when depth is truncated.', dest='show_ellipsis')
-
+    display.add_argument('--theme', choices=['emoji', 'nerd', 'none'], default='emoji',
+                         help='Icon theme (default: emoji).', dest='theme')
+    
     return parser.parse_args()
+
+def get_renderer_class(args: argparse.Namespace):
+    renderers = {
+        "text": TextRenderer,
+        "json": JsonRenderer,
+        "md": MarkdownRenderer,
+        "markdown": MarkdownRenderer,
+        "block": MarkdownBlockRenderer,
+        "rich": RichRenderer,
+    }
+    return renderers.get(args.format, TextRenderer)
+
 
 def run(args: argparse.Namespace) -> None:
     config = TreeConfig()
@@ -89,20 +103,12 @@ def run(args: argparse.Namespace) -> None:
         if not root:
             return
         
-        match args.format:
-            case "json":
-                render_json(node=root, file=output_file, config=config)
-            case "markdown" | "md":
-                render_markdown(node=root, file=output_file, config=config)
-            case "block":
-                render_markdown_as_block(node=root, file=output_file, config=config)
-            case "text":
-                render_text(node=root, file=output_file, config=config)
-            case _:
-                print("Unsupport format")
-                return
-        if is_console:
-            print_stats(root, config)
+        RendererClass = get_renderer_class(args)
+        renderer = RendererClass(config)
+        renderer.render(root, output_file)
+
+        if is_console and args.format != "json":
+            print_stats(root, config, args.format)
 
     finally:
         if not is_console:

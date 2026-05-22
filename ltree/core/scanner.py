@@ -2,7 +2,7 @@ import sys
 import os
 
 from .config import TreeConfig
-from .schema import TreeNode
+from .models import TreeNode
 from .utils import is_excluded, count_subtree, get_rel_path
 
 
