@@ -214,7 +214,8 @@ def test_validate_args_direct_conflicts(capsys, base_args):
 #=======================================================================#
 @patch(f'{CLI_MODULE}.scan_tree')
 @patch(f'{RENDERER_PATH}.exporters.TextRenderer.render')
-def test_run_file_output(mock_render_text, mock_scan, base_args, capsys):
+@patch('ltree.core.config.TreeConfig.load_config_file')
+def test_run_file_output(mock_load_config, mock_render_text, mock_scan, base_args, capsys):
     mock_scan.return_value = create_mock_root()
     base_args.output = 'test_output.txt'
 
