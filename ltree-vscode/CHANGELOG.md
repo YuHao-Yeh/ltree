@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **UI Settings Integration**: Added native VS Code settings fields for `theme`, `showSize`, and `dirsFirst`, eliminating the need to manually pass these flags through command-line arguments.
+- **Custom Argument Parsing**: Added a safe command-line argument splitter (`splitArguments`) to handle complex input arguments containing quotes and spaces in the custom prompt.
+
+### Changed
+- **Execution Engine**: Replaced the shell-dependent `exec` process invocation with `spawn` for executing the CLI tool, resolving potential path formatting anomalies across different OS environments.
+
+### Security
+- **Command Injection Prevention**: Migrated away from shell execution to direct process invocation (`spawn`), eliminating potential command injection vulnerabilities arising from crafted workspace directory names or custom arguments.
+
 ## [0.1.0] - 2026-05-08
 
 ### Added

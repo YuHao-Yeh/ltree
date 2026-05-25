@@ -26,9 +26,15 @@ This extension acts as a wrapper for the `ltree` Python package.
 
 This extension contributes the following settings:
 
-* `ltree.pythonPath`: Path to your Python executable (e.g., `python`, `python3`, or a full path to a virtual environment's interpreter).
-* `ltree.args`: Additional arguments to pass to the `ltree` CLI (e.g., `--all`, `--max-depth 2`, or `--re-ex 'pattern'`). 
-  *Note: The `-F` (format) argument is handled automatically by the menu options.*
+### Added
+- **UI Settings Integration**: Added native VS Code settings fields for `theme`, `showSize`, and `dirsFirst`, eliminating the need to manually pass these flags through command-line arguments.
+- **Custom Argument Parsing**: Added a safe command-line argument splitter (`splitArguments`) to handle complex input arguments containing quotes and spaces in the custom prompt.
+
+### Changed
+- **Execution Engine**: Replaced the shell-dependent `exec` process invocation with `spawn` for executing the CLI tool, resolving potential path formatting anomalies across different OS environments.
+
+### Security
+- **Command Injection Prevention**: Migrated away from shell execution to direct process invocation (`spawn`), eliminating potential command injection vulnerabilities arising from crafted workspace directory names or custom arguments.
 
 ## Usage
 
