@@ -13,12 +13,14 @@ from ..constants import RICH_COLOR_DIR, RICH_COLOR_FILE
 class RichRenderer(BaseRenderer):
     def render(self, node: TreeNode, output_file: TextIO) -> None:
         color_sys = "auto" if self.config.use_color else None
-        is_terminal = (output_file is sys.stdout)
+        is_a_tty = hasattr(output_file, "isatty") and output_file.isatty()
+        console_width = None if is_a_tty else 1000
 
         console = Console(
             file=output_file,
-            force_terminal=is_terminal,
-            color_system=color_sys
+            force_terminal=is_a_tty,
+            color_system=color_sys,
+            width=console_width
         )
 
         root_label = self._build_node_label(node, is_root=True)

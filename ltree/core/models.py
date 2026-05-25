@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-@dataclass
+@dataclass(slots=True)
 class Stats:
     visible_dirs: int = 0
     visible_files: int = 0
@@ -16,7 +16,7 @@ class Stats:
         return self.visible_files + self.hidden_files
 
 
-@dataclass
+@dataclass(slots=True)
 class TreeNode:
     name: str
     is_dir: bool

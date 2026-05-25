@@ -37,6 +37,7 @@ def setup_subtree(tmp_path):
 @pytest.fixture
 def base_args():
     return argparse.Namespace(
+        start_path='.',
         output="-",
         ex_dirs=[],
         ex_files=[],

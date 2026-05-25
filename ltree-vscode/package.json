@@ -65,10 +65,30 @@
         "default": "python",
         "description": "Path to Python executable"
       },
+      "ltree.theme": {
+        "type": "string",
+        "default": "emoji",
+        "enum": [
+          "emoji",
+          "nerd",
+          "none"
+        ],
+        "description": "Default icon theme for generated trees. (emoji, nerd, or none)"
+      },
+      "ltree.showSize": {
+        "type": "boolean",
+        "default": false,
+        "description": "Show file and directory sizes in the output."
+      },
+      "ltree.dirsFirst": {
+        "type": "boolean",
+        "default": false,
+        "description": "List directories before files."
+      },
       "ltree.args": {
         "type": "string",
         "default": "",
-        "description": "Default arguments for ltree"
+        "description": "Default additional arguments for ltree (e.g., --all, -L 2)"
       }
     }
   },

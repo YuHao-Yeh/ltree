@@ -23,7 +23,10 @@ def scan_tree(
         rel_path = "."
     
     is_dir = os.path.isdir(path)
-    name = os.path.basename(os.path.abspath(path)) if curr_depth == 0 else os.path.basename(path)
+    abs_path = os.path.abspath(path)
+    name = os.path.basename(abs_path) if curr_depth == 0 else os.path.basename(path)
+    if curr_depth == 0 and not name:
+        name = abs_path
     node = TreeNode(name=name, is_dir=is_dir, path=path)
 
     if not is_dir:
@@ -85,6 +88,9 @@ def scan_tree(
                         node.size += child.size
     except PermissionError:
         print(f"Error: No permission for the path '{path}'", file=sys.stderr)
+        return
+    except OSError as e:
+        print(f"Error: Failed to scan '{path}': {e}", file=sys.stderr)
         return
 
     return node
