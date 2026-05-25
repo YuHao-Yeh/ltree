@@ -7,18 +7,18 @@ from .config import TreeConfig
 
 
 def is_excluded(item: str, is_dir: bool, config: TreeConfig, rel_path: str) -> bool:
-    normalized_rel_path = rel_path.replace('\\', '/')
+    normalized_rel_path = rel_path.replace("\\", "/")
 
     # Priority 1
     if item in config.added_items:
         return False
-    
+
     # Priority 2 - gitignore
     if config.gitignore_spec:
-        path_for_git = normalized_rel_path + '/' if is_dir else normalized_rel_path
+        path_for_git = normalized_rel_path + "/" if is_dir else normalized_rel_path
         if config.gitignore_spec.match_file(path_for_git):
             return True
-    
+
     # Priority 3 - regex
     if config.regex_exclude_patterns:
         for regex in config.regex_exclude_patterns:
@@ -33,11 +33,11 @@ def is_excluded(item: str, is_dir: bool, config: TreeConfig, rel_path: str) -> b
         if item in config.exclude_files:
             return True
         if any(item.endswith(ext) for ext in config.exclude_exts):
-            return True    
+            return True
 
     if any(item.startswith(p) for p in config.exclude_prefixes):
         return True
-    
+
     if not is_dir:
         if any(fnmatch.fnmatch(item, pattern) for pattern in config._pattern_files):
             return True
@@ -49,10 +49,11 @@ def is_excluded(item: str, is_dir: bool, config: TreeConfig, rel_path: str) -> b
 
     return False
 
+
 def count_subtree(path: str, config: TreeConfig) -> tuple[int, int, int]:
     if path in config._subtree_cache:
         return config._subtree_cache[path]
-    
+
     total_dirs = 0
     total_files = 0
     total_size = 0
@@ -88,27 +89,30 @@ def count_subtree(path: str, config: TreeConfig) -> tuple[int, int, int]:
 
     return res
 
+
 def get_rel_path(target_path: str, base_path: str):
     abs_target = os.path.abspath(target_path)
     abs_base = os.path.abspath(base_path)
-    
+
     if abs_target == abs_base:
         return "."
-    
+
     rel = os.path.relpath(abs_target, abs_base)
 
     return rel.replace("\\", "/")
 
+
 def write_line(file: TextIO | TextIOWrapper | None = None, text: str = "") -> None:
     if file is None:
         return
-    file.write(text + '\n')
+    file.write(text + "\n")
+
 
 def format_size_classic(size_bytes: float, human: bool = False) -> str:
     if not human:
         return f"{size_bytes:>8} B"
-    
-    for unit in ['B', 'K', 'M', 'G', 'T']:
+
+    for unit in ["B", "K", "M", "G", "T"]:
         if size_bytes < 1024:
             return f"{size_bytes:>5.1f} {unit}"
         size_bytes /= 1024

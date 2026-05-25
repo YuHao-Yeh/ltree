@@ -90,7 +90,7 @@ pip install -e .
 
 ## VS Code Extension
 
-**ltree** now comes with an official VS Code companion! 
+**ltree** now comes with an official VS Code companion!
 
 - **Quick Action**: Right-click any file or folder in the Explorer to generate a tree.
 - **Multiple Formats**: Copy as Text, JSON, or Markdown Blocks (perfect for AI prompts).

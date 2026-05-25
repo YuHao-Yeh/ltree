@@ -35,7 +35,7 @@ function splitArguments(argsString: string): string[] {
 export function activate(context: vscode.ExtensionContext) {
 	const runLtree = async (uri: vscode.Uri, format: string | undefined) => {
 		let selectedPath = uri ? uri.fsPath : vscode.window.activeTextEditor?.document.uri.fsPath;
-        
+
         if (!selectedPath) {
             vscode.window.showErrorMessage("ltree: No file or folder selected.");
             return;
@@ -101,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const env = Object.assign ({}, process.env, {
-            PYTHONIOENCODING: "utf-8" 
+            PYTHONIOENCODING: "utf-8"
         });
 
 		vscode.window.withProgress({
@@ -133,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
                         vscode.window.showErrorMessage(`ltree Error: ${stderr || `Process exited with code ${code}`}`);
                         return reject();
                     }
-                    
+
                     vscode.env.clipboard.writeText(stdout).then(() => {
                         vscode.window.showInformationMessage(`ltree: Copied to clipboard!`);
                         resolve(null);

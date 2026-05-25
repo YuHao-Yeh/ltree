@@ -5,6 +5,7 @@ from ..core.models import TreeNode
 from ..core.config import TreeConfig
 from ..themes.icons import IconProvider
 
+
 class BaseRenderer(ABC):
     def __init__(self, config: TreeConfig):
         self.config = config
