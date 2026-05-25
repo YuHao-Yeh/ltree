@@ -4,33 +4,37 @@ import os
 from ltree.core.models import TreeNode, Stats
 from ltree.core.config import TreeConfig
 from ltree.renderers.exporters import (
-    TextRenderer, JsonRenderer, MarkdownRenderer, MarkdownBlockRenderer,
+    TextRenderer,
+    JsonRenderer,
+    MarkdownRenderer,
+    MarkdownBlockRenderer,
     print_stats,
 )
 
 
-#=======================================================================#
+# =======================================================================#
 # Test: render_text
-#=======================================================================#
+# =======================================================================#
 def test_render_text_path_normalization():
     # root/
     # └── child.txt
     root = TreeNode(name="root", is_dir=True, path="root")
     child = TreeNode(name="child.txt", is_dir=False, path="root\\child.txt", size=100)
     root.children.append(child)
-    
+
     config = TreeConfig()
     config.full_path = True
     config.use_color = False
     config.theme = "none"
-    
+
     output = io.StringIO()
     TextRenderer(config).render(root, output)
     result = output.getvalue()
-    
+
     assert f"root{os.sep}" in result
     assert f"└── root{os.sep}child.txt" in result
     assert "\033[97m" not in result
+
 
 def test_render_text_with_size_and_path():
     root = TreeNode(name="root", is_dir=True, path="root")
@@ -38,19 +42,20 @@ def test_render_text_with_size_and_path():
     root.children.append(child)
     root.size += child.size
     root.stats.visible_files = 1
-    
+
     config = TreeConfig()
     config.use_color = True
     config.show_size = True
     config.full_path = True
-    
+
     output = io.StringIO()
     TextRenderer(config).render(root, output)
     result = output.getvalue()
-    
+
     assert "[     100 B]" in result
     assert f"root{os.sep}child.txt" in result
     assert "\033[97m" in result
+
 
 def test_render_text_truncated_indentation():
     # root/
@@ -60,19 +65,19 @@ def test_render_text_truncated_indentation():
     sub = TreeNode(name="sub", is_dir=True, path="root/sub", is_truncated=True)
     sub.stats = Stats(hidden_dirs=1, hidden_files=1)
     other = TreeNode(name="other.txt", is_dir=False, path="root/other.txt")
-    
+
     root.children.append(sub)
     root.children.append(other)
-    
+
     config = TreeConfig()
     config.show_ellipsis = True
     config.use_color = False
-    
+
     # normal
     output = io.StringIO()
     TextRenderer(config).render(root, output)
     result = output.getvalue()
-    
+
     assert "│   └── ... (1 dirs, 1 files)" in result
 
     # only folders
@@ -83,22 +88,23 @@ def test_render_text_truncated_indentation():
     result = output.getvalue()
     assert "    └── ... (1 dirs)" in result
 
-#=======================================================================#
+
+# =======================================================================#
 # Test: render_json
-#=======================================================================#
+# =======================================================================#
 def test_render_json():
     root = TreeNode(name="root", is_dir=True, path="root", size=0)
-    child = TreeNode(name="file1.txt", is_dir=False,path="root/file1.txt", size=1536)
+    child = TreeNode(name="file1.txt", is_dir=False, path="root/file1.txt", size=1536)
     root.children.append(child)
     root.size += child.size
     root.stats.visible_files = 1
-    
+
     config = TreeConfig()
 
     # Raw bytes
     output = io.StringIO()
     JsonRenderer(config).render(root, output)
-    
+
     data = json.loads(output.getvalue())
     assert data["name"] == "root"
     assert data["size_bytes"] == 1536
@@ -114,6 +120,7 @@ def test_render_json():
     assert data["size_bytes"] == 1536
     assert data["size_human"] == "1.5 K"
 
+
 def test_render_json_truncated():
     root = TreeNode(name="root", is_dir=True, path="project/root")
     root.is_truncated = True
@@ -124,33 +131,34 @@ def test_render_json_truncated():
     config = TreeConfig()
     output = io.StringIO()
     JsonRenderer(config).render(root, output)
-    
+
     data = json.loads(output.getvalue())
-    
+
     assert data["is_truncated"] is True
     assert "hidden_summary" in data
     assert data["hidden_summary"]["hidden_folders"] == 5
     assert data["hidden_summary"]["hidden_files"] == 12
-    
+
     assert "children" not in data
 
-#=======================================================================#
+
+# =======================================================================#
 # Test: render_markdown
-#=======================================================================#
+# =======================================================================#
 def test_render_markdown():
     root = TreeNode(name="root", is_dir=True, path="root")
-    child = TreeNode(name="file.py", is_dir=False, path="root/file.py", size=3*1024)
+    child = TreeNode(name="file.py", is_dir=False, path="root/file.py", size=3 * 1024)
     root.children.append(child)
     root.size += child.size
     root.stats.visible_files = 1
-    
+
     config = TreeConfig()
 
     # normal
     output = io.StringIO()
     MarkdownRenderer(config).render(root, output)
     result = output.getvalue()
-    
+
     assert "📂 **root/**" in result
     assert "🐍 `file.py`" in result
 
@@ -172,6 +180,7 @@ def test_render_markdown():
     assert "📂 `3.0 K` **root/**" in result
     assert "🐍 `3.0 K` `file.py`" in result
 
+
 def test_markdown_renderer_truncation():
     root = TreeNode(name="root", is_dir=True, path="project/root")
     root.is_truncated = True
@@ -184,16 +193,16 @@ def test_markdown_renderer_truncation():
     config.show_ellipsis = True
     output = io.StringIO()
     MarkdownRenderer(config).render(root, output)
-    
+
     content = output.getvalue()
     assert "  - ... (5 dirs, 12 files)" in content
 
     # 2. folders_only
     config.folders_only = True
     output = io.StringIO()
-    
+
     MarkdownRenderer(config).render(root, output)
-    
+
     content = output.getvalue()
     assert "  - ... (5 dirs)" in content
     assert "files" not in content
@@ -201,39 +210,41 @@ def test_markdown_renderer_truncation():
     # 3. show_ellipsis = False
     config.show_ellipsis = False
     output = io.StringIO()
-    
+
     MarkdownRenderer(config).render(root, output)
-    
+
     content = output.getvalue()
     assert "..." not in content
 
-#=======================================================================#
+
+# =======================================================================#
 # Test: render_markdown
-#=======================================================================#
+# =======================================================================#
 def test_render_markdown_as_block():
     root = TreeNode(name="root", is_dir=True, path="root")
     child = TreeNode(name="file.py", is_dir=False, path="root/file.py")
     root.children.append(child)
-    
+
     config = TreeConfig()
     output = io.StringIO()
     MarkdownBlockRenderer(config).render(root, output)
     result = output.getvalue()
-    
+
     assert f"root{os.sep}" in result
     assert "file.py" in result
 
-#=======================================================================#
+
+# =======================================================================#
 # Test: print stats
-#=======================================================================#
+# =======================================================================#
 def test_print_stats(capsys):
     root = TreeNode(name="root", is_dir=True, path="root")
     root.stats = Stats(visible_dirs=1, visible_files=2, hidden_dirs=0, hidden_files=0)
-    
+
     # normal
     config = TreeConfig()
     print_stats(root, config)
-    
+
     captured = capsys.readouterr()
     assert "Summary" in captured.out
     assert "1 directories" in captured.out
@@ -246,14 +257,15 @@ def test_print_stats(capsys):
     captured = capsys.readouterr()
     assert "0 B" in captured.out
 
+
 def test_print_stats_rich(capsys):
     root = TreeNode(name="root", is_dir=True, path="root")
     root.stats = Stats(visible_dirs=1, visible_files=2, hidden_dirs=0, hidden_files=0)
-    
+
     # normal
     config = TreeConfig()
     print_stats(root, config, fmt="rich")
-    
+
     captured = capsys.readouterr()
     assert "Summary" in captured.out
     assert "1 directories" in captured.out
@@ -265,4 +277,3 @@ def test_print_stats_rich(capsys):
 
     captured = capsys.readouterr()
     assert "0 bytes" in captured.out
-

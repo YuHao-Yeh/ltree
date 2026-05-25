@@ -13,13 +13,27 @@ FILENAMES = {
 }
 
 EXTENSIONS = {
-    ".py": "🐍", ".js": "🟨", ".ts": "🟦", ".html": "🌐", 
-    ".css": "🎨", ".json": "⚙️", ".md": "📝", ".rs": "🦀", 
-    ".go": "🐹", ".sql": "🗄️", ".zip": "📦"
+    ".py": "🐍",
+    ".js": "🟨",
+    ".ts": "🟦",
+    ".html": "🌐",
+    ".css": "🎨",
+    ".json": "⚙️",
+    ".md": "📝",
+    ".rs": "🦀",
+    ".go": "🐹",
+    ".sql": "🗄️",
+    ".zip": "📦",
 }
 
 FOLDERS = {
-    ".git": "🌳", "node_modules": "📦", ".venv": "🐍",
-    "venv": "🐍", "tests": "🧪", "src": "📦", "docs": "📚",
-    "__pycache__": "🗑️", ".vscode": "💻"
+    ".git": "🌳",
+    "node_modules": "📦",
+    ".venv": "🐍",
+    "venv": "🐍",
+    "tests": "🧪",
+    "src": "📦",
+    "docs": "📚",
+    "__pycache__": "🗑️",
+    ".vscode": "💻",
 }

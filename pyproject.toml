@@ -35,6 +35,8 @@ Issues = "https://github.com/YuHao-Yeh/ltree/issues"
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
+    "pre-commit",
+    "ruff"
 ]
 
 # =====================================================================
@@ -55,7 +57,7 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["ltree*"]
-exclude = ["ltree-vscode*", "tests*", "docs*"] 
+exclude = ["ltree-vscode*", "tests*", "docs*"]
 
 # =====================================================================
 # Testing & Quality Control (Pytest & Coverage)

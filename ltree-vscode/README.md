@@ -6,7 +6,7 @@
 
 - **Right-Click Integration**: Generate directory trees without leaving the editor.
 - **Multiple Formats**: Support for `Text`, `JSON`, `Markdown`, and `Markdown Block`.
-- **Smart Path Context**: 
+- **Smart Path Context**:
     - Right-click a **folder** to scan that folder.
     - Right-click a **file** to scan the directory containing that file.
 
