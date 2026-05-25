@@ -186,6 +186,55 @@ ltree --help
 
 ---
 
+## Configuration
+
+You can save your favorite settings in a config file so you don't have to type them every time. `ltree` will automatically search for these files in your project directory (or climb up to find them):
+
+- `.ltreerc` (JSON)
+- `pyproject.toml` (under `[tool.ltree]`)
+
+### Configuration Priority
+Settings are merged and overridden in the following order (from highest to lowest priority):
+1. **Command Line Arguments**
+2. **Local Configuration File** (`.ltreerc` or `pyproject.toml`)
+3. **Default Settings**
+
+### Examples
+
+#### `.ltreerc` (JSON)
+Create a `.ltreerc` file in your project root:
+```json
+{
+  "theme": "nerd",
+  "size": true,
+  "human": true,
+  "dirs_first": true,
+  "ex_dirs": ["dist", "build", "target"],
+  "ex_ext": [".log", ".tmp"]
+}
+```
+
+#### `pyproject.toml` (TOML)
+Create a `pyproject.toml` file in your project root:
+```toml
+[tool.ltree]
+theme = "emoji"
+full_path = true
+color = true
+size = true
+add_dirs = ["output", "temp"]
+```
+
+### Supported Configuration Keys
+All command-line flags can be configured in your settings file:
+- Booleans & Strings:
+  - theme: "emoji", "nerd", or "none"
+  - color, size, human, all (show hidden files), dirs_only, full_path, dirs_first, show_ellipsis, no_ignore
+- Filter Rules:
+  - ex_dirs, ex_files, ex_ext, ex_prefix, add_dirs, add_files
+
+---
+
 ## Output Examples
 
 ### Standard Text
