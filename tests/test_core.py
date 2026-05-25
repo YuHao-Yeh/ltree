@@ -1,4 +1,5 @@
 import os
+import platform
 import pytest
 from unittest.mock import patch
 
@@ -39,7 +40,7 @@ def test_scan_tree_stats(tmp_path, setup_subtree):
     assert root_node.stats.visible_dirs == 2    # level1, level2
     assert root_node.size == 30                 # 10 + 20
 
-def test_sacn_tree_file(tmp_path, setup_subtree):
+def test_scan_tree_file(tmp_path, setup_subtree):
     config = TreeConfig()
 
     fp = tmp_path / "file1.txt"
@@ -47,6 +48,18 @@ def test_sacn_tree_file(tmp_path, setup_subtree):
 
     assert f1_node.is_dir is False
     assert f1_node.size == 10
+
+def test_scan_tree_system_root_fallback():
+    config = TreeConfig()
+    root_path = "C:\\" if platform.system() == "Windows" else "/"
+    
+    with patch("os.scandir") as mock_scandir:
+        mock_scandir.return_value.__enter__.return_value = []
+        
+        root_node = scan_tree(root_path, config, max_depth=0)
+    
+    assert root_node is not None
+    assert root_node.name == root_path
 
 #=======================================================================#
 # Test: Options & Filtering Tests
@@ -105,6 +118,14 @@ def test_scan_tree_permission_error(tmp_path, capsys):
         scan_tree(str(tmp_path), config)
         captured = capsys.readouterr()
         assert "Error: No permission" in captured.err
+
+def test_scan_tree_os_error(tmp_path, capsys):
+    config = TreeConfig()
+    
+    with patch("os.scandir", side_effect=OSError):
+        scan_tree(str(tmp_path), config)
+        captured = capsys.readouterr()
+        assert "Error: Failed to scan" in captured.err
 
 def test_scan_tree_skip_none_child(tmp_path, capsys):
     (tmp_path / "dir_a").mkdir()
