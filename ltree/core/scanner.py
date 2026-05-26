@@ -4,6 +4,7 @@ import os
 from .config import TreeConfig
 from .models import TreeNode
 from .utils import is_excluded, count_subtree
+from .metadata.basic import build_metadata
 
 
 def scan_tree(
@@ -27,7 +28,9 @@ def scan_tree(
     name = os.path.basename(abs_path) if curr_depth == 0 else os.path.basename(path)
     if curr_depth == 0 and not name:
         name = abs_path
+
     node = TreeNode(name=name, is_dir=is_dir, path=path)
+    build_metadata(path, node)
 
     if not is_dir:
         try:
@@ -65,11 +68,11 @@ def scan_tree(
                         continue
 
                     node.stats.visible_files += 1
-                    node.children.append(
-                        TreeNode(
-                            name=entry.name, is_dir=False, path=entry.path, size=f_size
-                        )
+                    child = TreeNode(
+                        name=entry.name, is_dir=False, path=entry.path, size=f_size
                     )
+                    build_metadata(entry.path, child)
+                    node.children.append(child)
                     continue
 
                 # visible folder
@@ -82,6 +85,7 @@ def scan_tree(
                     child = TreeNode(
                         name=entry.name, is_dir=True, path=entry.path, is_truncated=True
                     )
+                    build_metadata(entry.path, child)
                     child.stats.hidden_dirs = h_dirs
                     child.stats.hidden_files = h_files
                     child.size = h_size
