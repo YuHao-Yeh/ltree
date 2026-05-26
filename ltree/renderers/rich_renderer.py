@@ -1,12 +1,12 @@
 import os
-from rich.tree import Tree
 from rich.console import Console
 from rich.filesize import decimal as format_size
+from rich.text import Text
+from rich.tree import Tree
 from typing import TextIO
 
 from .base import BaseRenderer
 from ..core.models import TreeNode
-from ..constants import RICH_COLOR_DIR, RICH_COLOR_FILE
 
 
 class RichRenderer(BaseRenderer):
@@ -28,25 +28,25 @@ class RichRenderer(BaseRenderer):
         self._render_recursive(node, rich_tree)
         console.print(rich_tree)
 
-    def _build_node_label(self, node: TreeNode, is_root: bool = False) -> str:
-        icon = self.icon_provider.get_icon(node.name, node.is_dir)
+    def _build_node_label(self, node: TreeNode, is_root: bool = False) -> Text:
+        text = Text()
+
+        icon = self.theme_manager.get_icon(node)
+        text.append(icon)
+
         path_display = node.path.replace("/", os.sep)
         display_name = (
             path_display if (self.config.full_path and not is_root) else node.name
         )
 
-        if node.is_dir:
-            name_label = f"{RICH_COLOR_DIR}{display_name}[/]"
-        else:
-            name_label = f"{RICH_COLOR_FILE}{display_name}[/]"
-
-        label = f"{icon}{name_label}"
+        style = self.theme_manager.get_style(node)
+        text.append(display_name, style=style)
 
         if self.config.show_size:
             size_str = format_size(node.size)
-            label += f" [dim]({size_str.strip()})[/]"
+            text.append(f" ({size_str.strip()})", style="dim")
 
-        return label
+        return text
 
     def _render_recursive(self, node: TreeNode, rich_tree: Tree) -> None:
         # Truncated
@@ -57,7 +57,7 @@ class RichRenderer(BaseRenderer):
             else:
                 text = f"... ({stats.hidden_dirs} dirs, {stats.hidden_files} files)"
 
-            rich_tree.add(f"[yellow]{text}[/]")
+            rich_tree.add(Text(text, style="yellow"))
             return
 
         for child in node.children:

@@ -18,6 +18,12 @@ class Stats:
 
 
 @dataclass(slots=True)
+class GitStatus:
+    staged: str | None = None
+    unstaged: str | None = None
+
+
+@dataclass(slots=True)
 class TreeNode:
     name: str
     is_dir: bool
@@ -26,3 +32,8 @@ class TreeNode:
     children: list["TreeNode"] = field(default_factory=list)
     stats: Stats = field(default_factory=Stats)
     is_truncated: bool = False
+    extension: str = ""
+    is_symlink: bool = False
+    is_executable: bool = False
+    permissions: str = ""
+    git_status: GitStatus | None = None
