@@ -4,7 +4,6 @@ import pytest
 from ltree.core.models import TreeNode, Stats
 from ltree.core.config import TreeConfig
 from ltree.renderers.rich_renderer import RichRenderer
-from ltree.constants import RICH_COLOR_DIR, RICH_COLOR_FILE
 
 
 # ======================================================================= #
@@ -40,20 +39,22 @@ def sample_tree():
 # Test: _build_node_label
 # ======================================================================= #
 def test_build_node_label_basic(base_config):
+    base_config.theme = "emoji"
     renderer = RichRenderer(base_config)
 
     dir_node = TreeNode(name="src", is_dir=True, path="src")
     dir_label = renderer._build_node_label(dir_node)
-    assert RICH_COLOR_DIR in dir_label
-    assert "src" in dir_label
+    assert dir_label.plain == "📦 src"
+    assert any(span.style == "bold cyan" for span in dir_label.spans)
 
     file_node = TreeNode(name="main.py", is_dir=False, path="main.py")
     file_label = renderer._build_node_label(file_node)
-    assert RICH_COLOR_FILE in file_label
-    assert "main.py" in file_label
+    assert file_label.plain == "🐍 main.py"
+    assert any(span.style == "white" for span in file_label.spans)
 
 
 def test_build_node_label_with_size(base_config):
+    base_config.theme = "emoji"
     base_config.show_size = True
     renderer = RichRenderer(base_config)
 
@@ -61,11 +62,12 @@ def test_build_node_label_with_size(base_config):
     label = renderer._build_node_label(file_node)
 
     # 2048 -> 2.0 kBs
-    assert "2.0 kB" in label
-    assert "[dim]" in label
+    assert "2.0 kB" in label.plain
+    assert any(span.style == "dim" for span in label.spans)
 
 
 def test_build_node_label_full_path(base_config):
+    base_config.theme = "emoji"
     base_config.full_path = True
     renderer = RichRenderer(base_config)
 
@@ -73,12 +75,12 @@ def test_build_node_label_full_path(base_config):
 
     # root node: only displays the name.
     root_label = renderer._build_node_label(file_node, is_root=True)
-    assert f"{RICH_COLOR_FILE}main.py[/]" in root_label
+    assert root_label.plain == "🐍 main.py"
 
     # other: display path
     expected_path = "src/utils/main.py".replace("/", os.sep)
     child_label = renderer._build_node_label(file_node, is_root=False)
-    assert f"{RICH_COLOR_FILE}{expected_path}[/]" in child_label
+    assert expected_path in child_label.plain
 
 
 def test_build_node_label_with_icon(base_config):
@@ -86,6 +88,7 @@ def test_build_node_label_with_icon(base_config):
     renderer = RichRenderer(base_config)
 
     py_node = TreeNode(name="script.py", is_dir=False, path="script.py")
+    py_node.extension = ".py"
     label = renderer._build_node_label(py_node)
 
     assert "🐍" in label

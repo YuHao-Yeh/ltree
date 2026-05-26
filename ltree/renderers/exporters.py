@@ -49,7 +49,7 @@ class TextRenderer(BaseRenderer):
         display_name = name + (
             os.sep if node.is_dir and not name.endswith(os.sep) else ""
         )
-        icon = self.icon_provider.get_icon(node.name, node.is_dir)
+        icon = self.theme_manager.get_icon(node)
 
         size_str = ""
         if self.config.show_size:
@@ -122,7 +122,7 @@ class MarkdownRenderer(BaseRenderer):
 
     def _render_recursive(self, node: TreeNode, file: TextIO, depth: int = 0) -> None:
         indent = "  " * depth
-        icon = self.icon_provider.get_icon(node.name, node.is_dir)
+        icon = self.theme_manager.get_icon(node)
 
         size_str = ""
         if self.config.show_size:
