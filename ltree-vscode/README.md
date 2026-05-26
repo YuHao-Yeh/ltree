@@ -24,17 +24,14 @@ This extension acts as a wrapper for the `ltree` Python package.
 
 ## Extension Settings
 
-This extension contributes the following settings:
+This extension contributes the following configuration options:
 
-### Added
-- **UI Settings Integration**: Added native VS Code settings fields for `theme`, `showSize`, and `dirsFirst`, eliminating the need to manually pass these flags through command-line arguments.
-- **Custom Argument Parsing**: Added a safe command-line argument splitter (`splitArguments`) to handle complex input arguments containing quotes and spaces in the custom prompt.
-
-### Changed
-- **Execution Engine**: Replaced the shell-dependent `exec` process invocation with `spawn` for executing the CLI tool, resolving potential path formatting anomalies across different OS environments.
-
-### Security
-- **Command Injection Prevention**: Migrated away from shell execution to direct process invocation (`spawn`), eliminating potential command injection vulnerabilities arising from crafted workspace directory names or custom arguments.
+* `ltree.pythonPath`: Path to your Python executable (e.g., `python`, `python3`, or a full path to a virtual environment's interpreter).
+* `ltree.theme`: Choose your default icon theme. Choices: `emoji` (default), `nerd`, or `none`.
+* `ltree.showSize`: Enable this to display file/directory sizes in the output. Default is `false`.
+* `ltree.dirsFirst`: When enabled, directories will be listed before files. Default is `false`.
+* `ltree.args`: Default additional arguments to pass to the `ltree` CLI (e.g., `--all`, `-L 2`).
+  *Note: The `-F` (format) argument is handled automatically by the menu options.*
 
 ## Usage
 
@@ -49,6 +46,11 @@ This extension contributes the following settings:
 - If you encounter a `ENOENT` error on Windows, please ensure your `ltree.pythonPath` is correctly set in the settings.
 
 ## Release Notes
+
+### 0.2.0
+- **Native Settings UI**: Integrated settings for theme, showSize, and dirsFirst directly into VS Code Settings.
+- **Security Upgrade**: Migrated backend execution engine to `spawn` for safe parameter parsing and cmd-injection prevention.
+- **Improved Parsing**: Added a robust command-line argument splitter for the custom prompt.
 
 ### 0.1.0
 - Initial release.
