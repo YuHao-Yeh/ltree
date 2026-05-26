@@ -1,6 +1,6 @@
 [project]
 name = "ltree"
-version = "0.1.0"
+version = "0.2.0"
 description = "A customizable tree-like directory viewer with filtering, depth control, and statistics"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -23,6 +23,7 @@ classifiers = [
 
 dependencies = [
     "pathspec>=1.1.1",
+    "rich>=15.0.0",
 ]
 
 [project.urls]
@@ -34,6 +35,8 @@ Issues = "https://github.com/YuHao-Yeh/ltree/issues"
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
+    "pre-commit",
+    "ruff"
 ]
 
 # =====================================================================
@@ -54,7 +57,7 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["ltree*"]
-exclude = ["ltree-vscode*", "tests*", "docs*"] 
+exclude = ["ltree-vscode*", "tests*", "docs*"]
 
 # =====================================================================
 # Testing & Quality Control (Pytest & Coverage)
@@ -71,7 +74,9 @@ branch = true
 show_missing = true
 fail_under = 80
 exclude_lines = [
-    "if __name__ == '__main__'",
+    "if __name__ == \"__main__\"",
     "pragma: no cover",
-    "raise NotImplementedError"
+    "raise NotImplementedError",
+    "@abstractmethod",
+    "@abc.abstractmethod",
 ]

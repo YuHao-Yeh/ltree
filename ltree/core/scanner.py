@@ -2,8 +2,9 @@ import sys
 import os
 
 from .config import TreeConfig
-from .schema import TreeNode
-from .utils import is_excluded, count_subtree, get_rel_path
+from .models import TreeNode
+from .utils import is_excluded, count_subtree
+from .metadata.basic import build_metadata
 
 
 def scan_tree(
@@ -16,15 +17,20 @@ def scan_tree(
     if not os.path.exists(path):
         print(f"Error: Path '{path}' does not exist.", file=sys.stderr)
         return None
-    
+
     if curr_depth == 0:
         config.root_path = os.path.abspath(path)
         config.load_gitignore(config.root_path)
         rel_path = "."
-    
+
     is_dir = os.path.isdir(path)
-    name = os.path.basename(os.path.abspath(path)) if curr_depth == 0 else os.path.basename(path)
+    abs_path = os.path.abspath(path)
+    name = os.path.basename(abs_path) if curr_depth == 0 else os.path.basename(path)
+    if curr_depth == 0 and not name:
+        name = abs_path
+
     node = TreeNode(name=name, is_dir=is_dir, path=path)
+    build_metadata(path, node)
 
     if not is_dir:
         try:
@@ -36,10 +42,19 @@ def scan_tree(
     try:
         with os.scandir(path) as it:
             entries = list(it)
-            entries.sort(key=lambda e: (not e.is_dir() if config.dirs_first else False, e.name.lower()))
+            entries.sort(
+                key=lambda e: (
+                    not e.is_dir() if config.dirs_first else False,
+                    e.name.lower(),
+                )
+            )
 
             for entry in entries:
-                entry_rel_path = entry.name if rel_path == "." else os.path.join(rel_path, entry.name)
+                entry_rel_path = (
+                    entry.name
+                    if rel_path == "."
+                    else os.path.join(rel_path, entry.name)
+                )
                 if is_excluded(entry.name, entry.is_dir(), config, entry_rel_path):
                     continue
 
@@ -53,7 +68,11 @@ def scan_tree(
                         continue
 
                     node.stats.visible_files += 1
-                    node.children.append(TreeNode(name=entry.name, is_dir=False, path=entry.path, size=f_size))
+                    child = TreeNode(
+                        name=entry.name, is_dir=False, path=entry.path, size=f_size
+                    )
+                    build_metadata(entry.path, child)
+                    node.children.append(child)
                     continue
 
                 # visible folder
@@ -63,17 +82,22 @@ def scan_tree(
                     # hidden folders & files
                     h_dirs, h_files, h_size = count_subtree(entry.path, config)
 
-                    child = TreeNode(name=entry.name, is_dir=True, path=entry.path, is_truncated=True)
+                    child = TreeNode(
+                        name=entry.name, is_dir=True, path=entry.path, is_truncated=True
+                    )
+                    build_metadata(entry.path, child)
                     child.stats.hidden_dirs = h_dirs
                     child.stats.hidden_files = h_files
                     child.size = h_size
                     node.children.append(child)
-                    
+
                     node.size += h_size
                     node.stats.hidden_dirs += h_dirs
                     node.stats.hidden_files += h_files
                 else:
-                    child = scan_tree(entry.path, config, max_depth, curr_depth + 1, entry_rel_path)
+                    child = scan_tree(
+                        entry.path, config, max_depth, curr_depth + 1, entry_rel_path
+                    )
                     if child:
                         node.children.append(child)
 
@@ -85,6 +109,9 @@ def scan_tree(
                         node.size += child.size
     except PermissionError:
         print(f"Error: No permission for the path '{path}'", file=sys.stderr)
+        return
+    except OSError as e:
+        print(f"Error: Failed to scan '{path}': {e}", file=sys.stderr)
         return
 
     return node

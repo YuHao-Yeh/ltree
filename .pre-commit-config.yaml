@@ -1,0 +1,39 @@
+default_language_version:
+  python: python
+
+exclude: '^(.venv|venv|node_modules|dist|build|out)/'
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: Run pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [ pre-commit ]
+
+      - id: vscode-compile
+        name: Compile VS Code Extension (TypeScript)
+        entry: npm --prefix ltree-vscode run compile
+        language: system
+        files: ^ltree-vscode/src/
+        pass_filenames: false
+        stages: [ pre-commit ]

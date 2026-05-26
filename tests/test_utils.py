@@ -3,13 +3,19 @@ import io
 import os
 import pytest
 from unittest.mock import patch
-from ltree.utils import is_excluded, count_subtree, write_line, get_rel_path
-from ltree.config import TreeConfig
+from ltree.core.utils import (
+    is_excluded,
+    count_subtree,
+    write_line,
+    get_rel_path,
+    format_size_classic,
+)
+from ltree.core.config import TreeConfig
 
 
-#=======================================================================#
+# =======================================================================#
 # Fixture
-#=======================================================================#
+# =======================================================================#
 # tmp_path/
 # ├── file1.txt         (file, 10 bytes)
 # ├── .hidden_file      (file, 5 bytes)
@@ -17,24 +23,26 @@ from ltree.config import TreeConfig
 #     ├── file2.txt     (file, 20 bytes)
 #     └── __pycache__/  (dir)
 #         └── cache.pyc (file, 100 bytes)
-#=======================================================================#
+# =======================================================================#
 @pytest.fixture
 def setup_subtree(tmp_path):
-    (tmp_path / "file1.txt").write_text("0123456789")       # 10 bytes
-    (tmp_path / ".hidden").write_text("12345")              # 5 bytes
+    (tmp_path / "file1.txt").write_text("0123456789")  # 10 bytes
+    (tmp_path / ".hidden").write_text("12345")  # 5 bytes
 
     sub = tmp_path / "sub_dir"
     sub.mkdir()
     (sub / "file2.txt").write_text("01234567890123456789")  # 20 bytes
     sub = tmp_path / "sub_dir"
-    
+
     pycache = sub / "__pycache__"
     pycache.mkdir()
-    (pycache / "cache.pyc").write_text("a" * 100)           # 100 bytes
+    (pycache / "cache.pyc").write_text("a" * 100)  # 100 bytes
+
 
 @pytest.fixture
 def base_args():
     return argparse.Namespace(
+        start_path=".",
         output="-",
         ex_dirs=[],
         ex_files=[],
@@ -51,36 +59,41 @@ def base_args():
         no_ignore=True,
         regex_exclude=[],
         dirs_first=False,
-        show_ellipsis=False
+        show_ellipsis=False,
+        theme="none",
     )
 
-#=======================================================================#
+
+# =======================================================================#
 # Test: is_excluded
-#=======================================================================#
+# =======================================================================#
 def test_is_excluded_priority_1():
     config = TreeConfig()
     config.added_items.add(".gitignore")
     assert is_excluded(".gitignore", is_dir=False, config=config, rel_path=".") is False
 
+
 def test_is_excluded_priority_2(tmp_path):
     gitignore = tmp_path / ".gitignore"
     gitignore.write_text("*.log\nnode_modules/")
-    
+
     config = TreeConfig()
     config.load_gitignore(str(tmp_path))
-    
+
     assert is_excluded("test.log", False, config, "test.log")
     assert is_excluded("node_modules", True, config, "node_modules")
     assert is_excluded("src", True, config, "src") is False
+
 
 def test_is_excluded_priority_3(base_args):
     config = TreeConfig()
     base_args.regex_exclude = [r"temp_\d+"]
     base_args.no_ignore = False
     config.apply_args(base_args)
-    
+
     assert is_excluded("temp_123", True, config, "temp_123")
     assert is_excluded("temp_abc", True, config, "temp_abc") is False
+
 
 def test_is_excluded_priority_4():
     config = TreeConfig()
@@ -114,6 +127,7 @@ def test_is_excluded_priority_4():
     assert is_excluded("logging.txt", False, config, rel_path) is False
     assert is_excluded("record.log", False, config, rel_path)
 
+
 def test_is_excluded_priority_5():
     config = TreeConfig()
     config.show_all = False
@@ -132,42 +146,45 @@ def test_is_excluded_priority_5():
     config.show_all = True
     assert is_excluded(".env", is_dir=False, config=config, rel_path=rel_path) is False
 
-#=======================================================================#
+
+# =======================================================================#
 # Test: count_subtree
-#=======================================================================#
+# =======================================================================#
 def test_count_subtree_logic(tmp_path, setup_subtree):
     # Case A: show_all = False
     config = TreeConfig()
     config.show_all = False
     dirs, files, size = count_subtree(str(tmp_path), config)
 
-    assert dirs == 1    # sub_dir
-    assert files == 2   # file1.txt, file2.txt
-    assert size == 30   # 10 + 20
+    assert dirs == 1  # sub_dir
+    assert files == 2  # file1.txt, file2.txt
+    assert size == 30  # 10 + 20
 
     # Case B: show_all = True
-    config.subtree_cache.clear()
+    config._subtree_cache.clear()
     config.show_all = True
     config.added_items.add("__pycache__")
 
     d, f, s = count_subtree(str(tmp_path), config)
 
-    assert d == 2   # sub_dir/, __pycache__
-    assert f == 4   # file1.txt, file2.txt, .hidden_file, cache.pyc
+    assert d == 2  # sub_dir/, __pycache__
+    assert f == 4  # file1.txt, file2.txt, .hidden_file, cache.pyc
     assert s == 135
+
 
 def test_count_subtree_cache(tmp_path, setup_subtree):
     config = TreeConfig()
     path_str = str(tmp_path)
-    
+
     count_subtree(path_str, config)
-    
+
     config._subtree_cache[path_str] = (10, 20, 300)
-    
+
     d, f, s = count_subtree(path_str, config)
     assert d == 10
     assert f == 20
     assert s == 300
+
 
 def test_count_subtree_permission_error(tmp_path, setup_subtree):
     config = TreeConfig()
@@ -178,41 +195,45 @@ def test_count_subtree_permission_error(tmp_path, setup_subtree):
         assert dirs == 1
         assert files == 2
 
-#=======================================================================#
+
+# =======================================================================#
 # Test: get_rel_path
-#=======================================================================#
+# =======================================================================#
 def test_get_rel_path_logic():
     base = os.sep + os.path.join("Users", "user", "project")
     src = os.sep + os.path.join("Users", "user", "project", "src")
     fp = os.sep + os.path.join("Users", "user", "project", "src", "utils", "helper.py")
-    
+
     # Case A: same path
     assert get_rel_path(base, base) == "."
-    
+
     # Case B: sub-directories
     assert get_rel_path(src, base) == "src"
-    
+
     # Case C: deep archives
-    assert get_rel_path(fp, base) == f"src{os.sep}utils{os.sep}helper.py"
+    assert get_rel_path(fp, base) == "src/utils/helper.py"
+
 
 def test_get_rel_path_with_trailing_sep():
     base = os.path.join("home", "user", "project")
     full = os.path.join("home", "user", "project", "data", "db.sqlite")
-    
+
     res = get_rel_path(full, base)
-    assert res == os.path.join("data", "db.sqlite")
+    assert res == "data/db.sqlite"
     assert not res.startswith(os.sep)
 
-#=======================================================================#
+
+# =======================================================================#
 # Test: write_line
-#=======================================================================#
+# =======================================================================#
 def test_write_line_success():
     mock_file = io.StringIO()
-    
+
     test_text = "Hello Tree"
     write_line(mock_file, test_text)
-    
+
     assert mock_file.getvalue() == "Hello Tree\n"
+
 
 def test_write_line_none():
     try:
@@ -220,10 +241,26 @@ def test_write_line_none():
     except AttributeError:
         pytest.fail("write_line raised AttributeError on None file")
 
+
 def test_write_line_multiple_calls():
     mock_file = io.StringIO()
-    
+
     write_line(mock_file, "Line 1")
     write_line(mock_file, "Line 2")
-    
+
     assert mock_file.getvalue() == "Line 1\nLine 2\n"
+
+
+# =======================================================================#
+# Test: format_size_classic
+# =======================================================================#
+def test_format_size_classic():
+    # Raw Bytes
+    assert format_size_classic(100, human=False) == "     100 B"
+    assert format_size_classic(1024, human=False) == "    1024 B"
+
+    # Human Readable
+    assert format_size_classic(500, human=True) == "500.0 B"
+    assert format_size_classic(1024, human=True) == "  1.0 K"
+    assert format_size_classic(1024**2 * 1.5, human=True) == "  1.5 M"
+    assert format_size_classic(1024**5 * 1.5, human=True) == "  1.5 P"
