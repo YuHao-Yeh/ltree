@@ -17,10 +17,10 @@ This extension acts as a wrapper for the `ltree` Python package.
 1. **Python 3.10+** must be installed on your system.
 2. **ltree package**: Install the core tool from source:
    ```bash
-   git clone https://github.com/YuHao-Yeh/ltree.git
-   cd ltree
-   pip install -e .
+   pip install ltree-cli
    ```
+
+   (Alternatively, you can install from source: `git clone https://github.com/YuHao-Yeh/ltree.git && cd ltree && pip install -e .`)
 
 ## Extension Settings
 
