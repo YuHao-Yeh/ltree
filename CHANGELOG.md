@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-05-26
+
+### Fixed
+- **Rename PyPI Package**: Renamed package from `ltree` to `ltree-cli` due to name-similarity conflicts on PyPI.
+- **Documentation**: Updated installation instructions for both the main project and VS Code extension, and improved PyPI metadata and README badges.
+
+### CI/CD
+- **Automated Publishing Workflows**: Integrated OIDC Trusted Publishing workflows for PyPI and TestPyPI.
+
 ## [0.2.0] - 2026-05-26
 
 ### Added
@@ -32,6 +41,7 @@ All notable changes to this project will be documented in this file.
 - **Display Configurations**: Included toggles for depth limit (`-L`), full path prefix, colored output, directory-first listing, and classic or human-readable file sizes.
 - **Theme Support**: Integrated initial support for Emoji, Nerd Font, and Plain Text (none) icon themes.
 
-[Unreleased]: https://github.com/YuHao-Yeh/ltree/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/YuHao-Yeh/ltree/compare/v0.2.1...HEAD
+[0.2.0]: https://github.com/YuHao-Yeh/ltree/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/YuHao-Yeh/ltree/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/YuHao-Yeh/ltree/releases/tag/v0.1.0
