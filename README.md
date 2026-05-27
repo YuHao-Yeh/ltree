@@ -3,14 +3,23 @@
 <div align="center">
   <!-- Metadata -->
   <p>
-    <a href="https://github.com/YuHao-Yeh/ltree/actions">
-      <img src="https://github.com/YuHao-Yeh/ltree/actions/workflows/tests.yml/badge.svg" alt="Python Tests">
+    <a href="https://pypi.org/project/ltree-cli/">
+      <img src="https://img.shields.io/pypi/v/ltree-cli.svg" alt="PyPI version">
+    </a>
+    <a href="https://www.python.org/">
+      <img src="https://img.shields.io/badge/python-%3E%3D3.10-blue" alt="Python Version">
     </a>
     <a href="https://opensource.org/licenses/MIT">
       <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
     </a>
-    <a href="https://www.python.org/">
-      <img src="https://img.shields.io/badge/python-%3E%3D3.10-blue" alt="Python Version">
+  </p>
+  <!-- CI & Coverage -->
+  <p>
+    <a href="https://github.com/YuHao-Yeh/ltree/actions">
+      <img src="https://github.com/YuHao-Yeh/ltree/actions/workflows/tests.yml/badge.svg" alt="Tests">
+    </a>
+    <a href="https://coveralls.io/github/YuHao-Yeh/ltree">
+      <img src="https://coveralls.io/repos/github/YuHao-Yeh/ltree/badge.svg" alt="Coverage">
     </a>
   </p>
 </div>
@@ -71,6 +80,16 @@ Total  :   7 directories,  35 files
 ---
 
 ## Installation
+
+You can install **ltree** directly from PyPI:
+
+```bash
+# Using pip
+pip install ltree-cli
+
+# Or using uv
+uv pip install ltree-cli
+```
 
 For local development or usage:
 

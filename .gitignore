@@ -2,11 +2,13 @@
 __pycache__/
 *.py[oc]
 *.pyc
+*.pypirc
 build/
 dist/
 wheels/
 *.egg-info
 .pytest_cache
+.ruff_cache
 .coverage
 htmlcov/
 .venv/
@@ -38,5 +40,6 @@ Thumbs.db
 # --- Project Specific ---
 legacy/
 output/
+tmp/
 tree.txt
 *.log
