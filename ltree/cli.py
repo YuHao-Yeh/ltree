@@ -1,16 +1,16 @@
 import argparse
 import sys
 
-from .core.scanner import scan_tree
-from .core.config import TreeConfig
-from .renderers.exporters import (
+from ltree.core.scanner import scan_tree
+from ltree.core.config import TreeConfig
+from ltree.renderers.exporters import (
     TextRenderer,
     JsonRenderer,
     MarkdownRenderer,
     MarkdownBlockRenderer,
     print_stats,
 )
-from .renderers.rich_renderer import RichRenderer
+from ltree.renderers.rich_renderer import RichRenderer
 
 
 def parse_args() -> argparse.Namespace:
