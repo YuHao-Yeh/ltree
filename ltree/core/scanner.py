@@ -1,10 +1,26 @@
-import sys
+# ltree/core/scanner.py
 import os
+import stat
+import sys
 
 from .config import TreeConfig
-from .models import TreeNode
+from .models import TreeNode, NodeType
 from .utils import is_excluded, count_subtree
-from .metadata.basic import build_metadata
+from .metadata import MetadataPipeline, get_default_pipeline
+
+
+def build_metadata(path: str, node: TreeNode) -> None:
+    try:
+        st = os.lstat(path)
+
+        node.is_symlink = stat.S_ISLNK(st.st_mode)
+        node.is_executable = bool(st.st_mode & stat.S_IXUSR)
+        node.permissions = stat.filemode(st.st_mode)
+
+        _, ext = os.path.splitext(node.name)
+        node.extension = ext.lower()
+    except OSError:
+        return
 
 
 def scan_tree(
@@ -13,6 +29,7 @@ def scan_tree(
     max_depth: int | None = None,
     curr_depth: int = 0,
     rel_path: str = ".",
+    pipeline: MetadataPipeline | None = None,
 ) -> TreeNode | None:
     if not os.path.exists(path):
         print(f"Error: Path '{path}' does not exist.", file=sys.stderr)
@@ -22,6 +39,7 @@ def scan_tree(
         config.root_path = os.path.abspath(path)
         config.load_gitignore(config.root_path)
         rel_path = "."
+        pipeline = get_default_pipeline(config)
 
     is_dir = os.path.isdir(path)
     abs_path = os.path.abspath(path)
@@ -29,8 +47,8 @@ def scan_tree(
     if curr_depth == 0 and not name:
         name = abs_path
 
-    node = TreeNode(name=name, is_dir=is_dir, path=path)
-    build_metadata(path, node)
+    node = TreeNode(path=path, ntype=NodeType.DIR if is_dir else NodeType.FILE)
+    pipeline.execute(abs_path, node, config)
 
     if not is_dir:
         try:
@@ -71,7 +89,7 @@ def scan_tree(
                     child = TreeNode(
                         name=entry.name, is_dir=False, path=entry.path, size=f_size
                     )
-                    build_metadata(entry.path, child)
+                    pipeline.execute(entry.path, child, config)
                     node.children.append(child)
                     continue
 
@@ -85,7 +103,7 @@ def scan_tree(
                     child = TreeNode(
                         name=entry.name, is_dir=True, path=entry.path, is_truncated=True
                     )
-                    build_metadata(entry.path, child)
+                    pipeline.execute(entry.path, child, config)
                     child.stats.hidden_dirs = h_dirs
                     child.stats.hidden_files = h_files
                     child.size = h_size
@@ -96,7 +114,12 @@ def scan_tree(
                     node.stats.hidden_files += h_files
                 else:
                     child = scan_tree(
-                        entry.path, config, max_depth, curr_depth + 1, entry_rel_path
+                        entry.path,
+                        config,
+                        max_depth,
+                        curr_depth + 1,
+                        entry_rel_path,
+                        pipeline,
                     )
                     if child:
                         node.children.append(child)
