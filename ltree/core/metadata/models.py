@@ -1,6 +1,7 @@
 # ltree/core/metadata/models.py
 from __future__ import annotations
 from dataclasses import dataclass
+from enum import Enum
 
 
 @dataclass(slots=True)
@@ -11,6 +12,20 @@ class MetadataContainer:
     code: CodeMetadata | None = None
     project: ProjectMetadata | None = None
     time: TimeMetadata | None = None
+
+
+# ----------------------------------------------------------------------
+class GitStatus(Enum):
+    CLEAN = "clean"
+    MODIFIED = "modified"
+    ADDED = "added"
+    DELETED = "deleted"
+    RENAMED = "renamed"
+    UNTRACKED = "untracked"
+    IGNORED = "ignored"
+    UNMERGED = "unmerged"
+    COPIED = "copied"
+    DIRTY = "dirty"
 
 
 # ----------------------------------------------------------------------
@@ -26,9 +41,9 @@ class FilesystemMetadata:
 @dataclass(slots=True)
 class GitMetadata:
     tracked: bool = False
+    status: GitStatus | None = None
     is_repo_root: bool = False
     has_sub_changes: bool = False
-    status: str = ""
 
 
 @dataclass(slots=True)
