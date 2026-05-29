@@ -22,10 +22,12 @@ class MetadataPipeline:
         self._providers.append(provider)
         return self
 
-    def execute(self, path: str, node: "TreeNode", config: TreeConfig) -> None:
-        # todo: remove path from param
+    def execute(self, node: "TreeNode", config: TreeConfig) -> None:
         for provider in self._providers:
-            provider.enrich(node, config)
+            try:
+                provider.enrich(node, config)
+            except OSError:
+                pass
 
 
 def get_default_pipeline(config: TreeConfig) -> MetadataPipeline:
