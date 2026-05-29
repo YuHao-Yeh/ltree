@@ -48,7 +48,7 @@ def scan_tree(
         name = abs_path
 
     node = TreeNode(path=path, ntype=NodeType.DIR if is_dir else NodeType.FILE)
-    pipeline.execute(abs_path, node, config)
+    pipeline.execute(node, config)
 
     if not is_dir:
         try:
@@ -89,7 +89,7 @@ def scan_tree(
                     child = TreeNode(
                         name=entry.name, is_dir=False, path=entry.path, size=f_size
                     )
-                    pipeline.execute(entry.path, child, config)
+                    pipeline.execute(child, config)
                     node.children.append(child)
                     continue
 
@@ -103,7 +103,7 @@ def scan_tree(
                     child = TreeNode(
                         name=entry.name, is_dir=True, path=entry.path, is_truncated=True
                     )
-                    pipeline.execute(entry.path, child, config)
+                    pipeline.execute(child, config)
                     child.stats.hidden_dirs = h_dirs
                     child.stats.hidden_files = h_files
                     child.size = h_size

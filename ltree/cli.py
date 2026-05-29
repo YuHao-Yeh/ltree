@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from ltree.core.scanner import scan_tree
+from ltree.core.scanners.scanner import scan_tree
 from ltree.core.config import TreeConfig
 from ltree.renderers.exporters import (
     TextRenderer,
@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         dest="human_readable",
         help="Show size in human-readable format (e.g., 1K 2M).",
-    )  # 新功能預留
+    )
 
     # --- Filter Rules ---
     filtering = parser.add_argument_group("Filtering Rules")
