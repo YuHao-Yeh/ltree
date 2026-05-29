@@ -3,7 +3,7 @@ import platform
 import pytest
 from unittest.mock import patch
 
-from ltree.core.scanner import scan_tree
+from ltree.core.scanners.scanner import scan_tree
 from ltree.core.config import TreeConfig
 
 
@@ -115,7 +115,10 @@ def test_scan_tree_os_error_on_getsize(tmp_path, setup_subtree):
     config = TreeConfig()
     file_path = tmp_path / "file1.txt"
 
-    with patch("os.path.getsize", side_effect=OSError):
+    with patch(
+        "ltree.core.metadata.filesystem.FilesystemMetadataProvider.enrich",
+        side_effect=OSError,
+    ):
         f1_node = scan_tree(str(file_path), config)
         assert f1_node.size == 0
 

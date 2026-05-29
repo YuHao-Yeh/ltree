@@ -1,7 +1,7 @@
 import io
 import json
 import os
-from ltree.core.models import TreeNode, Stats
+from ltree.core.models import TreeNode, Stats, NodeType
 from ltree.core.config import TreeConfig
 from ltree.renderers.exporters import (
     TextRenderer,
@@ -18,9 +18,10 @@ from ltree.renderers.exporters import (
 def test_render_text_path_normalization():
     # root/
     # └── child.txt
-    root = TreeNode(name="root", is_dir=True, path="root")
+    root = TreeNode(path="root", ntype=NodeType.DIR)
     path = os.path.join("root", "child.txt")
-    child = TreeNode(name="child.txt", is_dir=False, path=path, size=100)
+    child = TreeNode(path=path, ntype=NodeType.FILE)
+    child.size = 100
     root.children.append(child)
 
     config = TreeConfig()
@@ -38,9 +39,10 @@ def test_render_text_path_normalization():
 
 
 def test_render_text_with_size_and_path():
-    root = TreeNode(name="root", is_dir=True, path="root")
+    root = TreeNode(path="root", ntype=NodeType.DIR)
     path = os.path.join("root", "child.txt")
-    child = TreeNode(name="child.txt", is_dir=False, path=path, size=100)
+    child = TreeNode(path=path, ntype=NodeType.FILE)
+    child.size = 100
     root.children.append(child)
     root.size += child.size
     root.stats.visible_files = 1
@@ -63,12 +65,12 @@ def test_render_text_truncated_indentation():
     # root/
     # ├── sub/ (truncated)
     # └── other.txt
-    root = TreeNode(name="root", is_dir=True, path="root")
+    root = TreeNode(path="root", ntype=NodeType.DIR)
     sub_path = os.path.join("root", "sub")
-    sub = TreeNode(name="sub", is_dir=True, path=sub_path, is_truncated=True)
+    sub = TreeNode(path=sub_path, ntype=NodeType.DIR, is_truncated=True)
     sub.stats = Stats(hidden_dirs=1, hidden_files=1)
     other_path = os.path.join("root", "other.txt")
-    other = TreeNode(name="other.txt", is_dir=False, path=other_path)
+    other = TreeNode(path=other_path, ntype=NodeType.FILE)
 
     root.children.append(sub)
     root.children.append(other)
@@ -97,9 +99,10 @@ def test_render_text_truncated_indentation():
 # Test: render_json
 # =======================================================================#
 def test_render_json():
-    root = TreeNode(name="root", is_dir=True, path="root", size=0)
+    root = TreeNode(path="root", ntype=NodeType.DIR)
     path = os.path.join("root", "file1.txt")
-    child = TreeNode(name="file1.txt", is_dir=False, path=path, size=1536)
+    child = TreeNode(path=path, ntype=NodeType.FILE)
+    child.size = 1536
     root.children.append(child)
     root.size += child.size
     root.stats.visible_files = 1
@@ -128,7 +131,7 @@ def test_render_json():
 
 def test_render_json_truncated():
     path = os.path.join("project", "root")
-    root = TreeNode(name="root", is_dir=True, path=path)
+    root = TreeNode(path=path, ntype=NodeType.DIR)
     root.is_truncated = True
     root.size = 5000
     root.stats.hidden_dirs = 5
@@ -152,9 +155,10 @@ def test_render_json_truncated():
 # Test: render_markdown
 # =======================================================================#
 def test_render_markdown():
-    root = TreeNode(name="root", is_dir=True, path="root")
+    root = TreeNode(path="root", ntype=NodeType.DIR)
     path = os.path.join("root", "file.py")
-    child = TreeNode(name="file.py", is_dir=False, path=path, size=3 * 1024)
+    child = TreeNode(path=path, ntype=NodeType.FILE)
+    child.size = 3 * 1024
     root.children.append(child)
     root.size += child.size
     root.stats.visible_files = 1
@@ -190,7 +194,7 @@ def test_render_markdown():
 
 def test_markdown_renderer_truncation():
     path = os.path.join("project", "root")
-    root = TreeNode(name="root", is_dir=True, path=path)
+    root = TreeNode(path=path, ntype=NodeType.DIR)
     root.is_truncated = True
     root.size = 5000
     root.stats.hidden_dirs = 5
@@ -229,9 +233,9 @@ def test_markdown_renderer_truncation():
 # Test: render_markdown
 # =======================================================================#
 def test_render_markdown_as_block():
-    root = TreeNode(name="root", is_dir=True, path="root")
+    root = TreeNode(path="root", ntype=NodeType.DIR)
     path = os.path.join("root", "file.py")
-    child = TreeNode(name="file.py", is_dir=False, path=path)
+    child = TreeNode(path=path, ntype=NodeType.FILE)
     root.children.append(child)
 
     config = TreeConfig()
@@ -247,7 +251,7 @@ def test_render_markdown_as_block():
 # Test: print stats
 # =======================================================================#
 def test_print_stats(capsys):
-    root = TreeNode(name="root", is_dir=True, path="root")
+    root = TreeNode(path="root", ntype=NodeType.DIR)
     root.stats = Stats(visible_dirs=1, visible_files=2, hidden_dirs=0, hidden_files=0)
 
     # normal
@@ -268,7 +272,7 @@ def test_print_stats(capsys):
 
 
 def test_print_stats_rich(capsys):
-    root = TreeNode(name="root", is_dir=True, path="root")
+    root = TreeNode(path="root", ntype=NodeType.DIR)
     root.stats = Stats(visible_dirs=1, visible_files=2, hidden_dirs=0, hidden_files=0)
 
     # normal
