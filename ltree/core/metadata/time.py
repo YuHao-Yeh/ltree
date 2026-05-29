@@ -21,7 +21,7 @@ class TimeMetadataProvider(MetadataProvider):
             return f"{int(diff // 60)}m ago"
         elif diff < 86400:
             return f"{int(diff // 3600)}h ago"
-        elif diff < 2592000:  # 30 days = 60 * 60 * 30
+        elif diff < 2592000:  # 30 days = 60 * 60 * 24* 30
             days = int(diff // 86400)
             return "yesterday" if days == 1 else f"{days}d ago"
         else:
