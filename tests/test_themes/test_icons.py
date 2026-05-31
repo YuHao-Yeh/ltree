@@ -152,6 +152,6 @@ def test_icons_symlink_and_executable_nerd():
     exec_file = make_node(path="run.sh", ntype=NodeType.FILE, is_executable=True)
     assert provider.get_style(exec_file) == "bold green"
 
-    fallback_file = make_node(path="style.css", ntype=NodeType.FILE)
+    fallback_file = TreeNode(path="style.css", ntype=NodeType.FILE)
     assert provider.get_icon(fallback_file) == " "
     assert provider.get_style(fallback_file) == "white"

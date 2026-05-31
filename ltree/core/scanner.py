@@ -86,9 +86,8 @@ def scan_tree(
                         continue
 
                     node.stats.visible_files += 1
-                    child = TreeNode(
-                        name=entry.name, is_dir=False, path=entry.path, size=f_size
-                    )
+                    child = TreeNode(path=entry.path, ntype=NodeType.FILE)
+                    child.size = f_size
                     pipeline.execute(child, config)
                     node.children.append(child)
                     continue
@@ -101,7 +100,7 @@ def scan_tree(
                     h_dirs, h_files, h_size = count_subtree(entry.path, config)
 
                     child = TreeNode(
-                        name=entry.name, is_dir=True, path=entry.path, is_truncated=True
+                        path=entry.path, ntype=NodeType.DIR, is_truncated=True
                     )
                     pipeline.execute(child, config)
                     child.stats.hidden_dirs = h_dirs
