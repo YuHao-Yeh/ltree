@@ -21,7 +21,12 @@ def traverse_path(
 ) -> TreeNode | None:
     node_filter = node_filter or CompositeFilter()
 
-    ntype = NodeType.DIR if path.is_dir() else NodeType.FILE
+    try:
+        ntype = NodeType.DIR if path.is_dir() else NodeType.FILE
+    except OSError as e:
+        print(f"Error: Failed to scan '{path}': {e}", file=sys.stderr)
+        return None
+
     node = TreeNode(path=path, ntype=ntype)
 
     if pipeline:
