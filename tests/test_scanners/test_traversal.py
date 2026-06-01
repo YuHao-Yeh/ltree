@@ -61,19 +61,14 @@ def test_traverse_path_single_file(test_file, capsys):
         assert "Error: Failed to scan" in captured.err
 
     # Case 3: stat OSError
-    call_count = 0
+    class MockStatResult:
+        st_mode = stat.S_IFREG | 0o644
 
-    def mock_stat(*args, **kwargs):
-        nonlocal call_count
-        call_count += 1
-        if call_count == 1:
-            mock_res = MagicMock()
-            mock_res.st_mode = stat.S_IFREG | 0o644
-            return mock_res
+        @property
+        def st_size(self):
+            raise OSError("Stat size failed")
 
-        raise OSError("Stat size failed")
-
-    with patch("pathlib.Path.stat", side_effect=mock_stat):
+    with patch("pathlib.Path.stat", return_value=MockStatResult()):
         node_stat_err = traverse_path(test_file, config)
         assert node_stat_err is not None
         assert node_stat_err.size == 0
