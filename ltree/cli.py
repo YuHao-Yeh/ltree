@@ -70,7 +70,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         dest="show_all",
         help="Show hidden files and directories.",
-    )  # 新功能預留
+    )
     filtering.add_argument(
         "-d",
         "--dirs-only",
