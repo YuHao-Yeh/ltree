@@ -1,6 +1,6 @@
 import os
 
-from ltree.core.models import TreeNode
+from ltree.core.models import TreeNode, NodeType
 from ltree.themes.manager import ThemeManager
 from ltree.themes.emoji import EmojiTheme
 from ltree.themes.nerd import NerdTheme
@@ -10,16 +10,16 @@ from ltree.themes.nerd import NerdTheme
 # Helper for concise TreeNode creation in tests
 # ======================================================================= #
 def make_node(
-    name: str,
-    is_dir: bool = False,
+    path: str,
+    ntype: NodeType,
     is_symlink: bool = False,
     is_executable: bool = False,
 ) -> TreeNode:
-    node = TreeNode(name=name, is_dir=is_dir, path=name)
+    node = TreeNode(path=path, ntype=ntype)
     node.is_symlink = is_symlink
     node.is_executable = is_executable
-    if not is_dir:
-        _, ext = os.path.splitext(name)
+    if ntype == NodeType.FILE:
+        _, ext = os.path.splitext(path)
         node.extension = ext.lower()
     return node
 
@@ -30,14 +30,14 @@ def make_node(
 def test_theme_manager_none_theme():
     provider = ThemeManager("none")
 
-    assert provider.get_icon(make_node("src", is_dir=True)) == ""
-    assert provider.get_icon(make_node("main.py", is_dir=False)) == ""
-    assert provider.get_icon(make_node("Dockerfile", is_dir=False)) == ""
+    assert provider.get_icon(make_node("src", ntype=NodeType.DIR)) == ""
+    assert provider.get_icon(make_node("main.py", ntype=NodeType.FILE)) == ""
+    assert provider.get_icon(make_node("Dockerfile", ntype=NodeType.FILE)) == ""
 
 
 def test_no_theme_style():
     provider = ThemeManager("none")
-    node = TreeNode(name="src", is_dir=True, path="src")
+    node = TreeNode(path="src", ntype=NodeType.DIR)
     assert provider.get_style(node) == ""
 
 
@@ -49,17 +49,17 @@ def test_get_icon_directories_emoji():
 
     # 1. known directories
     assert (
-        provider.get_icon(make_node(".git", is_dir=True))
+        provider.get_icon(make_node(".git", ntype=NodeType.DIR))
         == f"{EmojiTheme.DIR_ICON['.git']} "
     )
     assert (
-        provider.get_icon(make_node("node_modules", is_dir=True))
+        provider.get_icon(make_node("node_modules", ntype=NodeType.DIR))
         == f"{EmojiTheme.DIR_ICON['node_modules']} "
     )
 
     # 2. unknown directories
     assert (
-        provider.get_icon(make_node("my_custom_folder", is_dir=True))
+        provider.get_icon(make_node("my_custom_folder", ntype=NodeType.DIR))
         == f"{EmojiTheme.DEFAULT_FOLDER} "
     )
 
@@ -69,37 +69,37 @@ def test_get_icon_files_emoji():
 
     # 1. matched filename
     assert (
-        provider.get_icon(make_node("Dockerfile", is_dir=False))
+        provider.get_icon(make_node("Dockerfile", ntype=NodeType.FILE))
         == f"{EmojiTheme.FILE_ICON['Dockerfile']} "
     )
     assert (
-        provider.get_icon(make_node("README.md", is_dir=False))
+        provider.get_icon(make_node("README.md", ntype=NodeType.FILE))
         == f"{EmojiTheme.FILE_ICON['README.md']} "
     )
 
     # 2. file extension
     assert (
-        provider.get_icon(make_node("script.py", is_dir=False))
+        provider.get_icon(make_node("script.py", ntype=NodeType.FILE))
         == f"{EmojiTheme.EXT_ICON['.py']} "
     )
     assert (
-        provider.get_icon(make_node("style.css", is_dir=False))
+        provider.get_icon(make_node("style.css", ntype=NodeType.FILE))
         == f"{EmojiTheme.EXT_ICON['.css']} "
     )
 
     # 3. uppercase file extensions
     assert (
-        provider.get_icon(make_node("IMAGE.PNG", is_dir=False))
+        provider.get_icon(make_node("IMAGE.PNG", ntype=NodeType.FILE))
         == f"{EmojiTheme.EXT_ICON.get('.png', EmojiTheme.DEFAULT_FILE)} "
     )
 
     # 4. unknown extension file
     assert (
-        provider.get_icon(make_node("data.unknown", is_dir=False))
+        provider.get_icon(make_node("data.unknown", ntype=NodeType.FILE))
         == f"{EmojiTheme.DEFAULT_FILE} "
     )
     assert (
-        provider.get_icon(make_node("just_a_file", is_dir=False))
+        provider.get_icon(make_node("just_a_file", ntype=NodeType.FILE))
         == f"{EmojiTheme.DEFAULT_FILE} "
     )
 
@@ -107,14 +107,14 @@ def test_get_icon_files_emoji():
 def test_icons_symlink_and_executable_emoji():
     provider = ThemeManager("emoji")
 
-    symlink_dir = TreeNode(name="my_link", is_dir=True, path="my_link", is_symlink=True)
+    symlink_dir = make_node(path="my_link", ntype=NodeType.DIR, is_symlink=True)
     assert provider.get_icon(symlink_dir) == "🔗 "
     assert provider.get_style(symlink_dir) == "italic magenta"
 
-    exec_file = TreeNode(name="run.sh", is_dir=False, path="run.sh", is_executable=True)
+    exec_file = make_node(path="run.sh", ntype=NodeType.FILE, is_executable=True)
     assert provider.get_style(exec_file) == "bold green"
 
-    fallback_file = TreeNode(name="style.css", is_dir=False, path="style.css")
+    fallback_file = make_node(path="style.css", ntype=NodeType.FILE)
     assert provider.get_icon(fallback_file) == "🎨 "
 
 
@@ -125,15 +125,15 @@ def test_get_icon_nerd_font():
     provider = ThemeManager("nerd")
 
     assert (
-        provider.get_icon(make_node("Dockerfile", is_dir=False))
+        provider.get_icon(make_node("Dockerfile", ntype=NodeType.FILE))
         == f"{NerdTheme.FILE_ICON['Dockerfile']} "
     )
     assert (
-        provider.get_icon(make_node(".git", is_dir=True))
+        provider.get_icon(make_node(".git", ntype=NodeType.DIR))
         == f"{NerdTheme.DIR_ICON['.git']} "
     )
     assert (
-        provider.get_icon(make_node("main.py", is_dir=False))
+        provider.get_icon(make_node("main.py", ntype=NodeType.FILE))
         == f"{NerdTheme.EXT_ICON['.py']} "
     )
 
@@ -141,21 +141,17 @@ def test_get_icon_nerd_font():
 def test_icons_symlink_and_executable_nerd():
     provider = ThemeManager("nerd")
 
-    symlink_dir = TreeNode(
-        name="my_link", is_dir=True, path="my_link", is_symlink=False
-    )
+    symlink_dir = make_node(path="my_link", ntype=NodeType.DIR, is_symlink=False)
     assert provider.get_icon(symlink_dir) == " "
     assert provider.get_style(symlink_dir) == "bold cyan"
 
-    symlink_file = TreeNode(
-        name="my_link", is_dir=False, path="my_link", is_symlink=True
-    )
+    symlink_file = make_node(path="my_link", ntype=NodeType.FILE, is_symlink=True)
     assert provider.get_icon(symlink_file) == " "
     assert provider.get_style(symlink_file) == "italic magenta"
 
-    exec_file = TreeNode(name="run.sh", is_dir=False, path="run.sh", is_executable=True)
+    exec_file = make_node(path="run.sh", ntype=NodeType.FILE, is_executable=True)
     assert provider.get_style(exec_file) == "bold green"
 
-    fallback_file = TreeNode(name="style.css", is_dir=False, path="style.css")
+    fallback_file = TreeNode(path="style.css", ntype=NodeType.FILE)
     assert provider.get_icon(fallback_file) == " "
     assert provider.get_style(fallback_file) == "white"

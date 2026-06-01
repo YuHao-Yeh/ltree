@@ -1,7 +1,7 @@
 import io
 import os
 import pytest
-from ltree.core.models import TreeNode, Stats
+from ltree.core.models import TreeNode, Stats, NodeType
 from ltree.core.config import TreeConfig
 from ltree.renderers.rich_renderer import RichRenderer
 
@@ -23,13 +23,15 @@ def sample_tree():
     # ├── src/
     # │   └── main.py (1024 bytes)
     # └── README.md (500 bytes)
-    root = TreeNode(name="root", is_dir=True, path="root")
+    root = TreeNode(path="root", ntype=NodeType.DIR)
 
-    src = TreeNode(name="src", is_dir=True, path="root/src")
-    main_py = TreeNode(name="main.py", is_dir=False, path="root/src/main.py", size=1024)
+    src = TreeNode(path="root/src", ntype=NodeType.DIR)
+    main_py = TreeNode(path="root/src/main.py", ntype=NodeType.FILE)
+    main_py.size = 1024
     src.children.append(main_py)
 
-    readme = TreeNode(name="README.md", is_dir=False, path="root/README.md", size=500)
+    readme = TreeNode(path="root/README.md", ntype=NodeType.FILE)
+    readme.size = 500
 
     root.children.extend([src, readme])
     return root
@@ -42,12 +44,12 @@ def test_build_node_label_basic(base_config):
     base_config.theme = "emoji"
     renderer = RichRenderer(base_config)
 
-    dir_node = TreeNode(name="src", is_dir=True, path="src")
+    dir_node = TreeNode(path="src", ntype=NodeType.DIR)
     dir_label = renderer._build_node_label(dir_node)
     assert dir_label.plain == "📦 src"
     assert any(span.style == "bold cyan" for span in dir_label.spans)
 
-    file_node = TreeNode(name="main.py", is_dir=False, path="main.py")
+    file_node = TreeNode(path="main.py", ntype=NodeType.FILE)
     file_label = renderer._build_node_label(file_node)
     assert file_label.plain == "🐍 main.py"
     assert any(span.style == "white" for span in file_label.spans)
@@ -58,7 +60,8 @@ def test_build_node_label_with_size(base_config):
     base_config.show_size = True
     renderer = RichRenderer(base_config)
 
-    file_node = TreeNode(name="main.py", is_dir=False, path="main.py", size=2048)
+    file_node = TreeNode(path="main.py", ntype=NodeType.FILE)
+    file_node.size = 2048
     label = renderer._build_node_label(file_node)
 
     # 2048 -> 2.0 kBs
@@ -71,7 +74,7 @@ def test_build_node_label_full_path(base_config):
     base_config.full_path = True
     renderer = RichRenderer(base_config)
 
-    file_node = TreeNode(name="main.py", is_dir=False, path="src/utils/main.py")
+    file_node = TreeNode(path="src/utils/main.py", ntype=NodeType.FILE)
 
     # root node: only displays the name.
     root_label = renderer._build_node_label(file_node, is_root=True)
@@ -87,7 +90,7 @@ def test_build_node_label_with_icon(base_config):
     base_config.theme = "emoji"
     renderer = RichRenderer(base_config)
 
-    py_node = TreeNode(name="script.py", is_dir=False, path="script.py")
+    py_node = TreeNode(path="script.py", ntype=NodeType.FILE)
     py_node.extension = ".py"
     label = renderer._build_node_label(py_node)
 
@@ -98,9 +101,7 @@ def test_build_node_label_with_icon(base_config):
 # Test: _render_recursive (Truncation)
 # ======================================================================= #
 def test_render_truncated_node(base_config):
-    truncated_node = TreeNode(
-        name="hidden_dir", is_dir=True, path="hidden_dir", is_truncated=True
-    )
+    truncated_node = TreeNode(path="hidden_dir", ntype=NodeType.DIR, is_truncated=True)
     truncated_node.stats = Stats(hidden_dirs=2, hidden_files=5)
 
     from rich.tree import Tree

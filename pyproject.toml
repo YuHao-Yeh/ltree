@@ -75,8 +75,10 @@ show_missing = true
 fail_under = 80
 exclude_lines = [
     "if __name__ == \"__main__\"",
+    "if TYPE_CHECKING:",
     "pragma: no cover",
     "raise NotImplementedError",
     "@abstractmethod",
     "@abc.abstractmethod",
+    "Protocol",
 ]

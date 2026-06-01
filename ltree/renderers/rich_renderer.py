@@ -34,7 +34,7 @@ class RichRenderer(BaseRenderer):
         icon = self.theme_manager.get_icon(node)
         text.append(icon)
 
-        path_display = node.path.replace("/", os.sep)
+        path_display = str(node.path).replace("/", os.sep)
         display_name = (
             path_display if (self.config.full_path and not is_root) else node.name
         )

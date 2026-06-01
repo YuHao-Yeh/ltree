@@ -1,16 +1,16 @@
 import argparse
 import sys
 
-from .core.scanner import scan_tree
-from .core.config import TreeConfig
-from .renderers.exporters import (
+from ltree.core.scanners.scanner import scan_tree
+from ltree.core.config import TreeConfig
+from ltree.renderers.exporters import (
     TextRenderer,
     JsonRenderer,
     MarkdownRenderer,
     MarkdownBlockRenderer,
     print_stats,
 )
-from .renderers.rich_renderer import RichRenderer
+from ltree.renderers.rich_renderer import RichRenderer
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         dest="human_readable",
         help="Show size in human-readable format (e.g., 1K 2M).",
-    )  # 新功能預留
+    )
 
     # --- Filter Rules ---
     filtering = parser.add_argument_group("Filtering Rules")
@@ -70,7 +70,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         dest="show_all",
         help="Show hidden files and directories.",
-    )  # 新功能預留
+    )
     filtering.add_argument(
         "-d",
         "--dirs-only",

@@ -44,7 +44,7 @@ class TextRenderer(BaseRenderer):
     def _render_recursive(
         self, node: TreeNode, file: TextIO, indent: str, is_last: bool, is_root: bool
     ) -> None:
-        path_display = node.path.replace("/", os.sep)
+        path_display = str(node.path).replace("/", os.sep)
         name = path_display if self.config.full_path and not is_root else node.name
         display_name = name + (
             os.sep if node.is_dir and not name.endswith(os.sep) else ""
@@ -89,7 +89,7 @@ class JsonRenderer(BaseRenderer):
         def to_dict(n: TreeNode):
             d = {
                 "name": n.name,
-                "path": n.path.replace("\\", "/"),
+                "path": str(n.path).replace("\\", "/"),
                 "type": "directory" if n.is_dir else "file",
                 "size_bytes": n.size,
             }
