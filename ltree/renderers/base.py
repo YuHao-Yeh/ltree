@@ -1,8 +1,9 @@
+# ltree/renderers/base.py
 from abc import ABC, abstractmethod
 from typing import TextIO
 
-from ltree.core.models import TreeNode
 from ltree.core.config import TreeConfig
+from ltree.serializers.types import SerializedNode
 from ltree.themes.manager import ThemeManager
 
 
@@ -12,5 +13,5 @@ class BaseRenderer(ABC):
         self.theme_manager = ThemeManager(config.theme)
 
     @abstractmethod
-    def render(self, node: TreeNode, output_file: TextIO) -> None:
+    def render(self, node: SerializedNode, output_file: TextIO) -> None:
         pass
