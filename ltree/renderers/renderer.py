@@ -115,7 +115,7 @@ class JsonRenderer(BaseRenderer):
             if self.config.human_readable:
                 d["size_human"] = format_size_classic(size, True).strip()
 
-            if n["type"] == NodeType.DIR.value:
+            if is_dir:
                 d["content_summary"] = {
                     "folders": stats["total_dirs"],
                     "files": stats["total_files"],

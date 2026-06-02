@@ -18,3 +18,9 @@ class BaseRenderer(ABC):
     @abstractmethod
     def render(self, node: "SerializedNode", output_file: "TextIO") -> None:
         pass
+
+
+class Renderer(ABC):
+    @abstractmethod
+    def render(self, node: "SerializedNode") -> str:
+        pass

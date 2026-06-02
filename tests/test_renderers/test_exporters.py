@@ -1,11 +1,11 @@
-# tests/test_renderers/test_exporters.py
+# tests/test_renderers/test_renderers.py
 import io
 import json
 import os
 from ltree.core.models import TreeNode, Stats, NodeType
 from ltree.core.config import TreeConfig
 from ltree.serializers import TreeSerializer
-from ltree.renderers.exporters import (
+from ltree.renderers.renderer import (
     TextRenderer,
     JsonRenderer,
     MarkdownRenderer,

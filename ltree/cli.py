@@ -3,7 +3,7 @@ import sys
 
 from ltree.core.scanners.scanner import scan_tree
 from ltree.core.config import TreeConfig
-from ltree.renderers.exporters import (
+from ltree.renderers.renderer import (
     TextRenderer,
     JsonRenderer,
     MarkdownRenderer,

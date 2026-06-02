@@ -51,12 +51,6 @@ def create_mock_root(size=1024):
         visible_dirs=1,
         visible_files=1,
     )
-    # root = MagicMock()
-    # root.size = size
-    # root.stats.visible_dirs = 1
-    # root.stats.visible_files = 1
-    # root.stats.total_dirs = 1
-    # root.stats.total_files = 1
     return root
 
 
@@ -244,7 +238,7 @@ def test_validate_args_direct_conflicts(capsys, base_args):
 # Test: run
 # =======================================================================#
 @patch(f"{CLI_MODULE}.scan_tree")
-@patch(f"{RENDERER_PATH}.exporters.TextRenderer.render")
+@patch(f"{RENDERER_PATH}.renderer.TextRenderer.render")
 @patch("ltree.core.config.TreeConfig.load_config_file")
 def test_run_file_output(
     mock_load_config, mock_render_text, mock_scan, base_args, capsys
@@ -266,10 +260,10 @@ def test_run_file_output(
 @pytest.mark.parametrize(
     "fmt, renderer_class",
     [
-        ("text", "exporters.TextRenderer"),
-        ("json", "exporters.JsonRenderer"),
-        ("md", "exporters.MarkdownRenderer"),
-        ("block", "exporters.MarkdownBlockRenderer"),
+        ("text", "renderer.TextRenderer"),
+        ("json", "renderer.JsonRenderer"),
+        ("md", "renderer.MarkdownRenderer"),
+        ("block", "renderer.MarkdownBlockRenderer"),
         ("rich", "rich_renderer.RichRenderer"),
     ],
 )
