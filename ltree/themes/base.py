@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
-from ..core.models import TreeNode
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ltree.serializers.types import SerializedNode
 
 
 class BaseTheme(ABC):
     @abstractmethod
-    def get_icon(self, node: TreeNode) -> str:
+    def get_icon(self, node: "SerializedNode") -> str:
         pass
 
     @abstractmethod
-    def get_style(self, node: TreeNode) -> str:
+    def get_style(self, node: "SerializedNode") -> str:
         pass

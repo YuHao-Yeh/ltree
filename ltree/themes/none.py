@@ -1,10 +1,15 @@
-from .base import BaseTheme
-from ..core.models import TreeNode
+# ltree/themes/none.py
+from typing import TYPE_CHECKING
+
+from ltree.themes.base import BaseTheme
+
+if TYPE_CHECKING:
+    from ltree.serializers.types import SerializedNode
 
 
 class NoTheme(BaseTheme):
-    def get_icon(self, node: TreeNode) -> str:
+    def get_icon(self, node: "SerializedNode") -> str:
         return ""
 
-    def get_style(self, node: TreeNode) -> str:
+    def get_style(self, node: "SerializedNode") -> str:
         return ""
