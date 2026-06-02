@@ -1,12 +1,12 @@
-# ltree/core/scanner.py
+# ltree/_core/scanner.py
 import os
 import stat
 import sys
 
-from .config import TreeConfig
-from .models import TreeNode, NodeType
-from .utils import is_excluded, count_subtree
-from .metadata import MetadataPipeline, get_default_pipeline
+from ltree._core.utils import is_excluded, count_subtree
+from ltree.core.config import TreeConfig
+from ltree.core.models import TreeNode, NodeType
+from ltree.core.metadata import MetadataPipeline, get_default_pipeline
 
 
 def build_metadata(path: str, node: TreeNode) -> None:

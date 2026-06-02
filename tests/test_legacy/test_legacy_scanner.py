@@ -3,7 +3,7 @@ import platform
 import pytest
 from unittest.mock import patch
 
-from ltree.core.scanner import scan_tree
+from ltree._core.scanner import scan_tree
 from ltree.core.config import TreeConfig
 
 

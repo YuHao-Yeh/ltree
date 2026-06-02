@@ -3,7 +3,7 @@ import sys
 
 from ltree.core.scanners.scanner import scan_tree
 from ltree.core.config import TreeConfig
-from ltree.renderers.exporters import (
+from ltree.renderers.renderer import (
     TextRenderer,
     JsonRenderer,
     MarkdownRenderer,
@@ -11,6 +11,7 @@ from ltree.renderers.exporters import (
     print_stats,
 )
 from ltree.renderers.rich_renderer import RichRenderer
+from ltree.serializers import TreeSerializer
 
 
 def parse_args() -> argparse.Namespace:
@@ -323,16 +324,18 @@ def run(args: argparse.Namespace) -> None:
 
     try:
         root = scan_tree(path=args.start_path, config=config, max_depth=args.max_depth)
-
         if not root:
             return
 
+        serializer = TreeSerializer()
+        root_node = serializer.serialize(root)
+
         RendererClass = get_renderer_class(args)
         renderer = RendererClass(config)
-        renderer.render(root, output_file)
+        renderer.render(root_node, output_file)
 
         if is_console and args.format != "json":
-            print_stats(root, config, args.format)
+            print_stats(root_node, config, args.format)
 
     finally:
         if not is_console:

@@ -2,7 +2,7 @@ import os
 import stat
 from unittest.mock import patch
 
-from ltree.core.scanner import build_metadata
+from ltree._core.scanner import build_metadata
 from ltree.core.models import TreeNode
 
 

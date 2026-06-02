@@ -1,7 +1,12 @@
+# ltree/themes/manager.py
+from typing import TYPE_CHECKING
+
 from .emoji import EmojiTheme
 from .nerd import NerdTheme
 from .none import NoTheme
-from ..core.models import TreeNode
+
+if TYPE_CHECKING:
+    from ltree.serializers.types import SerializedNode
 
 
 class ThemeManager:
@@ -15,8 +20,8 @@ class ThemeManager:
         theme_cls = self.THEMES.get(theme_name, NoTheme)
         self.theme = theme_cls()
 
-    def get_icon(self, node: TreeNode) -> str:
+    def get_icon(self, node: "SerializedNode") -> str:
         return self.theme.get_icon(node)
 
-    def get_style(self, node: TreeNode) -> str:
+    def get_style(self, node: "SerializedNode") -> str:
         return self.theme.get_style(node)
