@@ -1,12 +1,14 @@
 import argparse
 import copy
 import io
+from pathlib import Path
 import pytest
 import sys
 from unittest.mock import MagicMock, patch, mock_open
 
 from ltree.cli import parse_args, validate_args, run, main
-
+from ltree.core.metadata.models import FilesystemMetadata, MetadataContainer
+from ltree.core.models import Stats, TreeNode, NodeType
 
 # =======================================================================#
 # Fixture
@@ -43,12 +45,18 @@ def base_args():
 
 
 def create_mock_root(size=1024):
-    root = MagicMock()
-    root.size = size
-    root.stats.visible_dirs = 1
-    root.stats.visible_files = 1
-    root.stats.total_dirs = 1
-    root.stats.total_files = 1
+    root = TreeNode(path=Path("root"), ntype=NodeType.DIR)
+    root.metadata = MetadataContainer(fs=FilesystemMetadata(size=size))
+    root.stats = Stats(
+        visible_dirs=1,
+        visible_files=1,
+    )
+    # root = MagicMock()
+    # root.size = size
+    # root.stats.visible_dirs = 1
+    # root.stats.visible_files = 1
+    # root.stats.total_dirs = 1
+    # root.stats.total_files = 1
     return root
 
 

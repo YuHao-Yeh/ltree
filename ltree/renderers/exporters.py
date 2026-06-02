@@ -59,7 +59,7 @@ class TextRenderer(BaseRenderer):
         is_last: bool,
         is_root: bool,
     ) -> None:
-        path_display = str(node["path"]).replace("/", os.sep)
+        path_display = node["path"].replace("/", os.sep)
         name = path_display if self.config.full_path and not is_root else node["name"]
         is_dir = bool(node["type"] == NodeType.DIR.value)
         display_name = name + (os.sep if is_dir and not name.endswith(os.sep) else "")
