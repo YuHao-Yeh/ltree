@@ -1,6 +1,10 @@
+# tests/test_themes/test_icons.py
 import os
 
 from ltree.core.models import TreeNode, NodeType
+from ltree.core.metadata.models import FilesystemMetadata
+from ltree.serializers.types import SerializedNode
+from ltree.serializers import TreeSerializer
 from ltree.themes.manager import ThemeManager
 from ltree.themes.emoji import EmojiTheme
 from ltree.themes.nerd import NerdTheme
@@ -14,14 +18,18 @@ def make_node(
     ntype: NodeType,
     is_symlink: bool = False,
     is_executable: bool = False,
-) -> TreeNode:
-    node = TreeNode(path=path, ntype=ntype)
-    node.is_symlink = is_symlink
-    node.is_executable = is_executable
+) -> SerializedNode:
+    tnode = TreeNode(path, ntype)
+    tnode.metadata.fs = FilesystemMetadata(
+        is_symlink=is_symlink,
+        is_executable=is_executable,
+    )
     if ntype == NodeType.FILE:
         _, ext = os.path.splitext(path)
-        node.extension = ext.lower()
-    return node
+        tnode.metadata.fs.extension = ext.lower()
+
+    snode = TreeSerializer().serialize(tnode)
+    return snode
 
 
 # ======================================================================= #
@@ -152,6 +160,8 @@ def test_icons_symlink_and_executable_nerd():
     exec_file = make_node(path="run.sh", ntype=NodeType.FILE, is_executable=True)
     assert provider.get_style(exec_file) == "bold green"
 
-    fallback_file = TreeNode(path="style.css", ntype=NodeType.FILE)
+    fallback_file = TreeSerializer().serialize(
+        TreeNode(path="style.css", ntype=NodeType.FILE)
+    )
     assert provider.get_icon(fallback_file) == " "
     assert provider.get_style(fallback_file) == "white"

@@ -1,9 +1,11 @@
+# tests/test_renderers/test_rich_renderer.py
 import io
 import os
 import pytest
 from ltree.core.models import TreeNode, Stats, NodeType
 from ltree.core.config import TreeConfig
 from ltree.renderers.rich_renderer import RichRenderer
+from ltree.serializers import TreeSerializer
 
 
 # ======================================================================= #
@@ -34,7 +36,7 @@ def sample_tree():
     readme.size = 500
 
     root.children.extend([src, readme])
-    return root
+    return TreeSerializer().serialize(root)
 
 
 # ======================================================================= #
@@ -45,12 +47,14 @@ def test_build_node_label_basic(base_config):
     renderer = RichRenderer(base_config)
 
     dir_node = TreeNode(path="src", ntype=NodeType.DIR)
-    dir_label = renderer._build_node_label(dir_node)
+    snode = TreeSerializer().serialize(dir_node)
+    dir_label = renderer._build_node_label(snode)
     assert dir_label.plain == "📦 src"
     assert any(span.style == "bold cyan" for span in dir_label.spans)
 
     file_node = TreeNode(path="main.py", ntype=NodeType.FILE)
-    file_label = renderer._build_node_label(file_node)
+    snode = TreeSerializer().serialize(file_node)
+    file_label = renderer._build_node_label(snode)
     assert file_label.plain == "🐍 main.py"
     assert any(span.style == "white" for span in file_label.spans)
 
@@ -62,7 +66,8 @@ def test_build_node_label_with_size(base_config):
 
     file_node = TreeNode(path="main.py", ntype=NodeType.FILE)
     file_node.size = 2048
-    label = renderer._build_node_label(file_node)
+    snode = TreeSerializer().serialize(file_node)
+    label = renderer._build_node_label(snode)
 
     # 2048 -> 2.0 kBs
     assert "2.0 kB" in label.plain
@@ -77,12 +82,14 @@ def test_build_node_label_full_path(base_config):
     file_node = TreeNode(path="src/utils/main.py", ntype=NodeType.FILE)
 
     # root node: only displays the name.
-    root_label = renderer._build_node_label(file_node, is_root=True)
+    snode = TreeSerializer().serialize(file_node)
+    root_label = renderer._build_node_label(snode, is_root=True)
     assert root_label.plain == "🐍 main.py"
 
     # other: display path
     expected_path = "src/utils/main.py".replace("/", os.sep)
-    child_label = renderer._build_node_label(file_node, is_root=False)
+    snode = TreeSerializer().serialize(file_node)
+    child_label = renderer._build_node_label(snode, is_root=False)
     assert expected_path in child_label.plain
 
 
@@ -92,7 +99,8 @@ def test_build_node_label_with_icon(base_config):
 
     py_node = TreeNode(path="script.py", ntype=NodeType.FILE)
     py_node.extension = ".py"
-    label = renderer._build_node_label(py_node)
+    snode = TreeSerializer().serialize(py_node)
+    label = renderer._build_node_label(snode)
 
     assert "🐍" in label
 
@@ -112,7 +120,8 @@ def test_render_truncated_node(base_config):
     rich_tree_1 = Tree("Root")
     base_config.folders_only = True
     renderer = RichRenderer(base_config)
-    renderer._render_recursive(truncated_node, rich_tree_1)
+    snode = TreeSerializer().serialize(truncated_node)
+    renderer._render_recursive(snode, rich_tree_1)
 
     child_nodes_1 = list(rich_tree_1.children)
     assert len(child_nodes_1) == 1
@@ -125,7 +134,8 @@ def test_render_truncated_node(base_config):
     rich_tree_2 = Tree("Root")
     base_config.folders_only = False
     renderer = RichRenderer(base_config)
-    renderer._render_recursive(truncated_node, rich_tree_2)
+    snode = TreeSerializer().serialize(truncated_node)
+    renderer._render_recursive(snode, rich_tree_2)
 
     child_nodes_2 = list(rich_tree_2.children)
     assert len(child_nodes_2) == 1

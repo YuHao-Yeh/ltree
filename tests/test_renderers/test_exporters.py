@@ -1,8 +1,10 @@
+# tests/test_renderers/test_exporters.py
 import io
 import json
 import os
 from ltree.core.models import TreeNode, Stats, NodeType
 from ltree.core.config import TreeConfig
+from ltree.serializers import TreeSerializer
 from ltree.renderers.exporters import (
     TextRenderer,
     JsonRenderer,
@@ -30,7 +32,8 @@ def test_render_text_path_normalization():
     config.theme = "none"
 
     output = io.StringIO()
-    TextRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    TextRenderer(config).render(node, output)
     result = output.getvalue()
 
     assert f"root{os.sep}" in result
@@ -53,7 +56,8 @@ def test_render_text_with_size_and_path():
     config.full_path = True
 
     output = io.StringIO()
-    TextRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    TextRenderer(config).render(node, output)
     result = output.getvalue()
 
     assert "[     100 B]" in result
@@ -81,7 +85,8 @@ def test_render_text_truncated_indentation():
 
     # normal
     output = io.StringIO()
-    TextRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    TextRenderer(config).render(node, output)
     result = output.getvalue()
 
     assert "│   └── ... (1 dirs, 1 files)" in result
@@ -90,7 +95,8 @@ def test_render_text_truncated_indentation():
     config.folders_only = True
     root.children.remove(other)
     output = io.StringIO()
-    TextRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    TextRenderer(config).render(node, output)
     result = output.getvalue()
     assert "    └── ... (1 dirs)" in result
 
@@ -111,7 +117,8 @@ def test_render_json():
 
     # Raw bytes
     output = io.StringIO()
-    JsonRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    JsonRenderer(config).render(node, output)
 
     data = json.loads(output.getvalue())
     assert data["name"] == "root"
@@ -123,7 +130,8 @@ def test_render_json():
     config.human_readable = True
     output = io.StringIO()
 
-    JsonRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    JsonRenderer(config).render(node, output)
     data = json.loads(output.getvalue())
     assert data["size_bytes"] == 1536
     assert data["size_human"] == "1.5 K"
@@ -139,7 +147,8 @@ def test_render_json_truncated():
 
     config = TreeConfig()
     output = io.StringIO()
-    JsonRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    JsonRenderer(config).render(node, output)
 
     data = json.loads(output.getvalue())
 
@@ -167,7 +176,8 @@ def test_render_markdown():
 
     # normal
     output = io.StringIO()
-    MarkdownRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    MarkdownRenderer(config).render(node, output)
     result = output.getvalue()
 
     assert "📂 **root/**" in result
@@ -176,7 +186,8 @@ def test_render_markdown():
     # show size
     config.show_size = True
     output.flush()
-    MarkdownRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    MarkdownRenderer(config).render(node, output)
     result = output.getvalue()
 
     assert "📂 `3072 B` **root/**" in result
@@ -185,7 +196,8 @@ def test_render_markdown():
     # show size - human readable
     config.human_readable = True
     output.flush()
-    MarkdownRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    MarkdownRenderer(config).render(node, output)
     result = output.getvalue()
 
     assert "📂 `3.0 K` **root/**" in result
@@ -204,7 +216,8 @@ def test_markdown_renderer_truncation():
     config = TreeConfig()
     config.show_ellipsis = True
     output = io.StringIO()
-    MarkdownRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    MarkdownRenderer(config).render(node, output)
 
     content = output.getvalue()
     assert "  - ... (5 dirs, 12 files)" in content
@@ -213,7 +226,8 @@ def test_markdown_renderer_truncation():
     config.folders_only = True
     output = io.StringIO()
 
-    MarkdownRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    MarkdownRenderer(config).render(node, output)
 
     content = output.getvalue()
     assert "  - ... (5 dirs)" in content
@@ -223,7 +237,8 @@ def test_markdown_renderer_truncation():
     config.show_ellipsis = False
     output = io.StringIO()
 
-    MarkdownRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    MarkdownRenderer(config).render(node, output)
 
     content = output.getvalue()
     assert "..." not in content
@@ -240,7 +255,8 @@ def test_render_markdown_as_block():
 
     config = TreeConfig()
     output = io.StringIO()
-    MarkdownBlockRenderer(config).render(root, output)
+    node = TreeSerializer().serialize(root)
+    MarkdownBlockRenderer(config).render(node, output)
     result = output.getvalue()
 
     assert f"root{os.sep}" in result
@@ -256,7 +272,8 @@ def test_print_stats(capsys):
 
     # normal
     config = TreeConfig()
-    print_stats(root, config)
+    node = TreeSerializer().serialize(root)
+    print_stats(node, config)
 
     captured = capsys.readouterr()
     assert "Summary" in captured.out
@@ -265,7 +282,8 @@ def test_print_stats(capsys):
 
     # show size
     config.show_size = True
-    print_stats(root, config)
+    node = TreeSerializer().serialize(root)
+    print_stats(node, config)
 
     captured = capsys.readouterr()
     assert "0 B" in captured.out
@@ -277,7 +295,8 @@ def test_print_stats_rich(capsys):
 
     # normal
     config = TreeConfig()
-    print_stats(root, config, fmt="rich")
+    node = TreeSerializer().serialize(root)
+    print_stats(node, config, fmt="rich")
 
     captured = capsys.readouterr()
     assert "Summary" in captured.out
@@ -286,7 +305,8 @@ def test_print_stats_rich(capsys):
 
     # show size
     config.show_size = True
-    print_stats(root, config, fmt="rich")
+    node = TreeSerializer().serialize(root)
+    print_stats(node, config, fmt="rich")
 
     captured = capsys.readouterr()
     assert "0 bytes" in captured.out
