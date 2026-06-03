@@ -95,6 +95,30 @@ def test_max_depth_filter_skips_already_truncated():
     assert res.size == 1000
 
 
+def test_calculate_subtree_stats_truncated_child():
+    """
+    root/       (dir)
+    └── src/    (dir, 100 bytes, truncated)
+    """
+    root = TreeNode(path="root", ntype=NodeType.DIR)
+
+    src = TreeNode(path="root/src", ntype=NodeType.DIR, is_truncated=True)
+    src.stats = Stats(hidden_dirs=2, hidden_files=5, hidden_size=100)
+    src.size = 100
+    root.stats.visible_dirs += 1
+    root.children.append(src)
+
+    filter = MaxDepthFilter(0)
+
+    stats = filter._calculate_subtree_stats(root)
+    print(stats)
+
+    assert stats.hidden_dirs == 3
+    assert stats.hidden_files == 5
+
+    assert stats.hidden_size == 100
+
+
 # ======================================================================= #
 # Tests: FoldersOnlyFilter
 # ======================================================================= #

@@ -60,8 +60,6 @@ def traverse_path(
                         node.stats.hidden_size += f_size
                         continue
 
-                    node.stats.visible_files += 1
-
                     child = TreeNode(path=entry_path, ntype=NodeType.FILE)
                     if pipeline:
                         pipeline.execute(child, config)
@@ -69,9 +67,7 @@ def traverse_path(
                     continue
 
                 # visible folder
-                node.stats.visible_dirs += 1
-
-                if max_depth is not None and curr_depth >= max_depth:
+                if max_depth is not None and curr_depth + 1 >= max_depth:
                     # hidden folders & files
                     h_dirs, h_files, h_size = count_subtree(entry_path, config)
                     child = TreeNode(path=entry_path, is_truncated=True)
@@ -81,7 +77,7 @@ def traverse_path(
 
                     child.stats.hidden_dirs = h_dirs
                     child.stats.hidden_files = h_files
-                    child.size = h_size
+                    child.stats.hidden_size = h_size
 
                     node.children.append(child)
                     continue

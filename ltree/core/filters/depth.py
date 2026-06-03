@@ -2,6 +2,7 @@
 from typing import TYPE_CHECKING
 
 from ltree.core.filters.base import TreeFilter
+from ltree.core.models import Stats
 
 if TYPE_CHECKING:
     from ltree.core.models import TreeNode
@@ -25,38 +26,40 @@ class MaxDepthFilter(TreeFilter):
         # TODO: Decouple aggregation from filter
         if curr_depth >= self.max_depth:
             # 1. Calculate the statistics of the pruned subtree
-            h_dirs, h_files, h_size = self._calculate_subtree_stats(node)
+            h_stats = self._calculate_subtree_stats(node)
 
             # 2. Prune and mark child node
             node.children = []
             node.is_truncated = True
-            node.stats.hidden_dirs = h_dirs
-            node.stats.hidden_files = h_files
-            node.stats.hidden_size = h_size
-            node.size = h_size
+            node.stats.hidden_dirs = h_stats.hidden_dirs
+            node.stats.hidden_files = h_stats.hidden_files
+            node.stats.hidden_size = h_stats.hidden_size
+            node.size = h_stats.hidden_size
             return
 
         for child in node.children:
             self._prune_recursive(child, curr_depth + 1)
 
-    def _calculate_subtree_stats(self, node: "TreeNode") -> tuple[int, int, int]:
-        hidden_dirs = node.stats.hidden_dirs
-        hidden_files = node.stats.hidden_files
-        hidden_size = node.stats.hidden_size
+    def _calculate_subtree_stats(self, node: "TreeNode") -> Stats:
+        hidden_stats: Stats = Stats(
+            hidden_dirs=node.stats.hidden_dirs,
+            hidden_files=node.stats.hidden_files,
+            hidden_size=node.stats.hidden_size,
+        )
 
         def walk(n: "TreeNode"):
-            nonlocal hidden_dirs, hidden_files, hidden_size
+            nonlocal hidden_stats
             for child in n.children:
                 if child.is_dir:
-                    hidden_dirs += 1
-                    hidden_dirs += child.stats.hidden_dirs
-                    hidden_files += child.stats.hidden_files
-                    hidden_size += child.stats.hidden_size
-                    hidden_size += child.size
-                    walk(child)
+                    hidden_stats += child.stats
+                    hidden_stats.hidden_dirs += 1
+
+                    if not child.is_truncated:
+                        hidden_stats.hidden_size += child.size
+                        walk(child)
                 else:
-                    hidden_files += 1
-                    hidden_size += child.size
+                    hidden_stats.hidden_files += 1
+                    hidden_stats.hidden_size += child.size
 
         walk(node)
-        return hidden_dirs, hidden_files, hidden_size
+        return hidden_stats
