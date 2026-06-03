@@ -1,3 +1,4 @@
+# tests/test_legacy/test_legacy_metadata_basic.py
 import os
 import stat
 from unittest.mock import patch

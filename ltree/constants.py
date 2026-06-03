@@ -1,3 +1,5 @@
+# ltree/constants.py
+
 # ANSI color codes
 ANSI_COLOR_RESET = "\033[0m"
 ANSI_COLOR_DIR = "\033[96m"  # Bright cyan

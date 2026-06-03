@@ -1,4 +1,4 @@
-# ltree/sserializers/tree.py
+# ltree/serializers/tree.py
 from dataclasses import asdict
 
 from ltree.core.models import TreeNode, Stats

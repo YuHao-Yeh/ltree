@@ -1,4 +1,4 @@
-# ltree/core/scanner/filters.py
+# ltree/core/scanners/filters.py
 import fnmatch
 from pathlib import Path
 from typing import Protocol
