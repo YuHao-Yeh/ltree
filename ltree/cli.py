@@ -3,6 +3,7 @@ import sys
 
 from ltree.core.scanners.scanner import scan_tree
 from ltree.core.config import TreeConfig
+from ltree.core.filters import get_default_filter_pipeline
 from ltree.renderers.renderer import (
     TextRenderer,
     JsonRenderer,
@@ -326,6 +327,11 @@ def run(args: argparse.Namespace) -> None:
         root = scan_tree(path=args.start_path, config=config, max_depth=args.max_depth)
         if not root:
             return
+
+        tree_filter = get_default_filter_pipeline(
+            config=config, max_depth=args.max_depth
+        )
+        root = tree_filter.apply(root)
 
         serializer = TreeSerializer()
         root_node = serializer.serialize(root)
