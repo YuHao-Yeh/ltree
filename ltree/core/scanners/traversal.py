@@ -1,22 +1,27 @@
 # ltree/core/scanners/traversal.py
+from __future__ import annotations
+
 import os
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from ltree.core.config import TreeConfig
 from ltree.core.models import TreeNode, NodeType
-from ltree.core.metadata import MetadataPipeline
 from ltree.core.scanners.filters import CompositeFilter
 from ltree.core.scanners.sorting import sort_entries
 from ltree.core.scanners.subtree import count_subtree
 
+if TYPE_CHECKING:
+    from ltree.core.config import TreeConfig
+    from ltree.core.metadata import MetadataPipeline
+
 
 def traverse_path(
     path: Path,
-    config: TreeConfig,
+    config: "TreeConfig",
     max_depth: int | None = None,
     curr_depth: int = 0,
-    pipeline: MetadataPipeline | None = None,
+    pipeline: "MetadataPipeline" | None = None,
     node_filter: CompositeFilter | None = None,
 ) -> TreeNode | None:
     node_filter = node_filter or CompositeFilter()

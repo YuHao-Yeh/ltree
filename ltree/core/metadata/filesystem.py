@@ -3,16 +3,16 @@ import os
 import stat
 from typing import TYPE_CHECKING
 
-from ltree.core.config import TreeConfig
 from ltree.core.metadata.base import MetadataProvider
 from ltree.core.metadata.models import FilesystemMetadata
 
 if TYPE_CHECKING:
+    from ltree.core.config import TreeConfig
     from ltree.core.models import TreeNode
 
 
 class FilesystemMetadataProvider(MetadataProvider):
-    def enrich(self, node: "TreeNode", config: TreeConfig) -> None:
+    def enrich(self, node: "TreeNode", config: "TreeConfig") -> None:
         try:
             st = node.path.lstat()
 

@@ -2,7 +2,7 @@
 import os
 from typing import TYPE_CHECKING
 
-from .base import BaseTheme
+from ltree.themes.base import BaseTheme
 from ltree.core.models import NodeType
 
 if TYPE_CHECKING:

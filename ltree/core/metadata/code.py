@@ -2,11 +2,11 @@
 import os
 from typing import TYPE_CHECKING
 
-from ltree.core.config import TreeConfig
 from ltree.core.metadata.base import MetadataProvider
 from ltree.core.metadata.models import CodeMetadata
 
 if TYPE_CHECKING:
+    from ltree.core.config import TreeConfig
     from ltree.core.models import TreeNode
 
 
@@ -33,7 +33,7 @@ class CodeMetadataProvider(MetadataProvider):
         ".yml": "yaml",
     }
 
-    def enrich(self, node: "TreeNode", config: TreeConfig) -> None:
+    def enrich(self, node: "TreeNode", config: "TreeConfig") -> None:
         if node.is_dir:
             return
 

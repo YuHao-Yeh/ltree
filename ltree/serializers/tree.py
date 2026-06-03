@@ -1,13 +1,16 @@
 # ltree/serializers/tree.py
 from dataclasses import asdict
+from typing import TYPE_CHECKING
 
-from ltree.core.models import TreeNode, Stats
-from ltree.core.metadata.models import MetadataContainer
 from ltree.serializers.base import Serializer
-from ltree.serializers.types import SerializedNode
+
+if TYPE_CHECKING:
+    from ltree.core.metadata.models import MetadataContainer
+    from ltree.core.models import TreeNode, Stats
+    from ltree.serializers.types import SerializedNode
 
 
-def _serialize_metadata(metadata: MetadataContainer) -> dict:
+def _serialize_metadata(metadata: "MetadataContainer") -> dict:
     result = {}
 
     if metadata.fs:
@@ -33,7 +36,7 @@ def _serialize_metadata(metadata: MetadataContainer) -> dict:
     return result
 
 
-def _serialize_stats(stats: Stats) -> dict[str, int]:
+def _serialize_stats(stats: "Stats") -> dict[str, int]:
     return {
         "visible_dirs": stats.visible_dirs,
         "visible_files": stats.visible_files,
@@ -46,7 +49,7 @@ def _serialize_stats(stats: Stats) -> dict[str, int]:
 
 
 class TreeSerializer(Serializer):
-    def serialize(self, node: TreeNode) -> SerializedNode:
+    def serialize(self, node: "TreeNode") -> "SerializedNode":
         return {
             "name": node.name,
             "path": str(node.path),
