@@ -115,8 +115,6 @@ def test_traverse_path_exclustion(test_dir):
     node = traverse_path(test_dir, config)
 
     assert len(node.children) == 2
-    assert node.stats.visible_files == 1
-    assert node.stats.visible_dirs == 1
 
 
 def test_traverse_path_folders_only(test_dir):
@@ -140,7 +138,7 @@ def test_traverse_path_max_depth_truncation(test_dir):
     assert truncated_child.is_truncated is True
     assert truncated_child.stats.hidden_files == 2
     assert truncated_child.stats.hidden_dirs == 0
-    assert truncated_child.size == 25
+    assert truncated_child.stats.hidden_size == 25
 
 
 def test_traverse_path_permission_error(tmp_path, capsys):

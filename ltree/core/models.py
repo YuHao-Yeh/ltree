@@ -1,7 +1,8 @@
 # ltree/core/models.py
 from dataclasses import dataclass, field
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
+from typing import Self
 
 from ltree.core.metadata.models import MetadataContainer, FilesystemMetadata
 
@@ -26,6 +27,48 @@ class Stats:
     @property
     def total_files(self) -> int:
         return self.visible_files + self.hidden_files
+
+    @classmethod
+    def empty(cls) -> "Stats":
+        return cls()
+
+    def reset_visible(self):
+        self.visible_dirs = 0
+        self.visible_files = 0
+
+    def __add__(self, other: "Stats") -> "Stats":
+        return Stats(
+            visible_dirs=self.visible_dirs + other.visible_dirs,
+            visible_files=self.visible_files + other.visible_files,
+            hidden_dirs=self.hidden_dirs + other.hidden_dirs,
+            hidden_files=self.hidden_files + other.hidden_files,
+            hidden_size=self.hidden_size + other.hidden_size,
+        )
+
+    def __iadd__(self, other: "Stats") -> Self:
+        self.visible_dirs += other.visible_dirs
+        self.visible_files += other.visible_files
+        self.hidden_dirs += other.hidden_dirs
+        self.hidden_files += other.hidden_files
+        self.hidden_size += other.hidden_size
+        return self
+
+    def __sub__(self, other: "Stats") -> "Stats":
+        return Stats(
+            visible_dirs=self.visible_dirs - other.visible_dirs,
+            visible_files=self.visible_files - other.visible_files,
+            hidden_dirs=self.hidden_dirs - other.hidden_dirs,
+            hidden_files=self.hidden_files - other.hidden_files,
+            hidden_size=self.hidden_size - other.hidden_size,
+        )
+
+    def __isub__(self, other: "Stats") -> Self:
+        self.visible_dirs -= other.visible_dirs
+        self.visible_files -= other.visible_files
+        self.hidden_dirs -= other.hidden_dirs
+        self.hidden_files -= other.hidden_files
+        self.hidden_size -= other.hidden_size
+        return self
 
 
 @dataclass(slots=True)

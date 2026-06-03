@@ -1,23 +1,34 @@
-# ltree/core/scanners/aggregation.py
-from ltree.core.models import TreeNode
+# ltree/core/scanner/aggregation.py
+from typing import TYPE_CHECKING
 
 
-def aggregate_tree(node: TreeNode) -> None:
+if TYPE_CHECKING:
+    from ltree.core.models import TreeNode
+
+
+def aggregate_tree(node: "TreeNode") -> None:
     if not node.is_dir:
         return
 
+    node.stats.reset_visible()
+
     if node.is_truncated:
+        node.size = node.stats.hidden_size
         return
 
     total_size = node.stats.hidden_size
 
     for child in node.children:
-        aggregate_tree(child)
-        total_size += child.size
+        if child.is_dir:
+            aggregate_tree(child)
 
-        node.stats.visible_dirs += child.stats.visible_dirs
-        node.stats.visible_files += child.stats.visible_files
-        node.stats.hidden_dirs += child.stats.hidden_dirs
-        node.stats.hidden_files += child.stats.hidden_files
+            node.stats.visible_dirs += 1
+            node.stats += child.stats
+
+            total_size += child.size
+
+        else:
+            node.stats.visible_files += 1
+            total_size += child.size
 
     node.size = total_size
