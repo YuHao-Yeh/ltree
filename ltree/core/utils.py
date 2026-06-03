@@ -1,7 +1,12 @@
 # ltree/core/utils.py
+from __future__ import annotations
+
 import os
-from io import TextIOWrapper
-from typing import TextIO
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from io import TextIOWrapper
+    from typing import TextIO
 
 
 def get_rel_path(target_path: str, base_path: str):
@@ -16,7 +21,7 @@ def get_rel_path(target_path: str, base_path: str):
     return rel.replace("\\", "/")
 
 
-def write_line(file: TextIO | TextIOWrapper | None = None, text: str = "") -> None:
+def write_line(file: "TextIO" | "TextIOWrapper" | None = None, text: str = "") -> None:
     if file is None:
         return
     file.write(text + "\n")

@@ -8,9 +8,8 @@ from ltree.core.metadata.git import GitMetadataProvider
 from ltree.core.metadata.time import TimeMetadataProvider
 from ltree.core.metadata.project import ProjectMetadataProvider
 
-from ltree.core.config import TreeConfig
-
 if TYPE_CHECKING:
+    from ltree.core.config import TreeConfig
     from ltree.core.models import TreeNode
 
 
@@ -22,7 +21,7 @@ class MetadataPipeline:
         self._providers.append(provider)
         return self
 
-    def execute(self, node: "TreeNode", config: TreeConfig) -> None:
+    def execute(self, node: "TreeNode", config: "TreeConfig") -> None:
         for provider in self._providers:
             try:
                 provider.enrich(node, config)
@@ -30,7 +29,7 @@ class MetadataPipeline:
                 pass
 
 
-def get_default_pipeline(config: TreeConfig) -> MetadataPipeline:
+def get_default_pipeline(config: "TreeConfig") -> MetadataPipeline:
     pipeline = MetadataPipeline()
 
     # 1. Basic file system attributes (required)

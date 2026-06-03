@@ -1,9 +1,9 @@
 # ltree/themes/manager.py
 from typing import TYPE_CHECKING
 
-from .emoji import EmojiTheme
-from .nerd import NerdTheme
-from .none import NoTheme
+from ltree.themes.emoji import EmojiTheme
+from ltree.themes.nerd import NerdTheme
+from ltree.themes.none import NoTheme
 
 if TYPE_CHECKING:
     from ltree.serializers.types import SerializedNode

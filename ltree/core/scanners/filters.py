@@ -1,23 +1,29 @@
 # ltree/core/scanners/filters.py
 import fnmatch
-from pathlib import Path
-from typing import Protocol
+from typing import Protocol, TYPE_CHECKING
 
-from ltree.core.config import TreeConfig
 from ltree.core.utils import get_rel_path
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from ltree.core.config import TreeConfig
 
 
 class NodeFilter(Protocol):
-    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool: ...
+    def should_exclude(
+        self, path: "Path", is_dir: bool, config: "TreeConfig"
+    ) -> bool: ...
 
 
+# ----------------------------------------------------------------------
 class ForceIncludeFilter:
-    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
+    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
         return False
 
 
+# ----------------------------------------------------------------------
 class GitignoreFilter:
-    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
+    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
         if not config.gitignore_spec:
             return False
 
@@ -30,7 +36,7 @@ class GitignoreFilter:
 
 
 class RegexFilter:
-    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
+    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
         if not config.regex_exclude_patterns:
             return False
 
@@ -43,7 +49,7 @@ class RegexFilter:
 
 
 class DefaultExcludeFilter:
-    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
+    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
         name = path.name
         if is_dir:
             if name in config.exclude_dirs:
@@ -64,13 +70,14 @@ class DefaultExcludeFilter:
 
 
 class HiddenFilter:
-    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
+    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
         if config.show_all:
             return False
 
         return path.name.startswith(".")
 
 
+# ----------------------------------------------------------------------
 class CompositeFilter:
     def __init__(self, filters: list[NodeFilter] | None = None):
         self.filters: list[NodeFilter] = filters or [
@@ -80,7 +87,7 @@ class CompositeFilter:
             HiddenFilter(),
         ]
 
-    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
+    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
         if path.name in config.added_items:
             return False
 

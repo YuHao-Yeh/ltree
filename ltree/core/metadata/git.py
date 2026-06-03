@@ -3,11 +3,11 @@ import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ltree.core.config import TreeConfig
 from ltree.core.metadata.base import MetadataProvider
 from ltree.core.metadata.models import GitMetadata, GitStatus
 
 if TYPE_CHECKING:
+    from ltree.core.config import TreeConfig
     from ltree.core.models import TreeNode
 
 
@@ -114,7 +114,7 @@ class GitMetadataProvider(MetadataProvider):
         except ValueError:
             return False
 
-    def enrich(self, node: "TreeNode", config: TreeConfig) -> None:
+    def enrich(self, node: "TreeNode", config: "TreeConfig") -> None:
         # 1. Initialize detection and caching on first call
         if self._git_available is None:
             self._check_git_and_find_root(node.path)

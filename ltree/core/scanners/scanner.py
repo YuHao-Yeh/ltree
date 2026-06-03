@@ -1,19 +1,24 @@
 # ltree/core/scanners/scanner.py
+from __future__ import annotations
+
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from ltree.core.config import TreeConfig
 from ltree.core.metadata import MetadataPipeline, get_default_pipeline
-from ltree.core.models import TreeNode
 from ltree.core.scanners.aggregation import aggregate_tree
 from ltree.core.scanners.filters import CompositeFilter
 from ltree.core.scanners.traversal import traverse_path
+
+if TYPE_CHECKING:
+    from ltree.core.config import TreeConfig
+    from ltree.core.models import TreeNode
 
 
 class Scanner:
     def __init__(
         self,
-        config: TreeConfig,
+        config: "TreeConfig",
         pipeline: MetadataPipeline | None = None,
         node_filter: CompositeFilter | None = None,
     ):
@@ -21,7 +26,7 @@ class Scanner:
         self.pipeline = pipeline or get_default_pipeline(config)
         self.node_filter = node_filter or CompositeFilter()
 
-    def scan(self, path: Path | str, max_depth: int | None = None) -> TreeNode | None:
+    def scan(self, path: Path | str, max_depth: int | None = None) -> "TreeNode" | None:
         root_path = Path(path).resolve()
         if not root_path.exists():
             print(f"Error: Path '{path}' does not exist.", file=sys.stderr)
@@ -47,8 +52,8 @@ class Scanner:
 
 def scan_tree(
     path: str | Path,
-    config: TreeConfig,
+    config: "TreeConfig",
     max_depth: int | None = None,
-) -> TreeNode | None:
+) -> "TreeNode" | None:
     scanner = Scanner(config)
     return scanner.scan(path, max_depth=max_depth)
