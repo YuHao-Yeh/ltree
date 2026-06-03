@@ -1,4 +1,4 @@
-# ltree/core/scanner/subtree.py
+# ltree/core/scanners/subtree.py
 import os
 from pathlib import Path
 

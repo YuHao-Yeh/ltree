@@ -1,4 +1,4 @@
-# ltree/core/scanner/traversal.py
+# ltree/core/scanners/traversal.py
 import os
 import sys
 from pathlib import Path

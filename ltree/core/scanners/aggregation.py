@@ -1,4 +1,4 @@
-# ltree/core/scanner/aggregation.py
+# ltree/core/scanners/aggregation.py
 from ltree.core.models import TreeNode
 
 

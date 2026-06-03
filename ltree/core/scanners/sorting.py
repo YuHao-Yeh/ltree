@@ -1,4 +1,4 @@
-# ltree/core/scanner/sorting.py
+# ltree/core/scanners/sorting.py
 from typing import TYPE_CHECKING
 
 from ltree.core.config import TreeConfig
