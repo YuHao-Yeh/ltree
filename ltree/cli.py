@@ -1,19 +1,25 @@
 # ltree/cli.py
 import argparse
 import sys
+from typing import TYPE_CHECKING
 
 from ltree.core.scanners.scanner import scan_tree
 from ltree.core.config import TreeConfig
 from ltree.core.filters import get_default_filter_pipeline
 from ltree.renderers.renderer import (
-    TextRenderer,
-    JsonRenderer,
+    # TextRenderer,
+    # JsonRenderer,
     MarkdownRenderer,
     MarkdownBlockRenderer,
     print_stats,
 )
+from ltree.renderers.text import TextRenderer
+from ltree.renderers.json import JsonRenderer
 from ltree.renderers.rich_renderer import RichRenderer
 from ltree.serializers import TreeSerializer
+
+if TYPE_CHECKING:
+    from ltree.renderers.base import BaseRenderer
 
 
 def parse_args() -> argparse.Namespace:
@@ -300,7 +306,7 @@ def validate_args(args: argparse.Namespace) -> None:
         )
 
 
-def get_renderer_class(args: argparse.Namespace):
+def get_renderer_class(args: argparse.Namespace) -> "BaseRenderer":
     renderers = {
         "text": TextRenderer,
         "json": JsonRenderer,
@@ -324,26 +330,28 @@ def run(args: argparse.Namespace) -> None:
     else:
         output_file = open(args.output, "w", encoding="utf-8")
 
+    tree_filter = get_default_filter_pipeline(config=config, max_depth=args.max_depth)
+    RendererClass = get_renderer_class(args)
+    renderer = RendererClass(config)
+    serializer = TreeSerializer(config)
+
     try:
         root = scan_tree(path=args.start_path, config=config, max_depth=args.max_depth)
         if not root:
             return
 
-        tree_filter = get_default_filter_pipeline(
-            config=config, max_depth=args.max_depth
-        )
         root = tree_filter.apply(root)
-
-        serializer = TreeSerializer()
         root_node = serializer.serialize(root)
 
-        RendererClass = get_renderer_class(args)
-        renderer = RendererClass(config)
-        renderer.render(root_node, output_file)
+        if renderer.input_type == "serialized":
+            output_content = renderer.render(root_node)
+        else:
+            output_content = renderer.render(root)
 
-        if is_console and args.format != "json":
+        output_file.write(output_content + "\n")
+
+        if is_console and args.format not in ("json"):
             print_stats(root_node, config, args.format)
-
     finally:
         if not is_console:
             output_file.close()

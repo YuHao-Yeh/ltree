@@ -52,6 +52,12 @@ class TreeConfig:
         self.show_ellipsis: bool = False
         self.theme: str = "emoji"
 
+        self.show_permission: bool = True
+        self.show_git: bool = True
+        self.show_time: bool = True
+        self.show_code: bool = True
+        self.show_project: bool = True
+
         self._prepare_patterns()
 
     def _prepare_patterns(self) -> None:

@@ -104,7 +104,7 @@ class JsonRenderer(BaseRenderer):
     def render(self, node: "SerializedNode", output_file: "TextIO") -> None:
         def to_dict(n: "SerializedNode"):
             size = n["metadata"].get("fs")["size"]
-            stats = n["stats"]
+            stats = n.get("stats", {})
             is_dir = bool(n["type"] == NodeType.DIR.value)
             d = {
                 "name": n["name"],

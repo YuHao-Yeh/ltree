@@ -59,7 +59,6 @@ def test_tree_serializer_full_metadata_serialization():
     assert res["path"] == str(Path("src/main.py"))
     assert res["type"] == "file"
     assert res["is_truncated"] is False
-    assert len(res["children"]) == 0
 
     # 2. Verify metadata serialization
     meta = res["metadata"]

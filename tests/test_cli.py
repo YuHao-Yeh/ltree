@@ -239,7 +239,7 @@ def test_validate_args_direct_conflicts(capsys, base_args):
 # Test: run
 # =======================================================================#
 @patch(f"{CLI_MODULE}.scan_tree")
-@patch(f"{RENDERER_PATH}.renderer.TextRenderer.render")
+@patch(f"{RENDERER_PATH}.text.TextRenderer.render")
 @patch("ltree.core.config.TreeConfig.load_config_file")
 def test_run_file_output(
     mock_load_config, mock_render_text, mock_scan, base_args, capsys
@@ -261,8 +261,8 @@ def test_run_file_output(
 @pytest.mark.parametrize(
     "fmt, renderer_class",
     [
-        ("text", "renderer.TextRenderer"),
-        ("json", "renderer.JsonRenderer"),
+        ("text", "text.TextRenderer"),
+        ("json", "json.JsonRenderer"),
         ("md", "renderer.MarkdownRenderer"),
         ("block", "renderer.MarkdownBlockRenderer"),
         ("rich", "rich_renderer.RichRenderer"),
@@ -278,6 +278,7 @@ def test_run_formats_and_stats(
     base_args.output = "-"
 
     with patch(f"{RENDERER_PATH}.{renderer_class}.render") as mock_render:
+        mock_render.return_value = "mock_output_content"
         with patch("sys.stdout", new_callable=io.StringIO):
             run(base_args)
 
