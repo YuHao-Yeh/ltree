@@ -26,6 +26,7 @@ class GitStatus(Enum):
     IGNORED = "ignored"
     UNMERGED = "unmerged"
     COPIED = "copied"
+    TYPE_CHANGED = "type_changed"
     DIRTY = "dirty"
 
 

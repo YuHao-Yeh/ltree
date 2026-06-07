@@ -30,7 +30,7 @@ class RowBuilder:
         # 2. Git status token
         git_text = ""
         git_status = GitStatus.CLEAN
-        if self.config.show_git and git and git.tracked:
+        if self.config.show_git and git:
             symbol_map = {
                 GitStatus.MODIFIED: "M",
                 GitStatus.ADDED: "A",
@@ -39,8 +39,10 @@ class RowBuilder:
                 GitStatus.UNTRACKED: "?",
                 GitStatus.IGNORED: "I",
                 GitStatus.UNMERGED: "U",
+                GitStatus.TYPE_CHANGED: "T",
                 GitStatus.COPIED: "C",
                 GitStatus.DIRTY: "*",
+                GitStatus.CLEAN: " ",
             }
             git_status = git.status
             git_text = symbol_map.get(git.status, "")

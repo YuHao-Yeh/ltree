@@ -263,9 +263,9 @@ def test_run_file_output(
     [
         ("text", "text.TextRenderer"),
         ("json", "json.JsonRenderer"),
-        ("md", "renderer.MarkdownRenderer"),
-        ("block", "renderer.MarkdownBlockRenderer"),
-        ("rich", "rich_renderer.RichRenderer"),
+        ("md", "markdown.MarkdownRenderer"),
+        ("block", "md_block.MarkdownBlockRenderer"),
+        ("rich", "rich.RichRenderer"),
     ],
 )
 @patch(f"{CLI_MODULE}.scan_tree")
@@ -284,7 +284,7 @@ def test_run_formats_and_stats(
 
         mock_render.assert_called_once()
         mock_scan.assert_called_once()
-        if fmt != "json":
+        if fmt not in ("json", "markdown", "md"):
             mock_print_stats.assert_called_once()
 
 

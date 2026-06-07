@@ -15,10 +15,8 @@ class GitMetadataProvider(MetadataProvider):
     def __init__(self):
         self._repo_root: Path | None = None
         self._git_available: bool | None = None
-        # rel_path -> status
-        self._status_cache: dict[str, GitStatus] = {}
-        # tracked paths
-        self._tracked_paths: set[str] = set()
+        self._status_cache: dict[str, GitStatus] = {}  # rel_path -> status
+        self._tracked_paths: set[str] = set()  # tracked paths
 
     def _check_git_and_find_root(self, path: Path) -> None:
         if self._git_available is False:
@@ -44,10 +42,24 @@ class GitMetadataProvider(MetadataProvider):
             return
 
         try:
-            # cmd: git status --porcelain=v1 --ignored
-            # -uall -> --untracked-files=all
+            # 1. Load tracked files
+            # cmd: git ls-files
+            res_tracked = subprocess.run(
+                ["git", "ls-files"],
+                cwd=str(self._repo_root),
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            for line in res_tracked.stdout.splitlines():
+                path_str = line.strip().strip('"').replace("\\", "/")
+                if path_str:
+                    self._tracked_paths.add(path_str)
+
+            # 2. Load git status
+            # cmd: git status --porcelain=v1 --ignored -uall
             res = subprocess.run(
-                ["git", "status", "--porcelain=v1", "--ignored"],
+                ["git", "status", "--porcelain=v1", "--ignored", "-uall"],
                 cwd=str(self._repo_root),
                 capture_output=True,
                 text=True,
@@ -59,12 +71,15 @@ class GitMetadataProvider(MetadataProvider):
                     continue
 
                 code = line[:2]
-                rel_path = line[3:].strip().strip('"').replace("\\", "/")
+                raw_path_part = line[3:]
 
                 # rename handling:
-                # R old.py -> new.py
-                if "->" in rel_path:
-                    rel_path = rel_path.split("->", 1)[1].strip()
+                # R "old.py" -> "new.py"
+                if "->" in raw_path_part:
+                    _, new_path_raw = raw_path_part.split("->", 1)
+                    rel_path = new_path_raw.strip().strip('"')
+                else:
+                    rel_path = raw_path_part.strip().strip('"')
 
                 rel_path = rel_path.replace("\\", "/")
 
@@ -78,27 +93,24 @@ class GitMetadataProvider(MetadataProvider):
             pass
 
     def _parse_status(self, code: str) -> GitStatus:
+        if code in {"DD", "AU", "UD", "UA", "DU", "AA", "UU"}:
+            return GitStatus.UNMERGED
+
         if "??" in code:
             return GitStatus.UNTRACKED
-
         if "!!" in code:
             return GitStatus.IGNORED
 
-        if "U" in code:
-            return GitStatus.UNMERGED
-
         if "R" in code:
             return GitStatus.RENAMED
-
-        if "A" in code:
-            return GitStatus.ADDED
-
-        if "D" in code:
-            return GitStatus.DELETED
-
         if "C" in code:
             return GitStatus.COPIED
-
+        if "A" in code:
+            return GitStatus.ADDED
+        if "D" in code:
+            return GitStatus.DELETED
+        if "T" in code:
+            return GitStatus.TYPE_CHANGED
         if "M" in code:
             return GitStatus.MODIFIED
 

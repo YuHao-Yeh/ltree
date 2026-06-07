@@ -6,16 +6,12 @@ from typing import TYPE_CHECKING
 from ltree.core.scanners.scanner import scan_tree
 from ltree.core.config import TreeConfig
 from ltree.core.filters import get_default_filter_pipeline
-from ltree.renderers.renderer import (
-    # TextRenderer,
-    # JsonRenderer,
-    MarkdownRenderer,
-    MarkdownBlockRenderer,
-    print_stats,
-)
+from ltree.renderers.renderer import print_stats
 from ltree.renderers.text import TextRenderer
 from ltree.renderers.json import JsonRenderer
-from ltree.renderers.rich_renderer import RichRenderer
+from ltree.renderers.rich import RichRenderer
+from ltree.renderers.markdown import MarkdownRenderer
+from ltree.renderers.md_block import MarkdownBlockRenderer
 from ltree.serializers import TreeSerializer
 
 if TYPE_CHECKING:
@@ -49,7 +45,7 @@ def parse_args() -> argparse.Namespace:
         "-F",
         "--format",
         dest="format",
-        choices=["text", "json", "md", "markdown", "block", "rich"],
+        choices=["text", "json", "md", "markdown", "block", "rich", "yaml"],
         default="text",
         help="Output format (default: text).",
     )
@@ -350,7 +346,7 @@ def run(args: argparse.Namespace) -> None:
 
         output_file.write(output_content + "\n")
 
-        if is_console and args.format not in ("json"):
+        if is_console and renderer.input_type == "row":
             print_stats(root_node, config, args.format)
     finally:
         if not is_console:

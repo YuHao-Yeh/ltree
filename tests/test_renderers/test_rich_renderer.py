@@ -4,7 +4,7 @@ import os
 import pytest
 from ltree.core.models import TreeNode, Stats, NodeType
 from ltree.core.config import TreeConfig
-from ltree.renderers.rich_renderer import RichRenderer
+from ltree._renderers.rich_renderer import RichRenderer
 from ltree.serializers import TreeSerializer
 
 
