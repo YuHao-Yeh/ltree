@@ -3,7 +3,12 @@ from typing import TYPE_CHECKING
 
 from ltree.core.models import NodeType
 from ltree.core.metadata.models import GitStatus
-from ltree.renderers.models import RenderRow, RenderDetail, MetadataToken
+from ltree.renderers.models import (
+    RenderRow,
+    RenderDetail,
+    MetadataToken,
+    GIT_SYMBOL_MAP,
+)
 from ltree.core.utils import format_size_classic
 
 if TYPE_CHECKING:
@@ -31,21 +36,8 @@ class RowBuilder:
         git_text = ""
         git_status = GitStatus.CLEAN
         if self.config.show_git and git:
-            symbol_map = {
-                GitStatus.MODIFIED: "M",
-                GitStatus.ADDED: "A",
-                GitStatus.DELETED: "D",
-                GitStatus.RENAMED: "R",
-                GitStatus.UNTRACKED: "?",
-                GitStatus.IGNORED: "I",
-                GitStatus.UNMERGED: "U",
-                GitStatus.TYPE_CHANGED: "T",
-                GitStatus.COPIED: "C",
-                GitStatus.DIRTY: "*",
-                GitStatus.CLEAN: " ",
-            }
             git_status = git.status
-            git_text = symbol_map.get(git.status, "")
+            git_text = GIT_SYMBOL_MAP.get(git.status, "")
         git_token = MetadataToken(text=git_text, kind="git", status=git_status)
 
         # 3. Size Token

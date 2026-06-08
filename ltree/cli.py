@@ -4,18 +4,14 @@ import sys
 from typing import TYPE_CHECKING
 
 from ltree.core.scanners.scanner import scan_tree
-from ltree.core.config import TreeConfig
+from ltree.core.config import TreeConfig, FORMATS
 from ltree.core.filters import get_default_filter_pipeline
-from ltree.renderers.renderer import print_stats
-from ltree.renderers.text import TextRenderer
-from ltree.renderers.json import JsonRenderer
-from ltree.renderers.rich import RichRenderer
-from ltree.renderers.markdown import MarkdownRenderer
-from ltree.renderers.md_block import MarkdownBlockRenderer
+from ltree.renderers.utils import print_stats
+from ltree.renderers import get_renderer_class
 from ltree.serializers import TreeSerializer
 
 if TYPE_CHECKING:
-    from ltree.renderers.base import BaseRenderer
+    pass
 
 
 def parse_args() -> argparse.Namespace:
@@ -45,7 +41,7 @@ def parse_args() -> argparse.Namespace:
         "-F",
         "--format",
         dest="format",
-        choices=["text", "json", "md", "markdown", "block", "rich", "yaml"],
+        choices=FORMATS,
         default="text",
         help="Output format (default: text).",
     )
@@ -302,18 +298,6 @@ def validate_args(args: argparse.Namespace) -> None:
         )
 
 
-def get_renderer_class(args: argparse.Namespace) -> "BaseRenderer":
-    renderers = {
-        "text": TextRenderer,
-        "json": JsonRenderer,
-        "md": MarkdownRenderer,
-        "markdown": MarkdownRenderer,
-        "block": MarkdownBlockRenderer,
-        "rich": RichRenderer,
-    }
-    return renderers.get(args.format, TextRenderer)
-
-
 def run(args: argparse.Namespace) -> None:
     validate_args(args)
 
@@ -327,7 +311,7 @@ def run(args: argparse.Namespace) -> None:
         output_file = open(args.output, "w", encoding="utf-8")
 
     tree_filter = get_default_filter_pipeline(config=config, max_depth=args.max_depth)
-    RendererClass = get_renderer_class(args)
+    RendererClass = get_renderer_class(args.format)
     renderer = RendererClass(config)
     serializer = TreeSerializer(config)
 

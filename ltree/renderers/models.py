@@ -29,3 +29,23 @@ class RenderRow:
     time: MetadataToken
 
     details: list[RenderDetail] = field(default_factory=list)
+
+
+_BASE_MAP = {
+    GitStatus.MODIFIED: "M",
+    GitStatus.ADDED: "A",
+    GitStatus.DELETED: "D",
+    GitStatus.RENAMED: "R",
+    GitStatus.UNTRACKED: "?",
+    GitStatus.IGNORED: "I",
+    GitStatus.UNMERGED: "U",
+    GitStatus.TYPE_CHANGED: "T",
+    GitStatus.COPIED: "C",
+    GitStatus.DIRTY: "*",
+    GitStatus.CLEAN: " ",
+}
+
+GIT_SYMBOL_MAP: dict[GitStatus | str, str] = {}
+for status, symbol in _BASE_MAP.items():
+    GIT_SYMBOL_MAP[status] = symbol
+    GIT_SYMBOL_MAP[status.value] = symbol

@@ -15,6 +15,19 @@ else:  # pragma: no cover
         tomllib = None
 
 
+FORMATS: list[str] = [
+    "text",
+    "json",
+    "md",
+    "markdown",
+    "block",
+    "rich",
+    "yaml",
+    "html",
+    "graphviz",
+]
+
+
 class TreeConfig:
     def __init__(self):
         self.root_path: str = ""
