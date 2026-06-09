@@ -123,7 +123,7 @@ class RichRenderer(BaseRenderer):
     def _format_row(self, row: RenderRow, prefix: str, tree_prefix: str) -> Text:
         line = self._format_metadata_prefix(row)
         line.append(f"{prefix}{tree_prefix}", style="dim")
-        line.append(f"{row.icon} ")
+        line.append(f"{row.icon}")
 
         name_style = "bold cyan" if row.is_dir else "white"
         line.append(row.name, style=name_style)

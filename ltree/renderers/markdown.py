@@ -30,12 +30,15 @@ class MarkdownRenderer(BaseRenderer):
         size_str = ""
         if self.config.show_size:
             fs = node["metadata"].get("fs", {})
-            size_val = (
-                fs.get("size_human") if self.config.human_readable else fs.get("size")
-            )
+            size_val, unit = fs.get("size"), "B"
+
+            if self.config.human_readable:
+                size_val = fs.get("size_human")
+                unit = ""
+
             if size_val is not None:
-                unit = "" if self.config.human_readable else " B"
-                size_str = f"`{size_val}{unit}` "
+                display_val = f"{size_val} {unit}".strip()
+                size_str = f"`{display_val}` "
 
         version_str = ""
         if self.config.show_project:
@@ -50,10 +53,10 @@ class MarkdownRenderer(BaseRenderer):
         lines.append(f"{indent}- {icon}{size_str}{name_display}{version_str}")
 
         # Truncated
-        if node.get("is_truncated") and self.config.show_ellipsis:
+        if node["is_truncated"] and self.config.show_ellipsis:
             sub_indent = "  " * (depth + 1)
             stats = node.get("stats", {})
-            if getattr(self.config, "folders_only", False):
+            if self.config.folders_only:
                 lines.append(f"{sub_indent}- ... ({stats.get('hidden_dirs', 0)} dirs)")
             else:
                 lines.append(

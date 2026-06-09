@@ -131,6 +131,7 @@ def test_git_metadata_provider_parse_all_git_statuses(config, provider):
         "UU src/conflict.py\n"
         "?? src/untracked.py\n"
         "!! src/ignored.py\n"
+        " T src/typechanged.py\n"
     )
 
     def mock_run(cmd, **kwargs):
@@ -158,6 +159,30 @@ def test_git_metadata_provider_parse_all_git_statuses(config, provider):
 
     # fallback
     assert provider._parse_status("XX") == GitStatus.CLEAN
+
+
+def test_git_metadata_provider_load_git_status_cache_empty_lines_in_tracked(
+    config, provider
+):
+    provider._repo_root = Path("/dummy/repo").resolve()
+
+    def mock_run(cmd, **kwargs):
+        mock = MagicMock()
+        if "ls-files" in cmd:
+            mock.stdout = 'src/main.py\n\n   \n""\nsrc/helper.py\n'
+        elif "status" in cmd:
+            mock.stdout = ""
+        return mock
+
+    with patch("subprocess.run", side_effect=mock_run):
+        provider._load_git_status_cache()
+
+    assert "src/main.py" in provider._tracked_paths
+    assert "src/helper.py" in provider._tracked_paths
+
+    assert "" not in provider._tracked_paths
+    assert "   " not in provider._tracked_paths
+    assert len(provider._tracked_paths) == 2
 
 
 # --- Tests: File Metadata Enrichment ---

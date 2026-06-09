@@ -1,4 +1,6 @@
 # ltree/renderers/row_builder.py
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from ltree.core.models import NodeType
@@ -18,11 +20,11 @@ if TYPE_CHECKING:
 
 
 class RowBuilder:
-    def __init__(self, config: "TreeConfig", theme_manager: "ThemeManager"):
+    def __init__(self, config: TreeConfig, theme_manager: ThemeManager):
         self.config = config
         self.theme = theme_manager
 
-    def build(self, node: "TreeNode") -> RenderRow:
+    def build(self, node: TreeNode) -> RenderRow:
         meta = node.metadata
         fs = meta.fs if meta else None
         git = meta.git if meta else None
@@ -84,7 +86,7 @@ class RowBuilder:
             details=details,
         )
 
-    def _build_details(self, node: "TreeNode") -> list[RenderDetail]:
+    def _build_details(self, node: TreeNode) -> list[RenderDetail]:
         meta = node.metadata
         if not meta:
             return []
@@ -94,18 +96,11 @@ class RowBuilder:
         # A. Code
         if self.config.show_code and meta.code and meta.code.is_source_code:
             code = meta.code
-            parts = []
-
-            for field_name in ["classes", "functions", "imports", "complexity"]:
-                if hasattr(code, field_name):
-                    val = getattr(code, field_name)
-                    if val is not None and val != 0:
-                        parts.append(f"{field_name}={val}")
-            if parts:
+            if code.language:
                 details.append(
                     RenderDetail(
                         kind="code",
-                        text=" ".join(parts),
+                        text=f"language={code.language}",
                     )
                 )
 
@@ -123,13 +118,13 @@ class RowBuilder:
             s = node.stats
             if self.config.folders_only:
                 details.append(
-                    RenderDetail(kind="truncated", text=f".. ({s.hidden_dirs} dirs)")
+                    RenderDetail(kind="truncated", text=f"... ({s.hidden_dirs} dirs)")
                 )
             else:
                 details.append(
                     RenderDetail(
                         kind="truncated",
-                        text=f".. ({s.hidden_dirs} dirs, {s.hidden_files} files)",
+                        text=f"... ({s.hidden_dirs} dirs, {s.hidden_files} files)",
                     )
                 )
 
