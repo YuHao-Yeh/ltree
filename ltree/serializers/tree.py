@@ -1,20 +1,28 @@
 # ltree/serializers/tree.py
+from __future__ import annotations
+
 from dataclasses import asdict
 from typing import TYPE_CHECKING
 
+from ltree.core.models import NodeType
+from ltree.core.utils import format_size_classic
 from ltree.serializers.base import Serializer
 
 if TYPE_CHECKING:
+    from ltree.core.config import TreeConfig
     from ltree.core.metadata.models import MetadataContainer
     from ltree.core.models import TreeNode, Stats
     from ltree.serializers.types import SerializedNode
 
 
-def _serialize_metadata(metadata: "MetadataContainer") -> dict:
+def _serialize_metadata(metadata: MetadataContainer, config: TreeConfig) -> dict:
     result = {}
 
     if metadata.fs:
         result["fs"] = asdict(metadata.fs)
+        if config and config.human_readable:
+            size = result["fs"].get("size", 0)
+            result["fs"]["size_human"] = format_size_classic(size, True).strip()
 
     if metadata.git:
         git_data = asdict(metadata.git)
@@ -36,7 +44,7 @@ def _serialize_metadata(metadata: "MetadataContainer") -> dict:
     return result
 
 
-def _serialize_stats(stats: "Stats") -> dict[str, int]:
+def _serialize_stats(stats: Stats) -> dict[str, int]:
     return {
         "visible_dirs": stats.visible_dirs,
         "visible_files": stats.visible_files,
@@ -49,13 +57,25 @@ def _serialize_stats(stats: "Stats") -> dict[str, int]:
 
 
 class TreeSerializer(Serializer):
-    def serialize(self, node: "TreeNode") -> "SerializedNode":
-        return {
-            "name": node.name,
-            "path": str(node.path),
-            "type": node.ntype.value,
-            "metadata": _serialize_metadata(node.metadata),
-            "stats": _serialize_stats(node.stats),
-            "is_truncated": node.is_truncated,
-            "children": [self.serialize(child) for child in node.children],
-        }
+    def __init__(self, config: TreeConfig | None = None):
+        super().__init__(config)
+
+    def serialize(self, node: TreeNode) -> SerializedNode:
+        if node.ntype == NodeType.DIR:
+            return {
+                "name": node.name,
+                "path": str(node.path),
+                "type": node.ntype.value,
+                "metadata": _serialize_metadata(node.metadata, self.config),
+                "stats": _serialize_stats(node.stats),
+                "is_truncated": node.is_truncated,
+                "children": [self.serialize(child) for child in node.children],
+            }
+        else:
+            return {
+                "name": node.name,
+                "path": str(node.path),
+                "type": node.ntype.value,
+                "metadata": _serialize_metadata(node.metadata, self.config),
+                "is_truncated": node.is_truncated,
+            }

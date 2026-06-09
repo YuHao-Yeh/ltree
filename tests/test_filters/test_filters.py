@@ -111,7 +111,6 @@ def test_calculate_subtree_stats_truncated_child():
     filter = MaxDepthFilter(0)
 
     stats = filter._calculate_subtree_stats(root)
-    print(stats)
 
     assert stats.hidden_dirs == 3
     assert stats.hidden_files == 5

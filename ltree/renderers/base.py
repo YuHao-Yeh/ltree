@@ -1,6 +1,6 @@
 # ltree/renderers/base.py
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import Literal, TYPE_CHECKING
 
 from ltree.themes.manager import ThemeManager
 
@@ -11,7 +11,9 @@ if TYPE_CHECKING:
 
 
 class BaseRenderer(ABC):
-    def __init__(self, config: "TreeConfig"):
+    input_type: Literal["row", "serialized"] = "serialized"
+
+    def __init__(self, config: "TreeConfig", **kwargs):
         self.config = config
         self.theme_manager = ThemeManager(config.theme)
 

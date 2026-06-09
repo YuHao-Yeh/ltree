@@ -15,6 +15,19 @@ else:  # pragma: no cover
         tomllib = None
 
 
+FORMATS: list[str] = [
+    "text",
+    "json",
+    "md",
+    "markdown",
+    "block",
+    "rich",
+    "yaml",
+    "html",
+    "graphviz",
+]
+
+
 class TreeConfig:
     def __init__(self):
         self.root_path: str = ""
@@ -51,6 +64,12 @@ class TreeConfig:
         self.dirs_first: bool = False
         self.show_ellipsis: bool = False
         self.theme: str = "emoji"
+
+        self.show_permission: bool = True
+        self.show_git: bool = True
+        self.show_time: bool = True
+        self.show_code: bool = True
+        self.show_project: bool = True
 
         self._prepare_patterns()
 

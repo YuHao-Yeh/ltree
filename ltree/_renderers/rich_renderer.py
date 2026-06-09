@@ -1,5 +1,6 @@
 # ltree/renderers/rich_renderer.py
 import os
+import sys
 from rich.console import Console
 from rich.filesize import decimal as format_size
 from rich.text import Text
@@ -15,7 +16,9 @@ if TYPE_CHECKING:
 
 
 class RichRenderer(BaseRenderer):
-    def render(self, node: "SerializedNode", output_file: "TextIO") -> None:
+    def render(
+        self, node: "SerializedNode", output_file: "TextIO" = sys.stdout
+    ) -> None:
         color_sys = "auto" if self.config.use_color else None
         is_a_tty = hasattr(output_file, "isatty") and output_file.isatty()
         console_width = None if is_a_tty else 1000
