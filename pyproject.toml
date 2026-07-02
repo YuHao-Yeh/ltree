@@ -43,7 +43,7 @@ dev = [
 # Execution Scripts
 # =====================================================================
 [project.scripts]
-ltree = "ltree.cli:main"
+ltree = "ltree.cli.main:main"
 
 # =====================================================================
 # Build System Configuration

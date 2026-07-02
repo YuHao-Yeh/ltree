@@ -39,6 +39,7 @@ def test_rich_renderer_with_color(sample_tree):
 def test_rich_renderer_label(sample_tree):
     config = TreeConfig()
     config.show_size = True
+    config.show_project = True
     config.theme = "emoji"
 
     renderer = RichRenderer(config)

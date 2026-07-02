@@ -1,4 +1,6 @@
 # ltree/core/config.py
+from __future__ import annotations
+
 import argparse
 import json
 import os
@@ -26,8 +28,10 @@ FORMATS: list[str] = [
     "html",
     "graphviz",
 ]
+THEMES: list[str] = ["nerd", "emoji", "none"]
 
 
+# @dataclass(slots=True)
 class TreeConfig:
     def __init__(self):
         self.root_path: str = ""
@@ -68,8 +72,8 @@ class TreeConfig:
         self.show_permission: bool = True
         self.show_git: bool = True
         self.show_time: bool = True
-        self.show_code: bool = True
-        self.show_project: bool = True
+        self.show_code: bool = False
+        self.show_project: bool = False
 
         self._prepare_patterns()
 

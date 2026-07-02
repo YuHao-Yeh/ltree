@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 class YamlRenderer(BaseRenderer):
     input_type = "serialized"
+    support_theme = False
 
     def __init__(self, config: TreeConfig, **kwargs):
         super().__init__(config)

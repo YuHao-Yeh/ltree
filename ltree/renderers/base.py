@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 class BaseRenderer(ABC):
     input_type: Literal["row", "serialized"] = "serialized"
+    support_theme: bool = False
 
     def __init__(self, config: "TreeConfig", **kwargs):
         self.config = config

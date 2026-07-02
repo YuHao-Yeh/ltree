@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 class MarkdownBlockRenderer(BaseRenderer):
     input_type = "row"
+    support_theme = True
 
     def __init__(self, config: TreeConfig):
         super().__init__(config)
