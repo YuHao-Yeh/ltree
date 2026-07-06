@@ -22,8 +22,11 @@ def build_config(args: Namespace) -> TreeConfig:
     config.use_gitignore = args.gitignore
 
     # output fmtargs.format
-    if args.color:
-        config.use_color = True
+    if args.color is None:
+        is_console = args.output == "-"
+        config.use_color = is_console and sys.stdout.isatty()
+    else:
+        config.use_color = args.color
     # metadata
     if not args.show_permission:
         config.show_permission = False

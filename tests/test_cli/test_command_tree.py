@@ -1,9 +1,7 @@
 # tests/test_cli/test_command_tree.py
 import argparse
-from unittest.mock import patch, MagicMock
 
 from ltree.cli.commands.tree import run_tree
-from ltree.app.tree import RenderResult
 
 cli_cmd = "ltree.cli.commands"
 
@@ -86,20 +84,3 @@ def test_run_tree_file_output(tmp_path, capsys):
     assert target_out_file.exists()
     content = target_out_file.read_text(encoding="utf-8")
     assert "baz.md" in content
-
-
-@patch("ltree.core.scanners.scanner.scan_tree")
-def test_run_tree_stats_scan_fallback_safety(mock_scan, tmp_path, capsys):
-    mock_scan.return_value = None
-    args = build_args(start_path=str(tmp_path))
-
-    with patch(f"{cli_cmd}.tree.TreeApplication") as mock_app_cls:
-        mock_app = MagicMock()
-        mock_app.generate.return_value = RenderResult(content="mock_tree", rtype="row")
-        mock_app_cls.return_value = mock_app
-
-        run_tree(args)
-
-    captured = capsys.readouterr()
-    assert "mock_tree" in captured.out
-    assert "Summary" not in captured.out

@@ -1,15 +1,28 @@
 # ltree/core/cli/parser.py
 import argparse
+
+from ltree import __version__
 from ltree.renderers import RENDERERS
 from ltree.cli.commands.tree import run_tree
 from ltree.cli.commands.theme import run_theme, run_theme_preview
-from ltree.core.config import THEMES
+from ltree.core.config import TreeConfig, THEMES
+
+
+default_config = TreeConfig()
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="ltree: A customizable directory tree viewer.",
         formatter_class=argparse.RawTextHelpFormatter,
+    )
+
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"ltree-cli {__version__}",
+        help="Show ltree-cli current version number.",
     )
 
     subparsers: argparse._SubParsersAction = parser.add_subparsers(
@@ -58,7 +71,9 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
     output.add_argument(
         "-c",
         "--color",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        dest="color",
         help="Enable colored output (Ignored in JSON/Markdown).",
     )
 
@@ -68,7 +83,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
     meta.add_argument(
         "--perm",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=default_config.show_permission,
         dest="show_permission",
         help="Show or hide permission (Default: --perm)",
     )
@@ -76,7 +91,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
     meta.add_argument(
         "--git",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=default_config.show_git,
         dest="show_git",
         help="Show or hide git status (Default: --git)",
     )
@@ -85,7 +100,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         "-s",
         "--size",
         action=argparse.BooleanOptionalAction,
-        default=False,
+        default=default_config.show_size,
         dest="show_size",
         help="Show file size (Default: --size).",
     )
@@ -97,10 +112,11 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         help="Show size in human-readable format (e.g., 1K 2M).",
     )
     # time
+    # [ ] NOTE: Now show_mtime in parser, show_time in TreeConfig, confliction exist.
     meta.add_argument(
         "--mtime",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=default_config.show_time,
         dest="show_mtime",
         help="Show or hide modification time (Default: --mtime)",
     )
@@ -108,7 +124,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
     meta.add_argument(
         "--code",
         action=argparse.BooleanOptionalAction,
-        default=False,
+        default=default_config.show_code,
         dest="show_code",
         help="Show or hide code info (Default: --no-code)",
     )
@@ -116,7 +132,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
     meta.add_argument(
         "--project",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=default_config.show_project,
         dest="show_project",
         help="Show or hide project (Default: --project)",
     )
@@ -198,7 +214,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
     filtering.add_argument(
         "--gitignore",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=default_config.use_gitignore,
         dest="gitignore",
         help="Exclude or include files/directories matched by .gitignore.",
     )
@@ -236,7 +252,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
     display.add_argument(
         "--theme",
         choices=THEMES,
-        default="emoji",
+        default=default_config.theme,
         dest="theme",
         help="Icon theme (default: emoji).",
     )

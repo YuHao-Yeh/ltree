@@ -73,7 +73,7 @@ class TreeConfig:
         self.show_git: bool = True
         self.show_time: bool = True
         self.show_code: bool = False
-        self.show_project: bool = False
+        self.show_project: bool = True
 
         self._prepare_patterns()
 

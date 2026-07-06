@@ -30,10 +30,4 @@ def run_tree(args: Namespace) -> None:
         print(f"Directory tree written to {args.output}")
 
     if is_console and (result.rtype == "row"):
-        from ltree.core.scanners.scanner import scan_tree
-        from ltree.serializers import TreeSerializer
-
-        root = scan_tree(path=args.start_path, config=config, max_depth=args.max_depth)
-        if root:
-            serializer = TreeSerializer(config)
-            print_stats(serializer.serialize(root), config, args.format)
+        print_stats(result.serialized, config, args.format)
