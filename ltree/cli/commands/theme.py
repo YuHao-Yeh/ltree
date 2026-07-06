@@ -12,6 +12,8 @@ def run_theme(args) -> None:
             desc = " - Nerd Fonts symbols (Requires patched terminal font)"
         elif theme_name == "none":
             desc = " - Pure text without any icons"
+        else:
+            desc = " - Unclear"
         print(f"  * {theme_name}{desc}")
 
 

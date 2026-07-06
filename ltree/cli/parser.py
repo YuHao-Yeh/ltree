@@ -85,6 +85,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         "-s",
         "--size",
         action=argparse.BooleanOptionalAction,
+        default=False,
         dest="show_size",
         help="Show file size (Default: --size).",
     )

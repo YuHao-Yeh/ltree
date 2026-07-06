@@ -176,6 +176,7 @@ class TreeConfig:
                 self.exclude_files.discard(f)
                 self.added_items.add(f)
 
+    # legacy func
     def apply_args(self, args: argparse.Namespace) -> None:
         # preset profile
         start_path = getattr(args, "start_path", ".")

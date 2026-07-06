@@ -29,8 +29,8 @@ def build_config(args: Namespace) -> TreeConfig:
         config.show_permission = False
     if not args.show_git:
         config.show_git = False
-    if not args.show_size:
-        config.show_size = False
+    if args.show_size:
+        config.show_size = True
     if args.human_readable:
         config.human_readable = True
     if not args.show_mtime:

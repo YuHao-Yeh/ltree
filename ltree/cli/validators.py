@@ -80,12 +80,13 @@ def _validate_output(args: argparse.Namespace) -> None:
     }
 
     expected = expected_extensions.get(args.format)
+    filepath = Path(args.output)
 
     if (
         expected
         and args.output != "-"
-        and Path(args.output).suffix
-        and Path(args.output).suffix != expected
+        and filepath.suffix
+        and filepath.suffix != expected
     ):
         _warn(
             f"Output file extension '{Path(args.output).suffix}' "

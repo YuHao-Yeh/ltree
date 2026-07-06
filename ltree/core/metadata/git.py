@@ -150,7 +150,10 @@ class GitMetadataProvider(MetadataProvider):
 
         if node.is_dir:
             if rel_to_repo == "":
-                has_changes = bool(self._status_cache)
+                has_changes = any(
+                    status != GitStatus.IGNORED
+                    for status in self._status_cache.values()
+                )
             else:
                 # prefix = rel_to_repo + "/"
                 has_changes = any(

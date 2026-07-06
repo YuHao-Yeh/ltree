@@ -29,7 +29,7 @@ class TreeApplication:
         # 1. scan
         root = scan_tree(path=start_path, config=self.config, max_depth=max_depth)
         if not root:
-            return ""
+            return RenderResult(content="", rtype="row")
 
         # 2. filter
         tree_filter = get_default_filter_pipeline(self.config, max_depth)
