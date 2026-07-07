@@ -98,6 +98,8 @@ def _validate_output(args: argparse.Namespace) -> None:
 def _validate_filters(args: argparse.Namespace) -> None:
     # dirs-only makes file filters useless
     if args.folders_only:
+        # ------------------------------------------------------------- #
+        # legacy filter:
         ignored = []
 
         if args.ex_files:
@@ -114,17 +116,31 @@ def _validate_filters(args: argparse.Namespace) -> None:
                 f"File filter flags ({', '.join(ignored)}) "
                 f"have no effect when --dirs-only is enabled."
             )
+        # ------------------------------------------------------------- #
+        # new:
+        all_patterns = getattr(args, "exclude", []) + getattr(args, "include", [])
+        ignored_file_patterns = [pat for pat in all_patterns if not pat.endswith("/")]
+
+        if ignored_file_patterns:
+            _warn(
+                f"File-specific filter patterns {sorted(ignored_file_patterns)} "
+                "have no effect when --dirs-only is enabled."
+            )
 
         if args.dirs_first:
             _warn("--dirs-first has no effect when --folders-only is active.")
 
     # regex validation
-    for pattern in args.regex_exclude:
+    valid_patterns = []
+    for pattern in getattr(args, "regex_exclude", []):
         try:
-            re.compile(pattern)
+            valid_patterns.append(re.compile(pattern))
         except re.error as exc:
             _warn(f"Invalid regex '{pattern}': {exc}")
+    args.regex_exclude = valid_patterns
 
+    # ----------------------------------------------------------------- #
+    # legacy filter:
     # conflicting include / exclude directories
     conflicting_dirs = set(args.ex_dirs) & set(args.add_dirs)
     if conflicting_dirs:
@@ -140,6 +156,17 @@ def _validate_filters(args: argparse.Namespace) -> None:
         _warn(
             "Files specified in both exclude and include: "
             f"{sorted(conflicting_files)}. "
+            "Inclusion takes priority."
+        )
+    # ----------------------------------------------------------------- #
+    # new:
+    conflicting_patterns = set(getattr(args, "exclude", [])) & set(
+        getattr(args, "include", [])
+    )
+    if conflicting_patterns:
+        _warn(
+            "Patterns specified in both exclude (-I) and include (-A): "
+            f"{sorted(list(conflicting_patterns))}. "
             "Inclusion takes priority."
         )
 

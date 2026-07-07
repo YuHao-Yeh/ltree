@@ -62,12 +62,16 @@ def build_config(args: Namespace) -> TreeConfig:
     # 4. regex
     regex_patterns = getattr(args, "regex_exclude", [])
     for pattern in regex_patterns:
-        try:
-            config.regex_exclude_patterns.append(re.compile(pattern))
-        except re.error as e:
-            print(f"Warning: Invalid regex '{pattern}': {e}", file=sys.stderr)
+        if isinstance(pattern, re.Pattern):
+            config.regex_exclude_patterns.append(pattern)
+        else:
+            try:
+                config.regex_exclude_patterns.append(re.compile(pattern))
+            except re.error as e:
+                print(f"Warning: Invalid regex '{pattern}': {e}", file=sys.stderr)
 
     # 5. include & exclude
+    # legacy part:
     for dir in args.add_dirs:
         config.exclude_dirs.discard(dir)
         config.added_items.add(dir)
@@ -83,12 +87,18 @@ def build_config(args: Namespace) -> TreeConfig:
         config.exclude_exts.add(ext)
     for pre in args.ex_prefix:
         config.exclude_prefixes.add(pre)
+    # new:
+    for pattern in getattr(args, "exclude", []):
+        config.exclude.add_pattern(pattern)
+
+    for pattern in getattr(args, "include", []):
+        config.include.add_pattern(pattern)
 
     # 6. color setting
     if args.output != "-":
         config.use_color = False
 
-    # 7. update patterns
+    # 7. update patterns -> ready to remove
     config._prepare_patterns()
 
     return config

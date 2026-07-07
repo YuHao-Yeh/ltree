@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import pathspec
 import re
 import sys
+from dataclasses import dataclass, field
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -31,10 +33,57 @@ FORMATS: list[str] = [
 THEMES: list[str] = ["nerd", "emoji", "none"]
 
 
+@dataclass(slots=True)
+class MatchRules:
+    literals: set[str] = field(default_factory=set)
+    globs: set[str] = field(default_factory=set)
+
+    def add_pattern(self, pattern: str) -> None:
+        pat = pattern.replace("\\", "/").strip("/")
+        if not pat:
+            return
+
+        if any(ch in pat for ch in "*?[]"):
+            self.globs.add(pat)
+        else:
+            self.literals.add(pat)
+
+    def matches(self, rel_path: str, name: str) -> bool:
+        # 1. Literal check
+        for lit in self.literals:
+            if "/" in lit:
+                if rel_path == lit:
+                    return True
+            else:
+                if name == lit:
+                    return True
+
+        # 2. Glob check
+        for glob in self.globs:
+            if "/" in glob:
+                if fnmatch.fnmatch(rel_path, glob):
+                    return True
+                if glob.startswith("**/"):
+                    remainder = glob[3:]
+                    if fnmatch.fnmatch(rel_path, remainder):
+                        return True
+                if glob.endswith("/**"):
+                    parent_dir = glob[:-3]  # 取出 'src'
+                    if fnmatch.fnmatch(rel_path, parent_dir):
+                        return True
+            else:
+                if fnmatch.fnmatch(name, glob):
+                    return True
+
+        return False
+
+
 # @dataclass(slots=True)
 class TreeConfig:
     def __init__(self):
         self.root_path: str = ""
+        # ------------------------------------------------------------- #
+        # legacy vars:
         self.exclude_dirs: set = {
             "__pycache__",
             ".git",
@@ -52,6 +101,26 @@ class TreeConfig:
         self.added_items: set = set()
         self._exact_files: set = set()
         self._pattern_files: list = []
+        # ------------------------------------------------------------- #
+
+        self.exclude: MatchRules = MatchRules()
+        self.include: MatchRules = MatchRules()
+
+        default_exclude_literals = {
+            "__pycache__",
+            ".git",
+            ".venv",
+            "env",
+            "venv",
+            ".idea",
+            ".mypy_cache",
+            "python",
+            "media",
+            ".DS_Store",
+        }
+        for lit in default_exclude_literals:
+            self.exclude.add_pattern(lit)
+        self.exclude.add_pattern("error*")
 
         self.use_gitignore: bool = True
         self.gitignore_spec: pathspec.PathSpec | None = None
@@ -75,7 +144,7 @@ class TreeConfig:
         self.show_code: bool = False
         self.show_project: bool = True
 
-        self._prepare_patterns()
+        self._prepare_patterns()  # legacy: ready to remove
 
     def _prepare_patterns(self) -> None:
         self._exact_files.clear()
@@ -154,6 +223,7 @@ class TreeConfig:
             self.use_gitignore = not config_dict["no_ignore"]
 
         # --- 2. Exclusion and Inclusion Lists ---
+        # legacy part:
         if "ex_dirs" in config_dict and isinstance(config_dict["ex_dirs"], list):
             self.exclude_dirs.update(config_dict["ex_dirs"])
 
@@ -175,6 +245,21 @@ class TreeConfig:
             for f in config_dict["add_files"]:
                 self.exclude_files.discard(f)
                 self.added_items.add(f)
+        # ------------------------------------------------------------- #
+        # new:
+        if "ex_dirs" in config_dict and isinstance(config_dict["ex_dirs"], list):
+            for d in config_dict["ex_dirs"]:
+                self.exclude.add_pattern(d + "/")
+        if "ex_files" in config_dict and isinstance(config_dict["ex_files"], list):
+            for f in config_dict["ex_files"]:
+                self.exclude.add_pattern(f)
+
+        if "add_dirs" in config_dict and isinstance(config_dict["add_dirs"], list):
+            for d in config_dict["add_dirs"]:
+                self.include.add_pattern(d + "/")
+        if "add_files" in config_dict and isinstance(config_dict["add_files"], list):
+            for f in config_dict["add_files"]:
+                self.include.add_pattern(f)
 
     # legacy func
     def apply_args(self, args: argparse.Namespace) -> None:

@@ -7,17 +7,20 @@ from ltree.cli.parser import build_parser
 def main() -> int:
     subcommands = {"tree", "theme"}
 
-    if len(sys.argv) > 1:
-        first_arg = sys.argv[1]
+    argv = getattr(sys, "argv", [])
+    if len(argv) < 2:
+        if len(argv) == 0:
+            argv.append("ltree")
+        argv.insert(1, "tree")
+    else:
+        first_arg = argv[1]
         if first_arg not in subcommands and first_arg not in {
             "-h",
             "--help",
             "-v",
             "--version",
         }:
-            sys.argv.insert(1, "tree")
-    elif len(sys.argv) == 1:
-        sys.argv.insert(1, "tree")
+            argv.insert(1, "tree")
 
     parser = build_parser()
     args = parser.parse_args()

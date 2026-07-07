@@ -6,7 +6,7 @@ import re
 import sys
 from unittest.mock import patch
 
-from ltree.core.config import TreeConfig
+from ltree.core.config import TreeConfig, MatchRules
 
 
 # =======================================================================#
@@ -35,6 +35,71 @@ def base_args():
         show_ellipsis=False,
         theme="none",
     )
+
+
+# =======================================================================#
+# Test: MatchRules
+# =======================================================================#
+def test_match_rules_add_pattern_and_normalization():
+    rules = MatchRules()
+
+    # Null value or /\\
+    rules.add_pattern("")
+    rules.add_pattern("/")
+    rules.add_pattern("\\")
+    assert len(rules.literals) == 0
+    assert len(rules.globs) == 0
+
+    # Literals
+    rules.add_pattern("node_modules/")
+    assert "node_modules" in rules.literals
+
+    rules.add_pattern("src\\build\\")
+    assert "src/build" in rules.literals
+
+    # Globs
+    rules.add_pattern("*.log")
+    assert "*.log" in rules.globs
+
+    rules.add_pattern("**/build")
+    assert "**/build" in rules.globs
+
+    rules.add_pattern("file?")
+    assert "file?" in rules.globs
+
+    rules.add_pattern("temp[0-9]")
+    assert "temp[0-9]" in rules.globs
+
+
+def test_match_rules_matches_literals():
+    rules = MatchRules()
+    rules.add_pattern("node_modules")
+    rules.add_pattern("src/build")
+
+    assert rules.matches("node_modules", "node_modules") is True
+    assert rules.matches("nested/node_modules", "node_modules") is True
+    assert rules.matches("nested/node_modules/sub", "node_modules") is True
+    assert rules.matches("nested/other_folder", "other_folder") is False
+
+    assert rules.matches("src/build", "build") is True
+    assert rules.matches("other/src/build", "build") is False
+
+
+def test_match_rules_matches_globs():
+    rules = MatchRules()
+    rules.add_pattern("*.log")
+    rules.add_pattern("**/build")
+    rules.add_pattern("src/**")
+
+    assert rules.matches("src/main.log", "main.log") is True
+    assert rules.matches("error.log", "error.log") is True
+
+    assert rules.matches("foo/bar/build", "build") is True
+    assert rules.matches("build", "build") is True
+    assert rules.matches("src/main.py", "main.py") is True
+    assert rules.matches("src", "src") is True
+
+    assert rules.matches("foo/bar/other", "other") is False
 
 
 # =======================================================================#

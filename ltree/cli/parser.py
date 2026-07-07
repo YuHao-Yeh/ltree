@@ -1,5 +1,6 @@
 # ltree/core/cli/parser.py
 import argparse
+import re
 
 from ltree import __version__
 from ltree.renderers import RENDERERS
@@ -9,6 +10,13 @@ from ltree.core.config import TreeConfig, THEMES
 
 
 default_config = TreeConfig()
+
+
+def regex_type(value: str) -> re.Pattern[str]:
+    try:
+        return re.compile(value)
+    except re.error as e:
+        raise argparse.ArgumentTypeError(f"Invalid regex '{value}': {e}")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -154,6 +162,18 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         help="Only display directories.",
     )
     # TODO: Consolidate into exclude (-I)
+    # new argument:
+    filtering.add_argument(
+        "-I",
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="PATTERN",
+        dest="exclude",
+        help="Exclude files / directories (supports wildcards).",
+    )
+    # ----------------------------------------------------------------- #
+    # legacy arguments:
     filtering.add_argument(
         "--ex-dirs",
         action="append",
@@ -163,7 +183,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         help="Exclude directories.",
     )
     filtering.add_argument(
-        "-I",
+        # "-I",
         "--ex-files",
         action="append",
         default=[],
@@ -185,8 +205,10 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         dest="ex_prefix",
         help="Exclude by prefix.",
     )
+    # ----------------------------------------------------------------- #
     filtering.add_argument(
         "--re-ex",
+        type=regex_type,
         action="append",
         default=[],
         metavar="REGEX",
@@ -195,6 +217,18 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
     )
 
     # TODO: Consolidate into include (-A)
+    # new argument:
+    filtering.add_argument(
+        "-A",
+        "--include",
+        action="append",
+        default=[],
+        metavar="PATTERN",
+        dest="include",
+        help="Re-include specific files / directories (supports wildcards).",
+    )
+    # ----------------------------------------------------------------- #
+    # legacy arguments:
     filtering.add_argument(
         "--add-dirs",
         action="append",
@@ -209,6 +243,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         dest="add_files",
         help="Re-include specific files.",
     )
+    # ----------------------------------------------------------------- #
 
     # gitignore
     filtering.add_argument(

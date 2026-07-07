@@ -154,6 +154,8 @@ def test_validate_tree_args_output(args, capsys):
 def test_validate_tree_args_filters_dirs_only(args, capsys):
     # Case 1.
     args.folders_only = True
+    args.exclude = ["*.log", "build/"]
+    args.include = ["extra.txt", "src/"]
     args.ex_files = ["*.log"]
     args.ex_ext = [".tmp"]
     args.add_files = ["extra.txt"]
@@ -166,8 +168,17 @@ def test_validate_tree_args_filters_dirs_only(args, capsys):
     assert "have no effect when --dirs-only is enabled" in captured.err
     assert "dirs-first has no effect when --folders-only is active" in captured.err
 
+    assert "File-specific filter patterns" in captured.err
+    assert "*.log" in captured.err
+    assert "extra.txt" in captured.err
+    assert "build/" not in captured.err
+    assert "src/" not in captured.err
+    assert "dirs-first has no effect when --folders-only is active" in captured.err
+
     # Case 2.
     args.folders_only = True
+    args.exclude = ["build/", "temp/"]
+    args.include = ["src/"]
     args.ex_files = []
     args.ex_ext = []
     args.add_files = []
@@ -176,7 +187,7 @@ def test_validate_tree_args_filters_dirs_only(args, capsys):
     validate_tree_args(args)
     captured = capsys.readouterr()
 
-    assert "" in captured.err
+    assert captured.err == ""
 
 
 def test_validate_tree_args_filters_regex(args, capsys):
@@ -189,6 +200,9 @@ def test_validate_tree_args_filters_regex(args, capsys):
 
 
 def test_validate_tree_args_filters_confliction(args, capsys):
+    args.exclude = ["src/", "extra.txt"]
+    args.include = ["src/", "extra.txt", "build/"]
+
     args.ex_dirs = ["src"]
     args.add_dirs = ["src"]
     args.ex_files = ["extra.txt"]
@@ -199,6 +213,11 @@ def test_validate_tree_args_filters_confliction(args, capsys):
 
     assert "Directories specified in both exclude and include" in captured.err
     assert "Files specified in both exclude and include" in captured.err
+
+    assert "Patterns specified in both exclude (-I) and include (-A)" in captured.err
+    assert "extra.txt" in captured.err
+    assert "src/" in captured.err
+    assert "build/" not in captured.err
 
 
 # ======================================================================= #
