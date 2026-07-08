@@ -1,4 +1,6 @@
 # ltree/core/scanners/filters.py
+from __future__ import annotations
+
 import fnmatch
 from typing import Protocol, TYPE_CHECKING
 
@@ -10,20 +12,18 @@ if TYPE_CHECKING:
 
 
 class NodeFilter(Protocol):
-    def should_exclude(
-        self, path: "Path", is_dir: bool, config: "TreeConfig"
-    ) -> bool: ...
+    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool: ...
 
 
 # ----------------------------------------------------------------------
 class ForceIncludeFilter:
-    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
+    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
         return False
 
 
 # ----------------------------------------------------------------------
 class GitignoreFilter:
-    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
+    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
         if not config.gitignore_spec:
             return False
 
@@ -36,7 +36,7 @@ class GitignoreFilter:
 
 
 class RegexFilter:
-    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
+    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
         if not config.regex_exclude_patterns:
             return False
 
@@ -49,7 +49,7 @@ class RegexFilter:
 
 
 class DefaultExcludeFilter:
-    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
+    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
         # legacy filter:
         name = path.name
         if is_dir:
@@ -78,7 +78,7 @@ class DefaultExcludeFilter:
 
 
 class HiddenFilter:
-    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
+    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
         if config.show_all:
             return False
 
@@ -95,7 +95,7 @@ class CompositeFilter:
             HiddenFilter(),
         ]
 
-    def should_exclude(self, path: "Path", is_dir: bool, config: "TreeConfig") -> bool:
+    def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
         # legacy filter:
         if path.name in config.added_items:
             return False

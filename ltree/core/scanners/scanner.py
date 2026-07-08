@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class Scanner:
     def __init__(
         self,
-        config: "TreeConfig",
+        config: TreeConfig,
         pipeline: MetadataPipeline | None = None,
         node_filter: CompositeFilter | None = None,
     ):
@@ -52,7 +52,7 @@ class Scanner:
 
 def scan_tree(
     path: str | Path,
-    config: "TreeConfig",
+    config: TreeConfig,
     max_depth: int | None = None,
 ) -> "TreeNode" | None:
     return Scanner(config).scan(path, max_depth=max_depth)

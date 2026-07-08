@@ -1,14 +1,14 @@
 # ltree/core/scanners/sorting.py
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import os
+    from os import DirEntry
     from ltree.core.config import TreeConfig
 
 
-def sort_entries(
-    entries: list["os.DirEntry"], config: "TreeConfig"
-) -> list["os.DirEntry"]:
+def sort_entries(entries: list[DirEntry], config: TreeConfig) -> list[DirEntry]:
     return sorted(
         entries,
         key=lambda e: (

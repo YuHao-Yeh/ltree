@@ -1,4 +1,6 @@
 # ltree/core/scanner/aggregation.py
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 
@@ -6,7 +8,7 @@ if TYPE_CHECKING:
     from ltree.core.models import TreeNode
 
 
-def aggregate_tree(node: "TreeNode") -> None:
+def aggregate_tree(node: TreeNode) -> None:
     if not node.is_dir:
         return
 

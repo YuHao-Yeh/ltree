@@ -1,8 +1,15 @@
 # ltree/cli/commands/theme.py
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from ltree.themes.manager import ThemeManager
 
+if TYPE_CHECKING:
+    from argparse import Namespace
 
-def run_theme(args) -> None:
+
+def run_theme(args: Namespace) -> None:
     print("Available icon themes:")
     for theme_name in ThemeManager.THEMES.keys():
         desc = ""
@@ -17,7 +24,7 @@ def run_theme(args) -> None:
         print(f"  * {theme_name}{desc}")
 
 
-def run_theme_preview(args) -> None:
+def run_theme_preview(args: Namespace) -> None:
     theme_name = args.theme_name
     manager = ThemeManager(theme_name)
 

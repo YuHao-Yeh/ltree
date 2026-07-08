@@ -17,8 +17,8 @@ def run_config_show(args: Namespace) -> None:
     print("Active Configuration")
     print("=" * 60)
 
+    # for key, value in sorted(asdict(config).items()):
     for key, value in sorted(vars(config).items()):
-        # for key, value in sorted(asdict(config).items()):
         if key.startswith("_"):
             continue
 
