@@ -32,6 +32,7 @@ GIT_STYLES = {
 
 class RichRenderer(BaseRenderer):
     input_type = "row"
+    support_theme = True
 
     def __init__(self, config: TreeConfig):
         super().__init__(config)

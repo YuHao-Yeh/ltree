@@ -10,6 +10,17 @@ from ltree.renderers.row_builder import RowBuilder
 from ltree.renderers.text import TextRenderer
 from ltree.renderers.yaml import YamlRenderer
 
+RENDERERS = {
+    "block": MarkdownBlockRenderer,
+    "graphviz": GraphvizRenderer,
+    "html": HtmlRenderer,
+    "json": JsonRenderer,
+    "markdown": MarkdownRenderer,
+    "md": MarkdownRenderer,
+    "rich": RichRenderer,
+    "text": TextRenderer,
+    "yaml": YamlRenderer,
+}
 
 __all__ = [
     "BaseRenderer",
@@ -22,19 +33,9 @@ __all__ = [
     "RowBuilder",
     "TextRenderer",
     "YamlRenderer",
+    "RENDERERS",
 ]
 
 
 def get_renderer_class(fmt: str) -> BaseRenderer:
-    renderers = {
-        "block": MarkdownBlockRenderer,
-        "graphviz": GraphvizRenderer,
-        "html": HtmlRenderer,
-        "json": JsonRenderer,
-        "markdown": MarkdownRenderer,
-        "md": MarkdownRenderer,
-        "rich": RichRenderer,
-        "text": TextRenderer,
-        "yaml": YamlRenderer,
-    }
-    return renderers.get(fmt, TextRenderer)
+    return RENDERERS.get(fmt, TextRenderer)

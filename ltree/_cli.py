@@ -4,7 +4,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from ltree.core.scanners.scanner import scan_tree
-from ltree.core.config import TreeConfig, FORMATS
+from ltree.core.config import TreeConfig, FORMATS, THEMES
 from ltree.core.filters import get_default_filter_pipeline
 from ltree.renderers.utils import print_stats
 from ltree.renderers import get_renderer_class
@@ -169,7 +169,7 @@ def parse_args() -> argparse.Namespace:
     )
     display.add_argument(
         "--theme",
-        choices=["emoji", "nerd", "none"],
+        choices=THEMES,
         default="emoji",
         help="Icon theme (default: emoji).",
         dest="theme",
@@ -266,7 +266,7 @@ def validate_args(args: argparse.Namespace) -> None:
 
         if args.dirs_first:
             print(
-                "Warning: --dirs-first has no effect when --dirs-only (-d) is active.",
+                "Warning: --dirs-first has no effect when --folders-only (-d) is active.",
                 file=sys.stderr,
             )
 

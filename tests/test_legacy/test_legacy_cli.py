@@ -7,14 +7,14 @@ import pytest
 import sys
 from unittest.mock import MagicMock, patch, mock_open
 
-from ltree.cli import parse_args, validate_args, run, main
+from ltree._cli import parse_args, validate_args, run, main
 from ltree.core.metadata.models import FilesystemMetadata, MetadataContainer
 from ltree.core.models import Stats, TreeNode, NodeType
 
 # =======================================================================#
 # Fixture
 # =======================================================================#
-CLI_MODULE = "ltree.cli"
+CLI_MODULE = "ltree._cli"
 RENDERER_PATH = "ltree.renderers"
 
 

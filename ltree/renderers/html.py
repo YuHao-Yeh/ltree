@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 class HtmlRenderer(BaseRenderer):
     input_type = "serialized"
+    support_theme = True
 
     def __init__(self, config: TreeConfig):
         super().__init__(config)

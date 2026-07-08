@@ -55,5 +55,4 @@ def scan_tree(
     config: "TreeConfig",
     max_depth: int | None = None,
 ) -> "TreeNode" | None:
-    scanner = Scanner(config)
-    return scanner.scan(path, max_depth=max_depth)
+    return Scanner(config).scan(path, max_depth=max_depth)
