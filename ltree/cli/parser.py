@@ -6,6 +6,11 @@ from ltree import __version__
 from ltree.renderers import RENDERERS
 from ltree.cli.commands.tree import run_tree
 from ltree.cli.commands.theme import run_theme, run_theme_preview
+from ltree.cli.commands.config import (
+    run_config_show,
+    run_config_locate,
+    run_config_validate,
+)
 from ltree.core.config import TreeConfig, THEMES
 
 
@@ -41,6 +46,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     _build_tree_parser(subparsers)
     _build_theme_parser(subparsers)
+    _build_config_parser(subparsers)
 
     return parser
 
@@ -313,3 +319,54 @@ def _build_theme_parser(subparsers: argparse._SubParsersAction) -> None:
         "theme_name", choices=["emoji", "nerd", "none"], help="Theme to preview."
     )
     preview_parser.set_defaults(func=run_theme_preview)
+
+
+def _build_config_parser(subparsers: argparse._SubParsersAction) -> None:
+    config_parser = subparsers.add_parser(
+        "config",
+        help="Inspect and manage ltree configuration.",
+    )
+
+    config_sub = config_parser.add_subparsers(dest="config_command", required=True)
+
+    # ------------------------------------------------------------------
+    # config show
+    show_parser = config_sub.add_parser(
+        "show",
+        help="Show the merged configuration currently in effect.",
+    )
+    show_parser.add_argument(
+        "start_path",
+        nargs="?",
+        default=".",
+        help="Directory used to resolve configuration files.",
+    )
+    show_parser.set_defaults(func=run_config_show)
+
+    # ------------------------------------------------------------------
+    # config locate
+    locate_parser = config_sub.add_parser(
+        "locate",
+        help="Locate configuration files from the current directory upwards.",
+    )
+    locate_parser.add_argument(
+        "start_path",
+        nargs="?",
+        default=".",
+        help="Directory used to search configuration files.",
+    )
+    locate_parser.set_defaults(func=run_config_locate)
+
+    # ------------------------------------------------------------------
+    # config validate
+    validate_parser = config_sub.add_parser(
+        "validate",
+        help="Validate all discovered configuration files.",
+    )
+    validate_parser.add_argument(
+        "start_path",
+        nargs="?",
+        default=".",
+        help="Directory used to search configuration files.",
+    )
+    validate_parser.set_defaults(func=run_config_validate)

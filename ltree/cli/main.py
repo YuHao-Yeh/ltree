@@ -5,7 +5,7 @@ from ltree.cli.parser import build_parser
 
 
 def main() -> int:
-    subcommands = {"tree", "theme"}
+    subcommands = {"tree", "theme", "config"}
 
     argv = getattr(sys, "argv", [])
     if len(argv) < 2:
