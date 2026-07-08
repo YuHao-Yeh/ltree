@@ -18,10 +18,10 @@ if TYPE_CHECKING:
 
 def traverse_path(
     path: Path,
-    config: "TreeConfig",
+    config: TreeConfig,
     max_depth: int | None = None,
     curr_depth: int = 0,
-    pipeline: "MetadataPipeline" | None = None,
+    pipeline: MetadataPipeline | None = None,
     node_filter: CompositeFilter | None = None,
 ) -> TreeNode | None:
     node_filter = node_filter or CompositeFilter()

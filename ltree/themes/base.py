@@ -1,4 +1,6 @@
 # ltree/themes/base.py
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
@@ -8,9 +10,9 @@ if TYPE_CHECKING:
 
 class BaseTheme(ABC):
     @abstractmethod
-    def get_icon(self, node: "SerializedNode") -> str:
+    def get_icon(self, node: SerializedNode) -> str:
         pass
 
     @abstractmethod
-    def get_style(self, node: "SerializedNode") -> str:
+    def get_style(self, node: SerializedNode) -> str:
         pass

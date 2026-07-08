@@ -1,4 +1,6 @@
 # ltree/themes/emoji.py
+from __future__ import annotations
+
 import os
 from typing import TYPE_CHECKING
 
@@ -50,7 +52,7 @@ class EmojiTheme(BaseTheme):
         ".vscode": "💻",
     }
 
-    def get_icon(self, node: "SerializedNode") -> str:
+    def get_icon(self, node: SerializedNode) -> str:
         if node["metadata"].get("fs")["is_symlink"]:
             return "🔗 "
 
@@ -68,7 +70,7 @@ class EmojiTheme(BaseTheme):
                 icon = self.EXT_ICON.get(ext, self.DEFAULT_FILE)
         return f"{icon} "
 
-    def get_style(self, node: "SerializedNode") -> str:
+    def get_style(self, node: SerializedNode) -> str:
         fs = node["metadata"].get("fs")
         if fs["is_symlink"]:
             return "italic magenta"

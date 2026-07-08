@@ -1,4 +1,6 @@
 # ltree/themes/manager.py
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from ltree.themes.emoji import EmojiTheme
@@ -20,8 +22,8 @@ class ThemeManager:
         theme_cls = self.THEMES.get(theme_name, NoTheme)
         self.theme = theme_cls()
 
-    def get_icon(self, node: "SerializedNode") -> str:
+    def get_icon(self, node: SerializedNode) -> str:
         return self.theme.get_icon(node)
 
-    def get_style(self, node: "SerializedNode") -> str:
+    def get_style(self, node: SerializedNode) -> str:
         return self.theme.get_style(node)

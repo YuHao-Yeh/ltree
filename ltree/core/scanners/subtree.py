@@ -1,4 +1,6 @@
 # ltree/core/scanners/subtree.py
+from __future__ import annotations
+
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -9,7 +11,7 @@ if TYPE_CHECKING:
     from ltree.core.config import TreeConfig
 
 
-def count_subtree(path: Path, config: "TreeConfig") -> tuple[int, int, int]:
+def count_subtree(path: Path, config: TreeConfig) -> tuple[int, int, int]:
     cache_key = str(path)
 
     if cache_key in config._subtree_cache:
