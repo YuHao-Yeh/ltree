@@ -70,4 +70,6 @@ class TextRenderer(BaseRenderer):
     def _format_row(self, row: RenderRow, prefix: str, tree_prefix: str) -> str:
         meta_prefix = self._format_metadata_prefix(row)
         branch_and_name = f"{prefix}{tree_prefix}{row.icon}{row.name}"
+        if row.is_dir:
+            branch_and_name += "/"
         return f"{meta_prefix}{branch_and_name}"

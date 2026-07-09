@@ -126,7 +126,9 @@ class RichRenderer(BaseRenderer):
         line.append(f"{prefix}{tree_prefix}", style="dim")
         line.append(f"{row.icon}")
 
-        name_style = "bold cyan" if row.is_dir else "white"
-        line.append(row.name, style=name_style)
+        if row.is_dir:
+            line.append(row.name + "/", style="bold cyan")
+        else:
+            line.append(row.name, style="white")
 
         return line

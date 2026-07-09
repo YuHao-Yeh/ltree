@@ -1,4 +1,4 @@
-# ltree/core/cli/parser.py
+# ltree/cli/parser.py
 import argparse
 import re
 
