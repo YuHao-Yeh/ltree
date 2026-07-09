@@ -50,10 +50,10 @@ class TextRenderer(BaseRenderer):
             ellipsis_indent = indent + ("    " if is_last else "│   ")
             stats = node["stats"]
             if self.config.folders_only:
-                text = f"... ({stats["hidden_dirs"]} dirs)"
+                text = f"... ({stats['hidden_dirs']} dirs)"
             else:
                 text = (
-                    f"... ({stats["hidden_dirs"]} dirs, {stats["hidden_files"]} files)"
+                    f"... ({stats['hidden_dirs']} dirs, {stats['hidden_files']} files)"
                 )
             write_line(file, f"{ellipsis_indent}└── {text}")
             return
@@ -120,7 +120,7 @@ class MarkdownRenderer(BaseRenderer):
             )
 
         is_dir = bool(node["type"] == NodeType.DIR.value)
-        name_display = f"**{node["name"]}/**" if is_dir else f"`{node["name"]}`"
+        name_display = f"**{node['name']}/**" if is_dir else f"`{node['name']}`"
         write_line(file, f"{indent}- {icon}{size_str}{name_display}")
 
         # Truncated
@@ -128,10 +128,10 @@ class MarkdownRenderer(BaseRenderer):
             indent = "  " * (depth + 1)
             stats = node["stats"]
             if self.config.folders_only:
-                text = f"... ({stats["hidden_dirs"]} dirs)"
+                text = f"... ({stats['hidden_dirs']} dirs)"
             else:
                 text = (
-                    f"... ({stats["hidden_dirs"]} dirs, {stats["hidden_files"]} files)"
+                    f"... ({stats['hidden_dirs']} dirs, {stats['hidden_files']} files)"
                 )
             write_line(file, f"{indent}- {text}")
             return

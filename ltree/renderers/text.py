@@ -42,7 +42,7 @@ class TextRenderer(BaseRenderer):
             for detail in row.details:
                 meta_width = len(self._format_metadata_prefix(row))
                 sub_indent = prefix + ("    " if is_last else "│   ")
-                lines.append(f"{' ' * meta_width}" f"{sub_indent}" f"└── {detail.text}")
+                lines.append(f"{' ' * meta_width}{sub_indent}└── {detail.text}")
 
         new_prefix = prefix if is_root else prefix + ("    " if is_last else "│   ")
         children = node.children

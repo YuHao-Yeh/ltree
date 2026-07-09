@@ -61,10 +61,10 @@ class RichRenderer(BaseRenderer):
         if node["is_truncated"] and self.config.show_ellipsis:
             stats = node["stats"]
             if self.config.folders_only:
-                text = f"... ({stats["hidden_dirs"]} dirs)"
+                text = f"... ({stats['hidden_dirs']} dirs)"
             else:
                 text = (
-                    f"... ({stats["hidden_dirs"]} dirs, {stats["hidden_files"]} files)"
+                    f"... ({stats['hidden_dirs']} dirs, {stats['hidden_files']} files)"
                 )
 
             rich_tree.add(Text(text, style="yellow"))

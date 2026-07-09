@@ -26,16 +26,16 @@ def print_stats(node: SerializedNode, config: TreeConfig, fmt: str = "text") -> 
         console = Console()
         console.print(f"\n[bold blue]Summary[/]{size_str}:", style="none")
         console.print(
-            f"  Visible: [bold cyan]{s["visible_dirs"]:>3}[/] directories, "
-            f"[bold cyan]{s["visible_files"]:>3}[/] files"
+            f"  Visible: [bold cyan]{s['visible_dirs']:>3}[/] directories, "
+            f"[bold cyan]{s['visible_files']:>3}[/] files"
         )
         console.print(
-            f"  Total  : [bold magenta]{s["total_dirs"]:>3}[/] directories, "
-            f"[bold magenta]{s["total_files"]:>3}[/] files"
+            f"  Total  : [bold magenta]{s['total_dirs']:>3}[/] directories, "
+            f"[bold magenta]{s['total_files']:>3}[/] files"
         )
     else:
         print(f"\nSummary{size_str}:")
         print(
-            f"Visible: {s["visible_dirs"]:>3} directories, {s["visible_files"]:>3} files"
+            f"Visible: {s['visible_dirs']:>3} directories, {s['visible_files']:>3} files"
         )
-        print(f"Total  : {s["total_dirs"]:>3} directories, {s["total_files"]:>3} files")
+        print(f"Total  : {s['total_dirs']:>3} directories, {s['total_files']:>3} files")
