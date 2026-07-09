@@ -37,13 +37,13 @@ def test_get_version_fallback_to_pyproject_toml_malformed_version():
     with patch(meta_version, side_effect=Exception("Metadata Error")):
         with patch.object(Path, "exists", return_value=True):
             with patch("builtins.open", mock_open(read_data=mock_toml_content)):
-                assert _get_version() == "0.2.1"
+                assert _get_version() == "0.3.0"
 
 
 def test_get_version_fallback_to_static_default():
     with patch(meta_version, side_effect=Exception("Generic Error")):
         with patch.object(Path, "exists", return_value=False):
-            assert _get_version() == "0.2.1"
+            assert _get_version() == "0.3.0"
 
 
 def test_get_version_fallback_climbing_exception_handling():
@@ -51,4 +51,4 @@ def test_get_version_fallback_climbing_exception_handling():
         with patch.object(
             Path, "resolve", side_effect=OSError("Disk resolution error")
         ):
-            assert _get_version() == "0.2.1"
+            assert _get_version() == "0.3.0"
