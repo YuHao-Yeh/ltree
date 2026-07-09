@@ -1,8 +1,9 @@
 # ltree/core/models.py
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Self
 
 from ltree.core.metadata.models import MetadataContainer, FilesystemMetadata
 
@@ -29,14 +30,14 @@ class Stats:
         return self.visible_files + self.hidden_files
 
     @classmethod
-    def empty(cls) -> "Stats":
+    def empty(cls) -> Stats:
         return cls()
 
     def reset_visible(self):
         self.visible_dirs = 0
         self.visible_files = 0
 
-    def __add__(self, other: "Stats") -> "Stats":
+    def __add__(self, other: Stats) -> Stats:
         return Stats(
             visible_dirs=self.visible_dirs + other.visible_dirs,
             visible_files=self.visible_files + other.visible_files,
@@ -45,7 +46,7 @@ class Stats:
             hidden_size=self.hidden_size + other.hidden_size,
         )
 
-    def __iadd__(self, other: "Stats") -> Self:
+    def __iadd__(self, other: Stats) -> Stats:
         self.visible_dirs += other.visible_dirs
         self.visible_files += other.visible_files
         self.hidden_dirs += other.hidden_dirs
@@ -53,7 +54,7 @@ class Stats:
         self.hidden_size += other.hidden_size
         return self
 
-    def __sub__(self, other: "Stats") -> "Stats":
+    def __sub__(self, other: Stats) -> Stats:
         return Stats(
             visible_dirs=self.visible_dirs - other.visible_dirs,
             visible_files=self.visible_files - other.visible_files,
@@ -62,7 +63,7 @@ class Stats:
             hidden_size=self.hidden_size - other.hidden_size,
         )
 
-    def __isub__(self, other: "Stats") -> Self:
+    def __isub__(self, other: Stats) -> Stats:
         self.visible_dirs -= other.visible_dirs
         self.visible_files -= other.visible_files
         self.hidden_dirs -= other.hidden_dirs
