@@ -1,7 +1,14 @@
+# ltree/themes/nerd.py
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING
 
 from .base import BaseTheme
-from ..core.models import TreeNode
+from ltree.core.models import NodeType
+
+if TYPE_CHECKING:
+    from ltree.serializers.types import SerializedNode
 
 
 class NerdTheme(BaseTheme):
@@ -43,28 +50,30 @@ class NerdTheme(BaseTheme):
         ".vscode": "",
     }
 
-    def get_icon(self, node: TreeNode) -> str:
-        if node.is_symlink:
+    def get_icon(self, node: SerializedNode) -> str:
+        if node["metadata"].get("fs")["is_symlink"]:
             return " "
 
-        if node.is_dir:
-            icon = self.DIR_ICON.get(node.name, self.DEFAULT_FOLDER)
+        if node["type"] == "directory":
+            icon = self.DIR_ICON.get(node["name"], self.DEFAULT_FOLDER)
         else:
-            if node.name in self.FILE_ICON:
-                icon = self.FILE_ICON[node.name]
+            name = node["name"]
+            if name in self.FILE_ICON:
+                icon = self.FILE_ICON[name]
             else:
-                ext = node.extension
+                ext = node["metadata"].get("fs")["extension"]
                 if not ext:
-                    _, file_ext = os.path.splitext(node.name)
+                    _, file_ext = os.path.splitext(name)
                     ext = file_ext.lower()
                 icon = self.EXT_ICON.get(ext, self.DEFAULT_FILE)
         return f"{icon} "
 
-    def get_style(self, node: TreeNode) -> str:
-        if node.is_symlink:
+    def get_style(self, node: SerializedNode) -> str:
+        fs = node["metadata"].get("fs")
+        if fs["is_symlink"]:
             return "italic magenta"
-        if node.is_dir:
+        if node["type"] == NodeType.DIR.value:
             return "bold cyan"
-        if node.is_executable:
+        if fs["is_executable"]:
             return "bold green"
         return "white"

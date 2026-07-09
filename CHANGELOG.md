@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-09
+
+### Added
+
+- **Command-Based CLI**: Replaced the monolithic CLI with dedicated `tree`, `theme`, and `config` subcommands.
+- **Serializer Layer**: Added an intermediate serialization stage between tree models and renderers.
+- **Exporter Layer**: Added a standalone exporter abstraction for console and file outputs.
+- **Provider-Based Metadata Pipeline**: Modularized metadata collection with extensible providers for filesystem, Git, timestamps, code, and project information.
+- **Unified Matching Rules**: Added centralized include/exclude rules with consistent glob pattern support.
+
+### Changed
+
+- **Layered Architecture**: Decoupled the core workflow into Configuration → Scanner → Serializer → Renderer → Exporter.
+- **Scanner Refactoring**: Split the scanning engine into dedicated traversal, filtering, sorting, aggregation, and subtree components.
+- **Configuration System**: Simplified configuration loading, validation, and precedence resolution.
+- **Project Structure**: Reorganized the codebase into smaller, well-defined modules with clearer responsibilities.
+- **Test Suite**: Expanded and reorganized tests to match the new modular architecture.
+
+### Removed
+
+- **Legacy CLI**: Removed the previous monolithic CLI implementation.
+- **Legacy Scanner Pipeline**: Removed obsolete scanning and rendering components replaced by the new modular architecture.
+
 ## [0.2.1] - 2026-05-26
 
 ### Fixed
@@ -41,7 +64,8 @@ All notable changes to this project will be documented in this file.
 - **Display Configurations**: Included toggles for depth limit (`-L`), full path prefix, colored output, directory-first listing, and classic or human-readable file sizes.
 - **Theme Support**: Integrated initial support for Emoji, Nerd Font, and Plain Text (none) icon themes.
 
-[Unreleased]: https://github.com/YuHao-Yeh/ltree/compare/v0.2.1...HEAD
-[0.2.0]: https://github.com/YuHao-Yeh/ltree/compare/v0.2.0...v0.2.1
+[Unreleased]: https://github.com/YuHao-Yeh/ltree/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/YuHao-Yeh/ltree/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/YuHao-Yeh/ltree/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/YuHao-Yeh/ltree/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/YuHao-Yeh/ltree/releases/tag/v0.1.0

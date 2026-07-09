@@ -8,17 +8,31 @@ repos:
     rev: v4.6.0
     hooks:
       - id: trailing-whitespace
+        description: Trims trailing whitespace from files.
       - id: end-of-file-fixer
+        description: Ensures that a file is either empty, or ends with one newline.
       - id: check-yaml
+        description: Attempts to load all yaml files to verify syntax.
       - id: check-toml
+        description: Attempts to load all toml files to verify syntax.
+      - id: check-json
+        description: Attempts to load all json files to verify syntax (covers package.json and .ltreerc).
       - id: check-added-large-files
+        description: Prevents giant files from being committed.
+      - id: check-merge-conflict
+        description: Checks for files that contain merge conflict strings.
+      - id: check-case-conflict
+        description: Helps locate files with names that would conflict on a case-insensitive filesystem.
+
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4
+    rev: v0.9.3
     hooks:
       - id: ruff
         args: [ --fix ]
+        description: Run Ruff linter and auto-fix safe rules.
       - id: ruff-format
+        description: Run Ruff formatter.
 
   - repo: local
     hooks:
@@ -29,6 +43,7 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [ pre-commit ]
+        description: Ensures all unit tests pass before staging.
 
       - id: vscode-compile
         name: Compile VS Code Extension (TypeScript)
@@ -37,3 +52,4 @@ repos:
         files: ^ltree-vscode/src/
         pass_filenames: false
         stages: [ pre-commit ]
+        description: Compiles TypeScript files inside VS Code extension to guarantee syntax validity.

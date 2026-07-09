@@ -1,6 +1,6 @@
 [project]
 name = "ltree-cli"
-version = "0.2.1"
+version = "0.3.0"
 description = "A customizable tree-like directory viewer with filtering, depth control, and statistics"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -43,7 +43,7 @@ dev = [
 # Execution Scripts
 # =====================================================================
 [project.scripts]
-ltree = "ltree.cli:main"
+ltree = "ltree.cli.main:main"
 
 # =====================================================================
 # Build System Configuration
@@ -75,8 +75,10 @@ show_missing = true
 fail_under = 80
 exclude_lines = [
     "if __name__ == \"__main__\"",
+    "if TYPE_CHECKING:",
     "pragma: no cover",
     "raise NotImplementedError",
     "@abstractmethod",
     "@abc.abstractmethod",
+    "Protocol",
 ]
