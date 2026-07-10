@@ -5,7 +5,7 @@ import os
 import pytest
 from ltree.core.utils import (
     write_line,
-    get_rel_path,
+    relative_path,
     format_size_classic,
 )
 
@@ -56,28 +56,28 @@ def base_args():
 
 
 # =======================================================================#
-# Test: get_rel_path
+# Test: relative_path
 # =======================================================================#
-def test_get_rel_path_logic():
+def test_relative_path_logic():
     base = os.sep + os.path.join("Users", "user", "project")
     src = os.sep + os.path.join("Users", "user", "project", "src")
     fp = os.sep + os.path.join("Users", "user", "project", "src", "utils", "helper.py")
 
     # Case A: same path
-    assert get_rel_path(base, base) == "."
+    assert relative_path(base, base) == "."
 
     # Case B: sub-directories
-    assert get_rel_path(src, base) == "src"
+    assert relative_path(src, base) == "src"
 
     # Case C: deep archives
-    assert get_rel_path(fp, base) == "src/utils/helper.py"
+    assert relative_path(fp, base) == "src/utils/helper.py"
 
 
-def test_get_rel_path_with_trailing_sep():
+def test_relative_path_with_trailing_sep():
     base = os.path.join("home", "user", "project")
     full = os.path.join("home", "user", "project", "data", "db.sqlite")
 
-    res = get_rel_path(full, base)
+    res = relative_path(full, base)
     assert res == "data/db.sqlite"
     assert not res.startswith(os.sep)
 

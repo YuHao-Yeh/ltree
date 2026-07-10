@@ -9,10 +9,11 @@ from ltree.core.scanners.filters import (
     ForceIncludeFilter,
     GitignoreFilter,
     RegexFilter,
-    DefaultExcludeFilter,
+    RuleFilter,
     HiddenFilter,
     CompositeFilter,
 )
+from ltree.core.scanners.models import FilterContext as FCTX
 
 
 # =======================================================================#
@@ -21,7 +22,7 @@ from ltree.core.scanners.filters import (
 def test_force_include_filter():
     f = ForceIncludeFilter()
     config = TreeConfig()
-    assert f.should_exclude(Path("src/main.py"), False, config) is False
+    assert f.should_exclude(FCTX(Path("src/main.py"), False, config)) is False
 
 
 # =======================================================================#
@@ -33,15 +34,19 @@ def test_gitignore_filter():
     config.root_path = "/dummy/repo"
 
     # Case 1: no gitignore spec is loaded
-    assert f.should_exclude(Path("/dummy/repo/file.txt"), False, config) is False
+    assert f.should_exclude(FCTX(Path("/dummy/repo/file.txt"), False, config)) is False
 
     # Case 2: gitignore
     config.gitignore_spec = pathspec.PathSpec.from_lines(
         "gitignore", ["*.log", "node_modules/"]
     )
-    assert f.should_exclude(Path("/dummy/repo/error.log"), False, config) is True
-    assert f.should_exclude(Path("/dummy/repo/node_modules"), True, config) is True
-    assert f.should_exclude(Path("/dummy/repo/src/main.py"), False, config) is False
+    assert f.should_exclude(FCTX(Path("/dummy/repo/error.log"), False, config)) is True
+    assert (
+        f.should_exclude(FCTX(Path("/dummy/repo/node_modules"), True, config)) is True
+    )
+    assert (
+        f.should_exclude(FCTX(Path("/dummy/repo/src/main.py"), False, config)) is False
+    )
 
 
 # =======================================================================#
@@ -53,20 +58,22 @@ def test_regex_filter():
     config.root_path = "/dummy/repo"
 
     # Case 1: no regex rule is set
-    assert f.should_exclude(Path("/dummy/repo/file.txt"), False, config) is False
+    assert f.should_exclude(FCTX(Path("/dummy/repo/file.txt"), False, config)) is False
 
     # Case 2: regex exclusion
     config.regex_exclude_patterns = [re.compile(r"temp_\d+"), re.compile(r"\.tmp$")]
-    assert f.should_exclude(Path("/dummy/repo/temp_123/data"), True, config) is True
-    assert f.should_exclude(Path("/dummy/repo/cache.tmp"), False, config) is True
-    assert f.should_exclude(Path("/dummy/repo/template"), False, config) is False
+    assert (
+        f.should_exclude(FCTX(Path("/dummy/repo/temp_123/data"), True, config)) is True
+    )
+    assert f.should_exclude(FCTX(Path("/dummy/repo/cache.tmp"), False, config)) is True
+    assert f.should_exclude(FCTX(Path("/dummy/repo/template"), False, config)) is False
 
 
 # =======================================================================#
-# Test: DefaultExcludeFilter
+# Test: RuleFilter
 # =======================================================================#
 def test_default_exclude_filter():
-    f = DefaultExcludeFilter()
+    f = RuleFilter()
     config = TreeConfig()
 
     config.exclude.add_pattern("__pycache__")
@@ -77,23 +84,23 @@ def test_default_exclude_filter():
     config.exclude.add_pattern("debug_*")
 
     # 1. directory
-    assert f.should_exclude(Path("__pycache__"), True, config) is True
-    assert f.should_exclude(Path("src"), True, config) is False
+    assert f.should_exclude(FCTX(Path("__pycache__"), True, config)) is True
+    assert f.should_exclude(FCTX(Path("src"), True, config)) is False
 
     # 2. file
-    assert f.should_exclude(Path(".DS_Store"), False, config) is True
+    assert f.should_exclude(FCTX(Path(".DS_Store"), False, config)) is True
 
     # 3. ext
-    assert f.should_exclude(Path("error.log"), False, config) is True
+    assert f.should_exclude(FCTX(Path("error.log"), False, config)) is True
 
     # 4. prefix
-    assert f.should_exclude(Path("tmp_cache"), False, config) is True
-    assert f.should_exclude(Path("tmp_folder"), True, config) is True
+    assert f.should_exclude(FCTX(Path("tmp_cache"), False, config)) is True
+    assert f.should_exclude(FCTX(Path("tmp_folder"), True, config)) is True
 
     # 5. glob
-    assert f.should_exclude(Path("data.bak"), False, config) is True
-    assert f.should_exclude(Path("debug_logs.txt"), False, config) is True
-    assert f.should_exclude(Path("release.txt"), False, config) is False
+    assert f.should_exclude(FCTX(Path("data.bak"), False, config)) is True
+    assert f.should_exclude(FCTX(Path("debug_logs.txt"), False, config)) is True
+    assert f.should_exclude(FCTX(Path("release.txt"), False, config)) is False
 
 
 # =======================================================================#
@@ -105,12 +112,12 @@ def test_hidden_filter():
 
     # Case 1: show_all = True
     config.show_all = True
-    assert f.should_exclude(Path(".env"), False, config) is False
+    assert f.should_exclude(FCTX(Path(".env"), False, config)) is False
 
     # Case 2: show_all = False
     config.show_all = False
-    assert f.should_exclude(Path(".env"), False, config) is True
-    assert f.should_exclude(Path("src"), True, config) is False
+    assert f.should_exclude(FCTX(Path(".env"), False, config)) is True
+    assert f.should_exclude(FCTX(Path("src"), True, config)) is False
 
 
 # =======================================================================#
@@ -136,28 +143,28 @@ def test_composite_filter():
     config.exclude.add_pattern("debug_*")
 
     # 1. Directory
-    assert f.should_exclude(Path("__pycache__"), True, config) is True
-    assert f.should_exclude(Path("src"), True, config) is False
+    assert f.should_exclude(FCTX(Path("__pycache__"), True, config)) is True
+    assert f.should_exclude(FCTX(Path("src"), True, config)) is False
 
     # 2. File
-    assert f.should_exclude(Path(".DS_Store"), False, config) is True
+    assert f.should_exclude(FCTX(Path(".DS_Store"), False, config)) is True
 
     # 3. Extension
-    assert f.should_exclude(Path("error.log"), False, config) is True
+    assert f.should_exclude(FCTX(Path("error.log"), False, config)) is True
 
     # 4. prefix
-    assert f.should_exclude(Path("tmp_cache"), False, config) is True
-    assert f.should_exclude(Path("tmp_folder"), True, config) is True
+    assert f.should_exclude(FCTX(Path("tmp_cache"), False, config)) is True
+    assert f.should_exclude(FCTX(Path("tmp_folder"), True, config)) is True
 
     # 5. Glob Patterns
-    assert f.should_exclude(Path("data.bak"), False, config) is True
-    assert f.should_exclude(Path("debug_logs.txt"), False, config) is True
-    assert f.should_exclude(Path("release.txt"), False, config) is False
+    assert f.should_exclude(FCTX(Path("data.bak"), False, config)) is True
+    assert f.should_exclude(FCTX(Path("debug_logs.txt"), False, config)) is True
+    assert f.should_exclude(FCTX(Path("release.txt"), False, config)) is False
 
     config.include.add_pattern("build/")
     config.include.add_pattern("error.log")
     config.include.add_pattern(".env")
 
-    assert f.should_exclude(Path("build"), True, config) is False
-    assert f.should_exclude(Path("error.log"), False, config) is False
-    assert f.should_exclude(Path(".env"), False, config) is False
+    assert f.should_exclude(FCTX(Path("build"), True, config)) is False
+    assert f.should_exclude(FCTX(Path("error.log"), False, config)) is False
+    assert f.should_exclude(FCTX(Path(".env"), False, config)) is False
