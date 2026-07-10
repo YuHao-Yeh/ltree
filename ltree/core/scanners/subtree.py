@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ltree.core.scanners.filters import CompositeFilter
+from ltree.core.scanners.models import FilterContext as FCTX
 
 if TYPE_CHECKING:
     from ltree.core.config import TreeConfig
@@ -31,7 +32,7 @@ def count_subtree(path: Path, config: TreeConfig) -> tuple[int, int, int]:
         for dirname in dirs:
             dir_path = root_path / dirname
 
-            if node_filter.should_exclude(dir_path, True, config):
+            if node_filter.should_exclude(FCTX(dir_path, True, config)):
                 continue
 
             total_dirs += 1
@@ -42,7 +43,7 @@ def count_subtree(path: Path, config: TreeConfig) -> tuple[int, int, int]:
         for filename in files:
             file_path = root_path / filename
 
-            if node_filter.should_exclude(file_path, False, config):
+            if node_filter.should_exclude(FCTX(file_path, False, config)):
                 continue
 
             total_files += 1

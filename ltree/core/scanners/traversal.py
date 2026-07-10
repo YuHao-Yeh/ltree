@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from ltree.core.models import TreeNode, NodeType
 from ltree.core.scanners.filters import CompositeFilter
+from ltree.core.scanners.models import FilterContext as FCTX
 from ltree.core.scanners.sorting import sort_entries
 from ltree.core.scanners.subtree import count_subtree
 
@@ -53,7 +54,7 @@ def traverse_path(
                 entry_path = Path(entry.path)
                 is_dir = entry.is_dir()
 
-                if node_filter.should_exclude(entry_path, is_dir, config):
+                if node_filter.should_exclude(FCTX(entry_path, is_dir, config)):
                     continue
 
                 # visible file

@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
+    from os import PathLike
     from typing import TextIO
 
 
-def get_rel_path(target_path: str, base_path: str):
+def relative_path(target_path: str | PathLike[str], base_path: str | PathLike[str]):
     abs_target = os.path.abspath(target_path)
     abs_base = os.path.abspath(base_path)
 
