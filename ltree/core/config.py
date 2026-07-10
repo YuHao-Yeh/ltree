@@ -1,12 +1,10 @@
 # ltree/core/config.py
 from __future__ import annotations
 
-import argparse
 import fnmatch
 import json
 import os
 import pathspec
-import re
 import sys
 from dataclasses import dataclass, field
 
@@ -82,26 +80,6 @@ class MatchRules:
 class TreeConfig:
     def __init__(self):
         self.root_path: str = ""
-        # ------------------------------------------------------------- #
-        # legacy vars:
-        self.exclude_dirs: set = {
-            "__pycache__",
-            ".git",
-            ".venv",
-            "env",
-            "venv",
-            ".idea",
-            ".mypy_cache",
-            "python",
-            "media",
-        }
-        self.exclude_files: set = {".DS_Store", "error*"}
-        self.exclude_exts: set = set()
-        self.exclude_prefixes: set = set()
-        self.added_items: set = set()
-        self._exact_files: set = set()
-        self._pattern_files: list = []
-        # ------------------------------------------------------------- #
 
         self.exclude: MatchRules = MatchRules()
         self.include: MatchRules = MatchRules()
@@ -143,18 +121,6 @@ class TreeConfig:
         self.show_time: bool = True
         self.show_code: bool = False
         self.show_project: bool = True
-
-        self._prepare_patterns()  # legacy: ready to remove
-
-    def _prepare_patterns(self) -> None:
-        self._exact_files.clear()
-        self._pattern_files.clear()
-
-        for pattern in self.exclude_files:
-            if "*" in pattern or "?" in pattern:
-                self._pattern_files.append(pattern)
-            else:
-                self._exact_files.add(pattern)
 
     def load_config_file(self, start_path: str) -> None:
         search_path = os.path.abspath(start_path)
@@ -223,105 +189,12 @@ class TreeConfig:
             self.use_gitignore = not config_dict["no_ignore"]
 
         # --- 2. Exclusion and Inclusion Lists ---
-        # legacy part:
-        if "ex_dirs" in config_dict and isinstance(config_dict["ex_dirs"], list):
-            self.exclude_dirs.update(config_dict["ex_dirs"])
-
-        if "ex_files" in config_dict and isinstance(config_dict["ex_files"], list):
-            self.exclude_files.update(config_dict["ex_files"])
-
-        if "ex_ext" in config_dict and isinstance(config_dict["ex_ext"], list):
-            self.exclude_exts.update(config_dict["ex_ext"])
-
-        if "ex_prefix" in config_dict and isinstance(config_dict["ex_prefix"], list):
-            self.exclude_prefixes.update(config_dict["ex_prefix"])
-
-        if "add_dirs" in config_dict and isinstance(config_dict["add_dirs"], list):
-            for d in config_dict["add_dirs"]:
-                self.exclude_dirs.discard(d)
-                self.added_items.add(d)
-
-        if "add_files" in config_dict and isinstance(config_dict["add_files"], list):
-            for f in config_dict["add_files"]:
-                self.exclude_files.discard(f)
-                self.added_items.add(f)
-        # ------------------------------------------------------------- #
-        # new:
-        if "ex_dirs" in config_dict and isinstance(config_dict["ex_dirs"], list):
-            for d in config_dict["ex_dirs"]:
-                self.exclude.add_pattern(d + "/")
-        if "ex_files" in config_dict and isinstance(config_dict["ex_files"], list):
-            for f in config_dict["ex_files"]:
-                self.exclude.add_pattern(f)
-
-        if "add_dirs" in config_dict and isinstance(config_dict["add_dirs"], list):
-            for d in config_dict["add_dirs"]:
-                self.include.add_pattern(d + "/")
-        if "add_files" in config_dict and isinstance(config_dict["add_files"], list):
-            for f in config_dict["add_files"]:
-                self.include.add_pattern(f)
-
-    # legacy func
-    def apply_args(self, args: argparse.Namespace) -> None:
-        # preset profile
-        start_path = getattr(args, "start_path", ".")
-        self.load_config_file(start_path)
-
-        # gitignore
-        self.use_gitignore = not args.no_ignore
-
-        # regex
-        for pattern in args.regex_exclude:
-            try:
-                self.regex_exclude_patterns.append(re.compile(pattern))
-            except re.error as e:
-                print(f"Warning: Invalid regex '{pattern}': {e}")
-
-        # include
-        for dir in args.add_dirs:
-            self.exclude_dirs.discard(dir)
-            self.added_items.add(dir)
-        for file in args.add_files:
-            self.exclude_files.discard(file)
-            self.added_items.add(file)
-
-        # exclude
-        for dir in args.ex_dirs:
-            self.exclude_dirs.add(dir)
-        for file in args.ex_files:
-            self.exclude_files.add(file)
-
-        # prefix, ext
-        for ext in args.ex_ext:
-            self.exclude_exts.add(ext)
-        for pre in args.ex_prefix:
-            self.exclude_prefixes.add(pre)
-
-        # merge CLI parameters
-        if args.color:
-            self.use_color = True
-        if args.show_size:
-            self.show_size = True
-        if args.human_readable:
-            self.human_readable = True
-        if args.show_all:
-            self.show_all = True
-        if args.folders_only:
-            self.folders_only = True
-        if args.full_path:
-            self.full_path = True
-        if args.dirs_first:
-            self.dirs_first = True
-        if args.show_ellipsis:
-            self.show_ellipsis = True
-
-        if any(arg in sys.argv for arg in ["--theme"]):
-            self.theme = args.theme
-
-        if args.output != "-":
-            self.use_color = False
-
-        self._prepare_patterns()
+        if "exclude" in config_dict and isinstance(config_dict["exclude"], list):
+            for d in config_dict["exclude"]:
+                self.exclude.add_pattern(d)
+        if "include" in config_dict and isinstance(config_dict["include"], list):
+            for d in config_dict["include"]:
+                self.include.add_pattern(d)
 
     def load_gitignore(self, root_path: str):
         if not self.use_gitignore:

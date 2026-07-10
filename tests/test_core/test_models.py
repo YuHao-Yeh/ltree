@@ -5,8 +5,6 @@ from ltree.core.models import Stats
 # ======================================================================= #
 # Tests: Stats Models & Operators
 # ======================================================================= #
-
-
 def test_stats_empty_factory():
     stats = Stats.empty()
 

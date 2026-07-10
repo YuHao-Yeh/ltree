@@ -71,6 +71,9 @@ def test_get_icon_directories_emoji():
         == f"{EmojiTheme.DEFAULT_FOLDER} "
     )
 
+    # 3. dir style
+    assert provider.get_style(make_node("emoji", ntype=NodeType.DIR)) == "bold cyan"
+
 
 def test_get_icon_files_emoji():
     provider = ThemeManager("emoji")
@@ -110,6 +113,9 @@ def test_get_icon_files_emoji():
         provider.get_icon(make_node("just_a_file", ntype=NodeType.FILE))
         == f"{EmojiTheme.DEFAULT_FILE} "
     )
+
+    # 5. file style
+    assert provider.get_style(make_node("emoji.jpg", ntype=NodeType.FILE)) == "white"
 
 
 def test_icons_symlink_and_executable_emoji():

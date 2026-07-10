@@ -41,12 +41,6 @@ def base_args():
     return argparse.Namespace(
         start_path=".",
         output="-",
-        ex_dirs=[],
-        ex_files=[],
-        ex_ext=[],
-        ex_prefix=[],
-        add_dirs=[],
-        add_files=[],
         color=False,
         show_size=False,
         full_path=False,
