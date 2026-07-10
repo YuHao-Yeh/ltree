@@ -17,6 +17,7 @@ repos:
         description: Attempts to load all toml files to verify syntax.
       - id: check-json
         description: Attempts to load all json files to verify syntax (covers package.json and .ltreerc).
+        exclude: ^ltree-vscode/tsconfig\.json$
       - id: check-added-large-files
         description: Prevents giant files from being committed.
       - id: check-merge-conflict
