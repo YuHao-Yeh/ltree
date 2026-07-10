@@ -110,7 +110,7 @@ def test_traverse_path_dir_with_pipeline(test_dir):
 
 def test_traverse_path_exclustion(test_dir):
     config = TreeConfig()
-    config.exclude_files.add("file3.txt")
+    config.exclude.add_pattern("file3.txt")
 
     node = traverse_path(test_dir, config)
 

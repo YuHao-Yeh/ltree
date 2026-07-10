@@ -31,12 +31,6 @@ def test_build_config_standard_args():
         show_ellipsis=True,
         gitignore=True,
         regex_exclude=["temp_\\d+", compiled_pattern, raw_pattern_str],
-        add_dirs=["__pycache__"],
-        add_files=["extra.txt"],
-        ex_dirs=["build"],
-        ex_files=["*.log"],
-        ex_ext=[".tmp"],
-        ex_prefix=["test_"],
         exclude=["build/", "secrets.txt", "*.log"],
         include=["src/", "main.py", "debug_*"],
     )
@@ -68,12 +62,6 @@ def test_build_config_standard_args():
     assert config.regex_exclude_patterns[2].pattern == r"\.bak$"
 
     # inclusion and exclusion
-    assert "__pycache__" in config.added_items
-    assert "build" in config.exclude_dirs
-    assert "*.log" in config.exclude_files
-    assert ".tmp" in config.exclude_exts
-    assert "test_" in config.exclude_prefixes
-
     assert "build" in config.exclude.literals
     assert "secrets.txt" in config.exclude.literals
     assert "*.log" in config.exclude.globs
@@ -118,12 +106,6 @@ def test_build_config_with_invalid_regex(capsys):
         show_ellipsis=False,
         gitignore=True,
         regex_exclude=["[invalid-regex+"],
-        add_dirs=[],
-        add_files=[],
-        ex_dirs=[],
-        ex_files=[],
-        ex_ext=[],
-        ex_prefix=[],
     )
 
     config = build_config(args)

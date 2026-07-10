@@ -103,33 +103,17 @@ class TreeNode:
     def is_symlink(self) -> bool:
         return self.metadata.fs.is_symlink
 
-    @is_symlink.setter
-    def is_symlink(self, value: bool) -> None:
-        self.metadata.fs.is_symlink = value
-
     @property
     def is_executable(self) -> bool:
         return self.metadata.fs.is_executable
-
-    @is_executable.setter
-    def is_executable(self, value: bool) -> None:
-        self.metadata.fs.is_executable = value
 
     @property
     def permissions(self) -> str:
         return self.metadata.fs.permissions
 
-    @permissions.setter
-    def permissions(self, value: str) -> None:
-        self.metadata.fs.permissions = value
-
     @property
     def extension(self) -> str:
         return self.metadata.fs.extension
-
-    @extension.setter
-    def extension(self, value: str) -> None:
-        self.metadata.fs.extension = value
 
     @property
     def size(self) -> int:

@@ -98,26 +98,6 @@ def _validate_output(args: argparse.Namespace) -> None:
 def _validate_filters(args: argparse.Namespace) -> None:
     # dirs-only makes file filters useless
     if args.folders_only:
-        # ------------------------------------------------------------- #
-        # legacy filter:
-        ignored = []
-
-        if args.ex_files:
-            ignored.append("--ex-files")
-
-        if args.ex_ext:
-            ignored.append("--ex-ext")
-
-        if args.add_files:
-            ignored.append("--add-files")
-
-        if ignored:
-            _warn(
-                f"File filter flags ({', '.join(ignored)}) "
-                f"have no effect when --dirs-only is enabled."
-            )
-        # ------------------------------------------------------------- #
-        # new:
         all_patterns = getattr(args, "exclude", []) + getattr(args, "include", [])
         ignored_file_patterns = [pat for pat in all_patterns if not pat.endswith("/")]
 
@@ -139,27 +119,7 @@ def _validate_filters(args: argparse.Namespace) -> None:
             _warn(f"Invalid regex '{pattern}': {exc}")
     args.regex_exclude = valid_patterns
 
-    # ----------------------------------------------------------------- #
-    # legacy filter:
-    # conflicting include / exclude directories
-    conflicting_dirs = set(args.ex_dirs) & set(args.add_dirs)
-    if conflicting_dirs:
-        _warn(
-            "Directories specified in both exclude and include: "
-            f"{sorted(conflicting_dirs)}. "
-            "Inclusion takes priority."
-        )
-
-    # conflicting include / exclude files
-    conflicting_files = set(args.ex_files) & set(args.add_files)
-    if conflicting_files:
-        _warn(
-            "Files specified in both exclude and include: "
-            f"{sorted(conflicting_files)}. "
-            "Inclusion takes priority."
-        )
-    # ----------------------------------------------------------------- #
-    # new:
+    # confliction
     conflicting_patterns = set(getattr(args, "exclude", [])) & set(
         getattr(args, "include", [])
     )

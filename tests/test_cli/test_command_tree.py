@@ -30,12 +30,6 @@ def build_args(**kwargs):
         "show_ellipsis": False,
         "gitignore": False,
         "regex_exclude": [],
-        "ex_dirs": [],
-        "ex_files": [],
-        "ex_ext": [],
-        "ex_prefix": [],
-        "add_dirs": [],
-        "add_files": [],
         "max_depth": None,
     }
     defaults.update(kwargs)

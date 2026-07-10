@@ -38,8 +38,8 @@ def test_dir(tmp_path):
 def test_count_subtree_basic_scanning(test_dir):
     config = TreeConfig()
     config.root_path = str(test_dir)
-    config.exclude_dirs = {"excluded_dir"}
-    config.exclude_files = {"file2.txt"}
+    config.exclude.add_pattern("excluded_dir")
+    config.exclude.add_pattern("file2.txt")
 
     dirs, files, size = count_subtree(test_dir, config)
 
@@ -70,7 +70,7 @@ def test_count_subtree_cache_hit(test_dir):
 def test_count_subtree_file_stat_os_error(test_dir):
     config = TreeConfig()
     config.root_path = str(test_dir)
-    config.exclude_dirs = {"excluded_dir"}
+    config.exclude.add_pattern("excluded_dir")
 
     with patch("pathlib.Path.stat", side_effect=OSError):
         dirs, files, size = count_subtree(test_dir, config)

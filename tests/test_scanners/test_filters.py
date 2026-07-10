@@ -69,36 +69,6 @@ def test_default_exclude_filter():
     f = DefaultExcludeFilter()
     config = TreeConfig()
 
-    config.exclude_dirs = {"__pycache__"}
-    config.exclude_files = {".DS_Store"}
-    config.exclude_exts = {".log"}
-    config.exclude_prefixes = {"tmp_"}
-    config._pattern_files = ["*.bak", "debug_*"]
-
-    # 1. directory
-    assert f.should_exclude(Path("__pycache__"), True, config) is True
-    assert f.should_exclude(Path("src"), True, config) is False
-
-    # 2. file
-    assert f.should_exclude(Path(".DS_Store"), False, config) is True
-
-    # 3. ext
-    assert f.should_exclude(Path("error.log"), False, config) is True
-
-    # 4. prefix
-    assert f.should_exclude(Path("tmp_cache"), False, config) is True
-    assert f.should_exclude(Path("tmp_folder"), True, config) is True
-
-    # 5. glob
-    assert f.should_exclude(Path("data.bak"), False, config) is True
-    assert f.should_exclude(Path("debug_logs.txt"), False, config) is True
-    assert f.should_exclude(Path("release.txt"), False, config) is False
-
-
-def test_default_exclude_filter_new():
-    f = DefaultExcludeFilter()
-    config = TreeConfig()
-
     config.exclude.add_pattern("__pycache__")
     config.exclude.add_pattern(".DS_Store")
     config.exclude.add_pattern(".log")
@@ -147,20 +117,6 @@ def test_hidden_filter():
 # Test: CompositeFilter
 # =======================================================================#
 def test_composite_filter():
-    config = TreeConfig()
-    config.added_items = {"src"}
-
-    f = CompositeFilter()
-
-    # Case 1: added_items
-    assert f.should_exclude(Path("src"), True, config) is False
-
-    # Case 2: common filter
-    config.exclude_files = {"secret.txt"}
-    assert f.should_exclude(Path("secret.txt"), False, config) is True
-
-
-def test_composite_filter_new():
     f = CompositeFilter()
     config = TreeConfig()
 
@@ -174,7 +130,7 @@ def test_composite_filter_new():
 
     config.exclude.add_pattern("__pycache__/")
     config.exclude.add_pattern(".DS_Store")
-    config.exclude.add_pattern(".log")
+    config.exclude.add_pattern("*.log")
     config.exclude.add_pattern("tmp_*")
     config.exclude.add_pattern("*.bak")
     config.exclude.add_pattern("debug_*")

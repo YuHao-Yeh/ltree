@@ -1,7 +1,6 @@
 # ltree/core/scanners/filters.py
 from __future__ import annotations
 
-import fnmatch
 from typing import Protocol, TYPE_CHECKING
 
 from ltree.core.utils import get_rel_path
@@ -50,25 +49,6 @@ class RegexFilter:
 
 class DefaultExcludeFilter:
     def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
-        # legacy filter:
-        name = path.name
-        if is_dir:
-            if name in config.exclude_dirs:
-                return True
-        else:
-            if name in config.exclude_files:
-                return True
-            if any(name.endswith(ext) for ext in config.exclude_exts):
-                return True
-
-        if any(name.startswith(p) for p in config.exclude_prefixes):
-            return True
-
-        if not is_dir:
-            if any(fnmatch.fnmatch(name, pattern) for pattern in config._pattern_files):
-                return True
-        # ------------------------------------------------------------- #
-        # new:
         name = path.name
         rel_path = get_rel_path(str(path), config.root_path)
         if config.exclude.matches(rel_path, name):
@@ -96,10 +76,6 @@ class CompositeFilter:
         ]
 
     def should_exclude(self, path: Path, is_dir: bool, config: TreeConfig) -> bool:
-        # legacy filter:
-        if path.name in config.added_items:
-            return False
-        # new:
         rel_path = get_rel_path(str(path), config.root_path)
         name = path.name
         if config.include.matches(rel_path, name):

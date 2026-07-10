@@ -167,8 +167,6 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         dest="folders_only",
         help="Only display directories.",
     )
-    # TODO: Consolidate into exclude (-I)
-    # new argument:
     filtering.add_argument(
         "-I",
         "--exclude",
@@ -178,40 +176,6 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         dest="exclude",
         help="Exclude files / directories (supports wildcards).",
     )
-    # ----------------------------------------------------------------- #
-    # legacy arguments:
-    filtering.add_argument(
-        "--ex-dirs",
-        action="append",
-        default=[],
-        metavar="DIR",
-        dest="ex_dirs",
-        help="Exclude directories.",
-    )
-    filtering.add_argument(
-        # "-I",
-        "--ex-files",
-        action="append",
-        default=[],
-        metavar="PATTERN",
-        dest="ex_files",
-        help="Exclude files (supports wildcards).",
-    )
-    filtering.add_argument(
-        "--ex-ext",
-        action="append",
-        default=[],
-        dest="ex_ext",
-        help="Exclude by file extension (e.g., .log).",
-    )
-    filtering.add_argument(
-        "--ex-prefix",
-        action="append",
-        default=[],
-        dest="ex_prefix",
-        help="Exclude by prefix.",
-    )
-    # ----------------------------------------------------------------- #
     filtering.add_argument(
         "--re-ex",
         type=regex_type,
@@ -221,9 +185,6 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         dest="regex_exclude",
         help="Exclude paths matching regex pattern.",
     )
-
-    # TODO: Consolidate into include (-A)
-    # new argument:
     filtering.add_argument(
         "-A",
         "--include",
@@ -233,23 +194,6 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
         dest="include",
         help="Re-include specific files / directories (supports wildcards).",
     )
-    # ----------------------------------------------------------------- #
-    # legacy arguments:
-    filtering.add_argument(
-        "--add-dirs",
-        action="append",
-        default=[],
-        dest="add_dirs",
-        help="Re-include specific directories.",
-    )
-    filtering.add_argument(
-        "--add-files",
-        action="append",
-        default=[],
-        dest="add_files",
-        help="Re-include specific files.",
-    )
-    # ----------------------------------------------------------------- #
 
     # gitignore
     filtering.add_argument(

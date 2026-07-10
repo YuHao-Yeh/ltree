@@ -168,12 +168,6 @@ ltree [path] [options]
 | `--include` | `-A` | Re-include paths previously matching an exclusion filter. |
 | `--re-ex` | | Exclude paths matching a specific Python regular expression. |
 | `--gitignore`, `--no-gitignore` | | Toggle automatic evaluation of `.gitignore` exclusion configurations. |
-| `--ex-dirs` | | *Legacy:* Exclude specific directories. |
-| `--ex-files` | | *Legacy:* Exclude files (supports wildcards like `*.log`). |
-| `--ex-ext` | | *Legacy:* Exclude by file extension (e.g., `.log`). |
-| `--ex-prefix` | | *Legacy:* Exclude items by prefix. |
-| `--add-dirs` | | *Legacy:* Re-include specific excluded directories. |
-| `--add-files` | | *Legacy:* Re-include specific excluded files. |
 
 #### Display Configurations
 | Argument | Short | Description |
