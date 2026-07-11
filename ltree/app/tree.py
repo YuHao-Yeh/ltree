@@ -6,23 +6,19 @@ from typing import TYPE_CHECKING
 
 from ltree.core.scanners.scanner import scan_tree
 from ltree.core.filters import get_default_filter_pipeline
-from ltree.serializers import TreeSerializer
-from ltree.renderers import get_renderer_class
+from ltree.renderers import registry
 
 if TYPE_CHECKING:
     from ltree.core.config import TreeConfig
     from ltree.core.models import TreeNode
     from ltree.renderers import BaseRenderer
-    from ltree.serializers.types import SerializedNode
 
 
 @dataclass(slots=True)
 class RenderResult:
     content: str
-    rtype: str
-
     root: TreeNode | None = None
-    serialized: SerializedNode | None = None
+    show_stats: bool = False
 
 
 class TreeApplication:
@@ -35,30 +31,23 @@ class TreeApplication:
         # 1. scan
         root = scan_tree(path=start_path, config=self.config, max_depth=max_depth)
         if not root:
-            return RenderResult(content="", rtype="row")
+            return RenderResult(content="", show_stats=False)
 
         # 2. filter
         tree_filter = get_default_filter_pipeline(self.config, max_depth)
         root = tree_filter.apply(root)
 
         # 3. render
-        RendererClass = get_renderer_class(fmt)
+        RendererClass = registry.get(fmt)
+        if RendererClass is None:
+            raise ValueError(f"Unknown renderer: {fmt}")
         renderer: BaseRenderer = RendererClass(self.config)
 
         # 4. serialize
-        serializer = TreeSerializer(self.config)
-        root_node = serializer.serialize(root)
-        if renderer.input_type == "serialized":
-            return RenderResult(
-                content=renderer.render(root_node),
-                rtype=renderer.input_type,
-                root=root,
-                serialized=root_node,
-            )
-        else:
-            return RenderResult(
-                content=renderer.render(root),
-                rtype=renderer.input_type,
-                root=root,
-                serialized=root_node,
-            )
+        data = renderer.prepare(root)
+        content = renderer.render(data)
+        return RenderResult(
+            content=content,
+            root=root,
+            show_stats=renderer.input_type == "row",
+        )

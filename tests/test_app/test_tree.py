@@ -1,4 +1,6 @@
-# tests/test_cli/test_app_tree.py
+# tests/test_cli/test_tree.py
+import pytest
+
 from ltree.core.config import TreeConfig
 from ltree.app.tree import TreeApplication, RenderResult
 
@@ -13,13 +15,13 @@ def test_tree_application_generate_success(tmp_path):
     result = app.generate(str(tmp_path), fmt="text")
     assert isinstance(result, RenderResult)
     assert "file1.txt" in result.content
-    assert result.rtype == "row"
+    assert result.show_stats is True
 
     # B. serialized format
     json_result = app.generate(str(tmp_path), fmt="json")
     assert isinstance(json_result, RenderResult)
     assert "file1.txt" in json_result.content
-    assert json_result.rtype == "serialized"
+    assert json_result.show_stats is False
 
 
 def test_tree_application_generate_non_existent_path(capsys):
@@ -32,4 +34,12 @@ def test_tree_application_generate_non_existent_path(capsys):
     assert "Path 'non_existent_path_999' does not exist." in captured.err
     assert isinstance(result, RenderResult)
     assert result.content == ""
-    assert result.rtype == "row"
+    assert result.show_stats is False
+
+
+def test_tree_application_generate_renderclass_error():
+    config = TreeConfig()
+    app = TreeApplication(config)
+
+    with pytest.raises(ValueError):
+        app.generate(".", fmt="abc")

@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
 
 class YamlRenderer(BaseRenderer):
+    name = "yaml"
+    aliases = []
     input_type = "serialized"
     support_theme = False
 

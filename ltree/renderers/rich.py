@@ -31,6 +31,8 @@ GIT_STYLES = {
 
 
 class RichRenderer(BaseRenderer):
+    name = "rich"
+    aliases = []
     input_type = "row"
     support_theme = True
 

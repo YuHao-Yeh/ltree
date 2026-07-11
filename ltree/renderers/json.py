@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 
 
 class JsonRenderer(BaseRenderer):
+    name = "json"
+    aliases = []
     input_type = "serialized"
     support_theme = False
 

@@ -29,5 +29,5 @@ def run_tree(args: Namespace) -> None:
             f.write(result.content + "\n")
         print(f"Directory tree written to {args.output}")
 
-    if is_console and (result.rtype == "row"):
-        print_stats(result.serialized, config, args.format)
+    if is_console and result.show_stats:
+        print_stats(result.root, config, args.format)
