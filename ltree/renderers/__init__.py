@@ -1,26 +1,16 @@
 # ltree/renderers/__init__.py
-from ltree.renderers.base import BaseRenderer
-from ltree.renderers.graphviz import GraphvizRenderer
-from ltree.renderers.html import HtmlRenderer
-from ltree.renderers.json import JsonRenderer
-from ltree.renderers.markdown import MarkdownRenderer
-from ltree.renderers.md_block import MarkdownBlockRenderer
-from ltree.renderers.rich import RichRenderer
-from ltree.renderers.row_builder import RowBuilder
-from ltree.renderers.text import TextRenderer
-from ltree.renderers.yaml import YamlRenderer
+from .base import BaseRenderer
+from .graphviz import GraphvizRenderer
+from .html import HtmlRenderer
+from .json import JsonRenderer
+from .markdown import MarkdownRenderer
+from .md_block import MarkdownBlockRenderer
+from .registry import registry
+from .rich import RichRenderer
+from .row_builder import RowBuilder
+from .text import TextRenderer
+from .yaml import YamlRenderer
 
-RENDERERS = {
-    "block": MarkdownBlockRenderer,
-    "graphviz": GraphvizRenderer,
-    "html": HtmlRenderer,
-    "json": JsonRenderer,
-    "markdown": MarkdownRenderer,
-    "md": MarkdownRenderer,
-    "rich": RichRenderer,
-    "text": TextRenderer,
-    "yaml": YamlRenderer,
-}
 
 __all__ = [
     "BaseRenderer",
@@ -33,9 +23,5 @@ __all__ = [
     "RowBuilder",
     "TextRenderer",
     "YamlRenderer",
-    "RENDERERS",
+    "registry",
 ]
-
-
-def get_renderer_class(fmt: str) -> BaseRenderer:
-    return RENDERERS.get(fmt, TextRenderer)

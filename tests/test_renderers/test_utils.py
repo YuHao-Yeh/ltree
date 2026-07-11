@@ -1,7 +1,6 @@
 # tests/test_renderers/test_utils.py
 from ltree.core.models import TreeNode, Stats, NodeType
 from ltree.core.config import TreeConfig
-from ltree.serializers import TreeSerializer
 from ltree.renderers.utils import print_stats
 
 
@@ -14,8 +13,7 @@ def test_print_stats(capsys):
 
     # normal
     config = TreeConfig()
-    node = TreeSerializer(config).serialize(root)
-    print_stats(node, config)
+    print_stats(root, config)
 
     captured = capsys.readouterr()
     assert "Summary" in captured.out
@@ -24,8 +22,7 @@ def test_print_stats(capsys):
 
     # show size
     config.show_size = True
-    node = TreeSerializer(config).serialize(root)
-    print_stats(node, config)
+    print_stats(root, config)
 
     captured = capsys.readouterr()
     assert "0 B" in captured.out
@@ -37,8 +34,7 @@ def test_print_stats_rich(capsys):
 
     # normal
     config = TreeConfig()
-    node = TreeSerializer(config).serialize(root)
-    print_stats(node, config, fmt="rich")
+    print_stats(root, config, fmt="rich")
 
     captured = capsys.readouterr()
     assert "Summary" in captured.out
@@ -47,8 +43,7 @@ def test_print_stats_rich(capsys):
 
     # show size
     config.show_size = True
-    node = TreeSerializer(config).serialize(root)
-    print_stats(node, config, fmt="rich")
+    print_stats(root, config, fmt="rich")
 
     captured = capsys.readouterr()
     assert "0 bytes" in captured.out

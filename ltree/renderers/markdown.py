@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
 
 class MarkdownRenderer(BaseRenderer):
+    name = "markdown"
+    aliases = ["md"]
     input_type = "serialized"
     support_theme = True
 

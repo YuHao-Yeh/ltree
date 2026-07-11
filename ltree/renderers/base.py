@@ -4,6 +4,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Literal, TYPE_CHECKING
 
+from ltree.serializers import TreeSerializer
 from ltree.themes.manager import ThemeManager
 
 if TYPE_CHECKING:
@@ -14,6 +15,8 @@ if TYPE_CHECKING:
 
 
 class BaseRenderer(ABC):
+    name: str = ""
+    aliases: list[str] = []
     input_type: Literal["row", "serialized"] = "serialized"
     support_theme: bool = False
 
@@ -25,8 +28,9 @@ class BaseRenderer(ABC):
     def render(self, node: SerializedNode | TreeNode, output_file: TextIO) -> None:
         pass
 
+    def prepare(self, root: TreeNode) -> TreeNode | SerializedNode:
+        if self.input_type == "serialized":
+            serializer = TreeSerializer(self.config)
+            return serializer.serialize(root)
 
-class Renderer(ABC):
-    @abstractmethod
-    def render(self, node: SerializedNode) -> str:
-        pass
+        return root

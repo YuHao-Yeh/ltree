@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 
 class MarkdownBlockRenderer(BaseRenderer):
+    name = "block"
+    aliases = []
     input_type = "row"
     support_theme = True
 

@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
 
 class HtmlRenderer(BaseRenderer):
+    name = "html"
+    aliases = []
     input_type = "serialized"
     support_theme = True
 

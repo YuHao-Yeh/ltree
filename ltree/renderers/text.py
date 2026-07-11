@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 
 class TextRenderer(BaseRenderer):
+    name = "text"
+    aliases = []
     input_type = "row"
     support_theme = True
 

@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 
 
 class GraphvizRenderer(BaseRenderer):
+    name = "graphviz"
+    aliases = []
     input_type = "serialized"
     support_theme = True
 

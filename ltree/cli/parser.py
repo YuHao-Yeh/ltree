@@ -3,7 +3,7 @@ import argparse
 import re
 
 from ltree import __version__
-from ltree.renderers import RENDERERS
+from ltree.renderers import registry
 from ltree.cli.commands.tree import run_tree
 from ltree.cli.commands.theme import run_theme, run_theme_preview
 from ltree.cli.commands.config import (
@@ -78,7 +78,7 @@ def _build_tree_parser(subparsers: argparse._SubParsersAction) -> None:
     output.add_argument(
         "-F",
         "--format",
-        choices=sorted(RENDERERS.keys()),
+        choices=registry.keys(),
         default="text",
         help="Output format (default: text).",
     )
