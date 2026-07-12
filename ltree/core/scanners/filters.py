@@ -57,10 +57,10 @@ class HiddenFilter:
 class CompositeFilter:
     def __init__(self, filters: list[NodeFilter] | None = None):
         self.filters: list[NodeFilter] = filters or [
-            GitignoreFilter(),
-            RegexFilter(),
-            RuleFilter(),
             HiddenFilter(),
+            RuleFilter(),
+            RegexFilter(),
+            GitignoreFilter(),
         ]
 
     def should_exclude(self, ctx: FilterContext) -> bool:

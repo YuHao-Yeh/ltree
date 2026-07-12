@@ -35,12 +35,11 @@ def test_metadata_pipeline_execute_success():
     pipeline.register(provider1).register(provider2)
 
     node = TreeNode(path="/dummy/path")
-    config = TreeConfig()
 
-    pipeline.execute(node, config)
+    pipeline.execute(node)
 
-    provider1.enrich.assert_called_once_with(node, config)
-    provider2.enrich.assert_called_once_with(node, config)
+    provider1.enrich.assert_called_once_with(node)
+    provider2.enrich.assert_called_once_with(node)
 
 
 def test_metadata_pipeline_execute_with_os_error():
@@ -54,12 +53,11 @@ def test_metadata_pipeline_execute_with_os_error():
     pipeline.register(provider1).register(provider2)
 
     node = TreeNode(path="/dummy/path")
-    config = TreeConfig()
 
-    pipeline.execute(node, config)
+    pipeline.execute(node)
 
-    provider1.enrich.assert_called_once_with(node, config)
-    provider2.enrich.assert_called_once_with(node, config)
+    provider1.enrich.assert_called_once_with(node)
+    provider2.enrich.assert_called_once_with(node)
 
 
 # ======================================================================= #

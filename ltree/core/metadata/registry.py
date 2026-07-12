@@ -1,4 +1,6 @@
 # ltree/core/metadata/registry.py
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from ltree.core.metadata.base import MetadataProvider
@@ -9,6 +11,7 @@ from ltree.core.metadata.time import TimeMetadataProvider
 from ltree.core.metadata.project import ProjectMetadataProvider
 
 if TYPE_CHECKING:
+    from os import stat_result
     from ltree.core.config import TreeConfig
     from ltree.core.models import TreeNode
 
@@ -17,19 +20,23 @@ class MetadataPipeline:
     def __init__(self):
         self._providers: list[MetadataProvider] = []
 
-    def register(self, provider: MetadataProvider) -> "MetadataPipeline":
+    def register(self, provider: MetadataProvider) -> MetadataPipeline:
         self._providers.append(provider)
         return self
 
-    def execute(self, node: "TreeNode", config: "TreeConfig") -> None:
+    def execute(self, node: TreeNode, /, *, stat: stat_result | None = None) -> None:
+        kwargs = {}
+        if stat is not None:
+            kwargs["stat"] = stat
+
         for provider in self._providers:
             try:
-                provider.enrich(node, config)
+                provider.enrich(node, **kwargs)
             except OSError:
                 pass
 
 
-def get_default_pipeline(config: "TreeConfig") -> MetadataPipeline:
+def get_default_pipeline(config: TreeConfig) -> MetadataPipeline:
     pipeline = MetadataPipeline()
 
     # 1. Basic file system attributes (required)

@@ -1,5 +1,6 @@
 # ltree/core/metadata/time.py
-import os
+from __future__ import annotations
+
 import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
@@ -8,7 +9,7 @@ from ltree.core.metadata.base import MetadataProvider
 from ltree.core.metadata.models import TimeMetadata
 
 if TYPE_CHECKING:
-    from ltree.core.config import TreeConfig
+    from os import stat_result
     from ltree.core.models import TreeNode
 
 
@@ -28,10 +29,10 @@ class TimeMetadataProvider(MetadataProvider):
             dt = datetime.fromtimestamp(mtime, tz=timezone.utc)
             return dt.strftime("%Y-%m-%d")
 
-    def enrich(self, node: "TreeNode", config: "TreeConfig") -> None:
+    def enrich(self, node: TreeNode, /, *, stat: stat_result | None = None) -> None:
         try:
-            st = os.lstat(node.path)
-            mtime = st.st_mtime
+            stat = stat if stat is not None else node.path.lstat()
+            mtime = stat.st_mtime
             node.metadata.time = TimeMetadata(
                 modified_timestamp=mtime,
                 modified_iso=datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(),
