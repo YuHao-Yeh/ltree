@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import stat as stat_module
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -24,42 +25,52 @@ def traverse_path(
     curr_depth: int = 0,
     pipeline: MetadataPipeline | None = None,
     node_filter: CompositeFilter | None = None,
+    *,
+    stat: os.stat_result | None = None,
 ) -> TreeNode | None:
     node_filter = node_filter or CompositeFilter()
 
-    try:
-        ntype = NodeType.DIR if path.is_dir() else NodeType.FILE
-    except OSError as e:
-        print(f"Error: Failed to scan '{path}': {e}", file=sys.stderr)
-        return None
+    if stat is None:
+        try:
+            stat = path.lstat()
+        except OSError as e:
+            print(f"Error: Failed to scan '{path}': {e}", file=sys.stderr)
+            return None
 
+    ntype = NodeType.DIR if stat_module.S_ISDIR(stat.st_mode) else NodeType.FILE
     node = TreeNode(path=path, ntype=ntype)
 
     if pipeline:
-        pipeline.execute(node, config)
+        pipeline.execute(node, stat=stat)
 
     if ntype == NodeType.FILE:
         if not pipeline:
-            try:
-                node.size = path.stat().st_size
-            except OSError:
-                node.size = 0
+            node.size = stat.st_size
         return node
 
     try:
-        with os.scandir(str(path)) as it:
+        with os.scandir(path) as it:
             sorted_entries = sort_entries(list(it), config)
 
             for entry in sorted_entries:
                 entry_path = Path(entry.path)
-                is_dir = entry.is_dir()
+
+                try:
+                    entry_stat = entry.stat(follow_symlinks=False)
+                    is_dir = stat_module.S_ISDIR(entry_stat.st_mode)
+                except OSError as e:
+                    print(
+                        f"Warning: Failed to stat '{entry.path}': {e}",
+                        file=sys.stderr,
+                    )
+                    continue
 
                 if node_filter.should_exclude(FCTX(entry_path, is_dir, config)):
                     continue
 
                 # visible file
                 if not is_dir:
-                    f_size = entry.stat().st_size
+                    f_size = entry_stat.st_size
 
                     if config.folders_only:
                         node.stats.hidden_files += 1
@@ -68,7 +79,7 @@ def traverse_path(
 
                     child = TreeNode(path=entry_path, ntype=NodeType.FILE)
                     if pipeline:
-                        pipeline.execute(child, config)
+                        pipeline.execute(child, stat=entry_stat)
                     node.children.append(child)
                     continue
 
@@ -79,7 +90,7 @@ def traverse_path(
                     child = TreeNode(path=entry_path, is_truncated=True)
 
                     if pipeline:
-                        pipeline.execute(child, config)
+                        pipeline.execute(child, stat=entry_stat)
 
                     child.stats.hidden_dirs = h_dirs
                     child.stats.hidden_files = h_files
@@ -95,6 +106,7 @@ def traverse_path(
                     curr_depth + 1,
                     pipeline,
                     node_filter,
+                    stat=entry_stat,
                 )
                 if child:
                     node.children.append(child)

@@ -5,7 +5,6 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from ltree.core.models import TreeNode, NodeType
-from ltree.core.config import TreeConfig
 from ltree.core.metadata.git import GitMetadataProvider
 from ltree.core.metadata.models import GitStatus
 
@@ -13,11 +12,6 @@ from ltree.core.metadata.models import GitStatus
 # ======================================================================= #
 # Fixtures
 # ======================================================================= #
-@pytest.fixture
-def config():
-    return TreeConfig()
-
-
 @pytest.fixture
 def provider():
     return GitMetadataProvider()
@@ -27,22 +21,22 @@ def provider():
 # Tests: GitMetadataProvider
 # ======================================================================= #
 # --- Tests: Initialization & Root Detection ---
-def test_git_metadata_provider_git_not_available(config, provider):
+def test_git_metadata_provider_git_not_available(provider):
     node = TreeNode(path="/dummy/file.txt", ntype=NodeType.FILE)
 
     with patch("subprocess.run", side_effect=FileNotFoundError):
-        provider.enrich(node, config)
+        provider.enrich(node)
 
     assert provider._git_available is False
     assert node.metadata.git is not None
     assert node.metadata.git.tracked is False
 
 
-def test_git_metadata_provider_check_git_and_find_root_os_error(config, provider):
+def test_git_metadata_provider_check_git_and_find_root_os_error(provider):
     node = TreeNode(path="/dummy/file.txt", ntype=NodeType.FILE)
 
     with patch("subprocess.run", side_effect=OSError):
-        provider.enrich(node, config)
+        provider.enrich(node)
 
     assert provider._git_available is False
     assert node.metadata.git is not None
@@ -55,13 +49,13 @@ def test_git_metadata_provider_check_git_and_find_root_already_unavailable(provi
         mock_run.assert_not_called()
 
 
-def test_git_metadata_provider_path_not_in_root(config, provider):
+def test_git_metadata_provider_path_not_in_root(provider):
     provider._repo_root = Path("/dummy/repo").resolve()
     provider._git_available = True
 
     node = TreeNode(path="/other_path/file.txt", ntype=NodeType.FILE)
 
-    provider.enrich(node, config)
+    provider.enrich(node)
     assert node.metadata.git is not None
     assert node.metadata.git.tracked is False
 
@@ -72,7 +66,7 @@ def test_git_metadata_provider_is_inside_repo_no_repo_root(provider):
 
 
 # --- Tests: Porcelain Status Parsing & Cache Loading ---
-def test_git_metadata_provider_subprocess_error(config, provider):
+def test_git_metadata_provider_subprocess_error(provider):
     node = TreeNode(path="/dummy/file.txt", ntype=NodeType.FILE)
 
     def mock_subprocess_run(cmd, **kwargs):
@@ -83,13 +77,13 @@ def test_git_metadata_provider_subprocess_error(config, provider):
         raise subprocess.SubprocessError("Git error")
 
     with patch("subprocess.run", side_effect=mock_subprocess_run):
-        provider.enrich(node, config)
+        provider.enrich(node)
 
     assert provider._git_available is True
     assert node.metadata.git is not None
 
 
-def test_git_metadata_provider_load_git_status_cache_subprocess_error(config, provider):
+def test_git_metadata_provider_load_git_status_cache_subprocess_error(provider):
     provider._repo_root = Path("/dummy/repo")
 
     with patch("subprocess.run", side_effect=subprocess.SubprocessError):
@@ -121,7 +115,7 @@ def test_git_metadata_provider_load_git_status_cache_short_lines(provider):
     assert "" not in provider._status_cache
 
 
-def test_git_metadata_provider_parse_all_git_statuses(config, provider):
+def test_git_metadata_provider_parse_all_git_statuses(provider):
     status_output = (
         " M src/main.py\n"
         "A  src/helper.py\n"
@@ -144,7 +138,7 @@ def test_git_metadata_provider_parse_all_git_statuses(config, provider):
 
     with patch("subprocess.run", side_effect=mock_run):
         node = TreeNode(path="/dummy/repo/src/main.py", ntype=NodeType.FILE)
-        provider.enrich(node, config)
+        provider.enrich(node)
         assert node.metadata.git.tracked is True
         assert node.metadata.git.status == GitStatus.MODIFIED
 
@@ -161,9 +155,7 @@ def test_git_metadata_provider_parse_all_git_statuses(config, provider):
     assert provider._parse_status("XX") == GitStatus.CLEAN
 
 
-def test_git_metadata_provider_load_git_status_cache_empty_lines_in_tracked(
-    config, provider
-):
+def test_git_metadata_provider_load_git_status_cache_empty_lines_in_tracked(provider):
     provider._repo_root = Path("/dummy/repo").resolve()
 
     def mock_run(cmd, **kwargs):
@@ -186,7 +178,7 @@ def test_git_metadata_provider_load_git_status_cache_empty_lines_in_tracked(
 
 
 # --- Tests: File Metadata Enrichment ---
-def test_git_metadata_provider_file_metadata_modified(config, provider):
+def test_git_metadata_provider_file_metadata_modified(provider):
     provider._git_available = True
     provider._repo_root = Path("/dummy/repo").resolve()
     provider._status_cache = {"src/main.py": GitStatus.MODIFIED}
@@ -194,84 +186,84 @@ def test_git_metadata_provider_file_metadata_modified(config, provider):
 
     node = TreeNode(path="/dummy/repo/src/main.py", ntype=NodeType.FILE)
 
-    provider.enrich(node, config)
+    provider.enrich(node)
 
     assert node.metadata.git.tracked is True
     assert node.metadata.git.status == GitStatus.MODIFIED
 
 
-def test_git_metadata_provider_file_metadata_clean(config, provider):
+def test_git_metadata_provider_file_metadata_clean(provider):
     provider._git_available = True
     provider._repo_root = Path("/dummy/repo").resolve()
     provider._tracked_paths = {"src/clean.py"}
 
     node = TreeNode(path="/dummy/repo/src/clean.py", ntype=NodeType.FILE)
 
-    provider.enrich(node, config)
+    provider.enrich(node)
 
     assert node.metadata.git.tracked is True
     assert node.metadata.git.status == GitStatus.CLEAN
 
 
-def test_git_metadata_provider_file_metadata_untracked(config, provider):
+def test_git_metadata_provider_file_metadata_untracked(provider):
     provider._git_available = True
     provider._repo_root = Path("/dummy/repo").resolve()
 
     node = TreeNode(path="/dummy/repo/src/new.py", ntype=NodeType.FILE)
 
-    provider.enrich(node, config)
+    provider.enrich(node)
 
     assert node.metadata.git.tracked is False
     assert node.metadata.git.status == GitStatus.UNTRACKED
 
 
-def test_git_metadata_provider_file_metadata_ignored(config, provider):
+def test_git_metadata_provider_file_metadata_ignored(provider):
     provider._git_available = True
     provider._repo_root = Path("/dummy/repo").resolve()
     provider._status_cache = {"src/cache.pyc": GitStatus.IGNORED}
 
     node = TreeNode(path="/dummy/repo/src/cache.pyc", ntype=NodeType.FILE)
 
-    provider.enrich(node, config)
+    provider.enrich(node)
 
     assert node.metadata.git.tracked is False
     assert node.metadata.git.status == GitStatus.IGNORED
 
 
 # --- Tests: Directory Metadata Enrichment ---
-def test_git_metadata_provider_directory_has_changes(config, provider):
+def test_git_metadata_provider_directory_has_changes(provider):
     provider._git_available = True
     provider._repo_root = Path("/dummy/repo").resolve()
     provider._status_cache = {"src/main.py": GitStatus.MODIFIED}
 
     node = TreeNode(path="/dummy/repo/src", ntype=NodeType.DIR)
 
-    provider.enrich(node, config)
+    provider.enrich(node)
 
     assert node.metadata.git.has_sub_changes is True
     assert node.metadata.git.status == GitStatus.DIRTY
 
 
-def test_git_metadata_provider_directory_clean(config, provider):
+def test_git_metadata_provider_directory_clean(provider):
     provider._git_available = True
     provider._repo_root = Path("/dummy/repo").resolve()
 
     node = TreeNode(path="/dummy/repo/docs", ntype=NodeType.DIR)
 
-    provider.enrich(node, config)
+    provider.enrich(node)
 
     assert node.metadata.git.has_sub_changes is False
     assert node.metadata.git.status == GitStatus.CLEAN
 
 
-def test_git_metadata_provider_repo_root_detection(config, provider):
+def test_git_metadata_provider_repo_root_detection(provider):
     provider._git_available = True
     provider._repo_root = Path("/dummy/repo").resolve()
     provider._status_cache = {"src/main.py": GitStatus.MODIFIED}
 
     node = TreeNode(path="/dummy/repo", ntype=NodeType.DIR)
 
-    provider.enrich(node, config)
+    provider.enrich(node)
 
     assert node.metadata.git.is_repo_root is True
     assert node.metadata.git.has_sub_changes is True

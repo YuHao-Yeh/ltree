@@ -1,8 +1,7 @@
 # tests/test_scanners/test_traversal.py
 import os
 import pytest
-import stat
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, ANY
 
 from ltree.core.config import TreeConfig
 from ltree.core.models import TreeNode
@@ -54,24 +53,11 @@ def test_traverse_path_single_file(test_file, capsys):
     assert node.size == 4
 
     # Case 2: OSError
-    with patch("pathlib.Path.is_dir", side_effect=OSError):
+    with patch("pathlib.Path.lstat", side_effect=OSError):
         node_os_err = traverse_path(test_file, config)
         assert node_os_err is None
         captured = capsys.readouterr()
         assert "Error: Failed to scan" in captured.err
-
-    # Case 3: stat OSError
-    class MockStatResult:
-        st_mode = stat.S_IFREG | 0o644
-
-        @property
-        def st_size(self):
-            raise OSError("Stat size failed")
-
-    with patch("pathlib.Path.stat", return_value=MockStatResult()):
-        node_stat_err = traverse_path(test_file, config)
-        assert node_stat_err is not None
-        assert node_stat_err.size == 0
 
 
 def test_traverse_path_with_pipeline(test_file):
@@ -80,7 +66,7 @@ def test_traverse_path_with_pipeline(test_file):
     pipeline = MagicMock(spec=MetadataPipeline)
     node = traverse_path(test_file, config, pipeline=pipeline)
 
-    pipeline.execute.assert_called_once_with(node, config)
+    pipeline.execute.assert_called_once_with(node, stat=ANY)
 
 
 def test_traverse_path_file_with_pipeline(test_dir):
@@ -157,7 +143,7 @@ def test_traverse_path_no_next_child(test_dir, capsys):
     original_scandir = os.scandir
 
     def mock_scandir(path_str):
-        if "level1" in path_str:
+        if "level1" in str(path_str):
             raise PermissionError("No permission for level1")
         return original_scandir(path_str)
 
@@ -181,3 +167,37 @@ def test_traverse_path_os_error(tmp_path, capsys):
     assert node is None
     captured = capsys.readouterr()
     assert "Error: Failed to scan" in captured.err
+
+
+def test_traverse_path_skip_entry_stat_error(tmp_path, capsys):
+    config = TreeConfig()
+
+    import stat
+
+    bad = MagicMock()
+    bad.name = "bad.txt"
+    bad.path = str(tmp_path / "bad.txt")
+    bad.stat.side_effect = OSError("boom")
+
+    good = MagicMock()
+    good.name = "good.txt"
+    good.path = str(tmp_path / "good.txt")
+    good.stat.return_value = os.stat_result((stat.S_IFREG, 0, 0, 0, 0, 0, 10, 0, 0, 0))
+
+    with (
+        patch("ltree.core.scanners.traversal.os.scandir") as scandir,
+        patch(
+            "ltree.core.scanners.traversal.sort_entries",
+            return_value=[bad, good],
+        ),
+    ):
+        scandir.return_value.__enter__.return_value = [bad, good]
+
+        node = traverse_path(tmp_path, config)
+
+    assert node is not None
+    assert len(node.children) == 1
+    assert node.children[0].name == "good.txt"
+
+    captured = capsys.readouterr()
+    assert "Warning: Failed to stat" in captured.err

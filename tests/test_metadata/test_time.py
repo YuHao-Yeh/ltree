@@ -5,18 +5,12 @@ import pytest
 from unittest.mock import patch
 
 from ltree.core.models import TreeNode, NodeType
-from ltree.core.config import TreeConfig
 from ltree.core.metadata.time import TimeMetadataProvider
 
 
 # ======================================================================= #
 # Fixtures
 # ======================================================================= #
-@pytest.fixture
-def config():
-    return TreeConfig()
-
-
 @pytest.fixture
 def provider():
     return TimeMetadataProvider()
@@ -51,25 +45,25 @@ def test_time_metadata_provider_relative_times(provider: TimeMetadataProvider):
     assert res[7] == "-"
 
 
-def test_time_metadata_provider_enrich_success(config, provider):
+def test_time_metadata_provider_enrich_success(provider):
     node = TreeNode(path="/dummy/file.txt", ntype=NodeType.FILE)
 
     mtime = 1779888000.0
     mock_stat = os.stat_result((0, 0, 0, 0, 0, 0, 0, 0, mtime, 0))
 
-    with patch("os.lstat", return_value=mock_stat):
-        provider.enrich(node, config)
+    with patch("pathlib.Path.lstat", return_value=mock_stat):
+        provider.enrich(node)
 
     assert node.metadata.time is not None
     assert node.metadata.time.modified_timestamp == mtime
     assert "2026-" in node.metadata.time.modified_iso
 
 
-def test_time_metadata_provider_enrich_os_error(config, provider):
+def test_time_metadata_provider_enrich_os_error(provider):
     node = TreeNode(path="/dummy/missing.txt", ntype=NodeType.FILE)
 
-    with patch("os.lstat", side_effect=OSError):
-        provider.enrich(node, config)
+    with patch("pathlib.Path.lstat", side_effect=OSError):
+        provider.enrich(node)
 
     assert node.metadata.time is not None
     assert node.metadata.time.modified_timestamp == 0.0

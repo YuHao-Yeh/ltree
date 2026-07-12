@@ -1,4 +1,6 @@
 # ltree/core/metadata/project.py
+from __future__ import annotations
+
 import json
 import re
 from pathlib import Path
@@ -8,7 +10,7 @@ from ltree.core.metadata.base import MetadataProvider
 from ltree.core.metadata.models import ProjectMetadata
 
 if TYPE_CHECKING:
-    from ltree.core.config import TreeConfig
+    from os import stat_result
     from ltree.core.models import TreeNode
 
 
@@ -39,7 +41,7 @@ class ProjectMetadataProvider(MetadataProvider):
         except Exception:
             return ProjectMetadata()
 
-    def enrich(self, node: "TreeNode", config: "TreeConfig") -> None:
+    def enrich(self, node: TreeNode, /, *, stat: stat_result | None = None) -> None:
         if node.is_dir:
             return
 
