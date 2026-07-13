@@ -9,6 +9,9 @@ from ltree.core.metadata import MetadataPipeline
 from ltree.core.scanners.traversal import traverse_path
 
 
+TRAV = "ltree.core.scanners.traversal"
+
+
 # =======================================================================#
 # Fixture
 # =======================================================================#
@@ -185,11 +188,8 @@ def test_traverse_path_skip_entry_stat_error(tmp_path, capsys):
     good.stat.return_value = os.stat_result((stat.S_IFREG, 0, 0, 0, 0, 0, 10, 0, 0, 0))
 
     with (
-        patch("ltree.core.scanners.traversal.os.scandir") as scandir,
-        patch(
-            "ltree.core.scanners.traversal.sort_entries",
-            return_value=[bad, good],
-        ),
+        patch(f"{TRAV}.os.scandir") as scandir,
+        patch(f"{TRAV}.sort_entries", return_value=[bad, good]),
     ):
         scandir.return_value.__enter__.return_value = [bad, good]
 

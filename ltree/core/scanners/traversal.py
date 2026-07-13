@@ -53,8 +53,6 @@ def traverse_path(
             sorted_entries = sort_entries(list(it), config)
 
             for entry in sorted_entries:
-                entry_path = Path(entry.path)
-
                 try:
                     entry_stat = entry.stat(follow_symlinks=False)
                     is_dir = stat_module.S_ISDIR(entry_stat.st_mode)
@@ -64,6 +62,8 @@ def traverse_path(
                         file=sys.stderr,
                     )
                     continue
+
+                entry_path = Path(entry.path)
 
                 if node_filter.should_exclude(FCTX(entry_path, is_dir, config)):
                     continue
@@ -86,7 +86,9 @@ def traverse_path(
                 # visible folder
                 if max_depth is not None and curr_depth + 1 >= max_depth:
                     # hidden folders & files
-                    h_dirs, h_files, h_size = count_subtree(entry_path, config)
+                    h_dirs, h_files, h_size = count_subtree(
+                        entry_path, config, node_filter
+                    )
                     child = TreeNode(path=entry_path, is_truncated=True)
 
                     if pipeline:
