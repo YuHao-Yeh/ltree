@@ -13,12 +13,16 @@ if TYPE_CHECKING:
     from ltree.core.models import TreeNode
 
 
+_ROOT_SENTINEL = Path(".")
+
+
 class GitMetadataProvider(MetadataProvider):
     def __init__(self):
         self._repo_root: Path | None = None
         self._git_available: bool | None = None
         self._status_cache: dict[str, GitStatus] = {}  # rel_path -> status
         self._tracked_paths: set[str] = set()  # tracked paths
+        self._dirty_dirs: set[str] = set()
 
     def _check_git_and_find_root(self, path: Path) -> None:
         if self._git_available is False:
@@ -90,9 +94,29 @@ class GitMetadataProvider(MetadataProvider):
 
                 if status != GitStatus.IGNORED:
                     self._tracked_paths.add(rel_path)
-
         except subprocess.SubprocessError:
-            pass
+            return
+        else:
+            self._build_dirty_dir_cache()
+
+    def _build_dirty_dir_cache(self) -> None:
+        self._dirty_dirs.clear()
+
+        for rel_path, status in self._status_cache.items():
+            if status == GitStatus.IGNORED:
+                continue
+
+            parent = Path(rel_path).parent
+
+            while True:
+                self._dirty_dirs.add(
+                    "" if parent == _ROOT_SENTINEL else parent.as_posix()
+                )
+
+                if parent == _ROOT_SENTINEL:
+                    break
+
+                parent = parent.parent
 
     def _parse_status(self, code: str) -> GitStatus:
         if code in {"DD", "AU", "UD", "UA", "DU", "AA", "UU"}:
@@ -118,16 +142,6 @@ class GitMetadataProvider(MetadataProvider):
 
         return GitStatus.CLEAN
 
-    def _is_inside_repo(self, path: Path) -> bool:
-        if not self._repo_root:
-            return False
-
-        try:
-            path.resolve().relative_to(self._repo_root)
-            return True
-        except ValueError:
-            return False
-
     def enrich(self, node: TreeNode, /, *, stat: stat_result | None = None) -> None:
         # 1. Initialize detection and caching on first call
         if self._git_available is None:
@@ -141,26 +155,21 @@ class GitMetadataProvider(MetadataProvider):
             return
 
         # 2. Relative path to the root dir of the git repo
-        if not self._is_inside_repo(node.path):
+        try:
+            abs_path = node.path.resolve()
+            rel_to_repo = abs_path.relative_to(self._repo_root).as_posix()
+        except ValueError:
             node.metadata.git = GitMetadata()
             return
 
-        abs_path = node.path.resolve()
-        rel_to_repo = abs_path.relative_to(self._repo_root).as_posix()
         if rel_to_repo == ".":
             rel_to_repo = ""
 
         if node.is_dir:
             if rel_to_repo == "":
-                has_changes = any(
-                    status != GitStatus.IGNORED
-                    for status in self._status_cache.values()
-                )
+                has_changes = bool(self._dirty_dirs)
             else:
-                # prefix = rel_to_repo + "/"
-                has_changes = any(
-                    p.startswith(rel_to_repo + "/") for p in self._status_cache
-                )
+                has_changes = rel_to_repo in self._dirty_dirs
 
             node.metadata.git = GitMetadata(
                 tracked=True,
@@ -169,7 +178,7 @@ class GitMetadataProvider(MetadataProvider):
                 status=GitStatus.DIRTY if has_changes else GitStatus.CLEAN,
             )
         else:
-            tracked = bool(rel_to_repo in self._tracked_paths)
+            tracked = rel_to_repo in self._tracked_paths
             status = self._status_cache.get(
                 rel_to_repo, GitStatus.CLEAN if tracked else GitStatus.UNTRACKED
             )

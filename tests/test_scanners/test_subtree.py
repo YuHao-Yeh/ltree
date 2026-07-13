@@ -1,9 +1,12 @@
 # tests/test_scanners/test_subtree.py
 import pytest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ltree.core.config import TreeConfig
 from ltree.core.scanners.subtree import count_subtree
+
+
+SUBTREE = "ltree.core.scanners.subtree"
 
 
 # =======================================================================#
@@ -72,9 +75,39 @@ def test_count_subtree_file_stat_os_error(test_dir):
     config.root_path = str(test_dir)
     config.exclude.add_pattern("excluded_dir")
 
-    with patch("pathlib.Path.stat", side_effect=OSError):
+    with patch("os.DirEntry.stat", side_effect=OSError):
         dirs, files, size = count_subtree(test_dir, config)
 
         assert dirs == 1
         assert files == 3
         assert size == 0
+
+
+def test_count_subtree_entry_is_dir_error(test_dir):
+    config = TreeConfig()
+
+    fake_entry = MagicMock()
+    fake_entry.is_dir.side_effect = OSError
+    fake_entry.path = test_dir / "test"
+
+    fake_scandir = MagicMock()
+    fake_scandir.__enter__.return_value = [fake_entry]
+    fake_scandir.__exit__.return_value = None
+
+    with patch("os.scandir", return_value=fake_scandir):
+        dirs, files, size = count_subtree(test_dir, config)
+
+    assert dirs == 0
+    assert files == 0
+    assert size == 0
+
+
+def test_count_subtree_scandir_permission_error(test_dir):
+    config = TreeConfig()
+
+    with patch("os.scandir", side_effect=OSError):
+        dirs, files, size = count_subtree(test_dir, config)
+
+    assert dirs == 0
+    assert files == 0
+    assert size == 0

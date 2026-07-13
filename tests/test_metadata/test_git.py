@@ -60,11 +60,6 @@ def test_git_metadata_provider_path_not_in_root(provider):
     assert node.metadata.git.tracked is False
 
 
-def test_git_metadata_provider_is_inside_repo_no_repo_root(provider):
-    provider._repo_root = None
-    assert provider._is_inside_repo(Path("/dummy/repo")) is False
-
-
 # --- Tests: Porcelain Status Parsing & Cache Loading ---
 def test_git_metadata_provider_subprocess_error(provider):
     node = TreeNode(path="/dummy/file.txt", ntype=NodeType.FILE)
@@ -235,6 +230,7 @@ def test_git_metadata_provider_directory_has_changes(provider):
     provider._git_available = True
     provider._repo_root = Path("/dummy/repo").resolve()
     provider._status_cache = {"src/main.py": GitStatus.MODIFIED}
+    provider._build_dirty_dir_cache()
 
     node = TreeNode(path="/dummy/repo/src", ntype=NodeType.DIR)
 
@@ -260,6 +256,7 @@ def test_git_metadata_provider_repo_root_detection(provider):
     provider._git_available = True
     provider._repo_root = Path("/dummy/repo").resolve()
     provider._status_cache = {"src/main.py": GitStatus.MODIFIED}
+    provider._build_dirty_dir_cache()
 
     node = TreeNode(path="/dummy/repo", ntype=NodeType.DIR)
 
