@@ -3,15 +3,15 @@ import argparse
 import re
 
 from ltree import __version__
-from ltree.renderers import registry
-from ltree.cli.commands.tree import run_tree
-from ltree.cli.commands.theme import run_theme, run_theme_preview
+from ltree.rendering import registry
 from ltree.cli.commands.config import (
     run_config_show,
     run_config_locate,
     run_config_validate,
 )
-from ltree.core.config import TreeConfig, THEMES
+from ltree.cli.commands.theme import run_theme, run_theme_preview
+from ltree.cli.commands.tree import run_tree
+from ltree.config.config import TreeConfig, THEMES
 
 
 default_config = TreeConfig()

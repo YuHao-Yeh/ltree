@@ -29,7 +29,7 @@ def args():
 
 
 # ======================================================================= #
-# Tests: _validate_format
+# Tests: _validate_format()
 # ======================================================================= #
 def test_validate_tree_args_format_text(args, caplog):
     # Case 1: color = True
@@ -121,7 +121,7 @@ def test_validate_tree_args_format_rich(args, caplog):
 
 
 # ======================================================================= #
-# Tests: _validate_output
+# Tests: _validate_output()
 # ======================================================================= #
 def test_validate_tree_args_output(args, caplog):
     args.format = "yaml"
@@ -138,7 +138,7 @@ def test_validate_tree_args_output(args, caplog):
 
 
 # ======================================================================= #
-# Tests: _validate_filters
+# Tests: _validate_filters()
 # ======================================================================= #
 def test_validate_tree_args_filters_dirs_only(args, caplog):
     # Case 1.
@@ -189,7 +189,7 @@ def test_validate_tree_args_filters_confliction(args, caplog):
 
 
 # ======================================================================= #
-# Tests: _validate_values
+# Tests: _validate_values()
 # ======================================================================= #
 def test_validate_tree_args_values(args, caplog):
     # Case 1: human readable size

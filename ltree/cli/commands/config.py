@@ -1,10 +1,10 @@
-# ltree/clis/commands/config.py
+# ltree/cli/commands/config.py
 from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ltree.core.config import TreeConfig
+from ltree.config.config import TreeConfig
 
 if TYPE_CHECKING:
     from argparse import Namespace

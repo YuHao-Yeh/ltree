@@ -1,11 +1,14 @@
-# tests/test_cli/test_tree.py
+# tests/test_app/test_tree.py
 import logging
 import pytest
 
-from ltree.core.config import TreeConfig
+from ltree.config.config import TreeConfig
 from ltree.app.tree import TreeApplication, RenderResult
 
 
+# ======================================================================= #
+# Tests: TreeApplication
+# ======================================================================= #
 def test_tree_application_generate_success(tmp_path):
     (tmp_path / "file1.txt").write_text("hello")
 

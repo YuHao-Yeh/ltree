@@ -4,8 +4,8 @@ import time
 import pytest
 from unittest.mock import patch
 
-from ltree.core.models import TreeNode, NodeType
-from ltree.core.metadata.time import TimeMetadataProvider
+from ltree.metadata.providers.time import TimeMetadataProvider
+from ltree.tree.models import TreeNode, NodeType
 
 
 # ======================================================================= #

@@ -8,7 +8,7 @@ from ltree.themes.nerd import NerdTheme
 from ltree.themes.none import NoTheme
 
 if TYPE_CHECKING:
-    from ltree.serializers.types import SerializedNode
+    from ltree.serialization.types import SerializedNode
 
 
 class ThemeManager:

@@ -11,6 +11,8 @@ from ltree.cli.commands.config import (
     run_config_validate,
 )
 
+config_path = "ltree.config.config"
+
 
 # ======================================================================= #
 # Tests: run_config_show()
@@ -117,7 +119,7 @@ def test_run_config_validate_failure(tmp_path, capsys):
 
     with patch.object(Path, "exists", autospec=True, side_effect=mock_exists):
         with patch(
-            "ltree.core.config.TreeConfig.load_config_file",
+            f"{config_path}.TreeConfig.load_config_file",
             side_effect=ValueError("Invalid parsing configurations"),
         ):
             run_config_validate(args)
@@ -128,9 +130,6 @@ def test_run_config_validate_failure(tmp_path, capsys):
 
 
 def test_run_config_validate_not_found(tmp_path, capsys):
-    """
-    測試當無設定檔可校驗時，config validate 的回饋。
-    """
     with patch.object(Path, "exists", return_value=False):
         args = argparse.Namespace(start_path=str(tmp_path))
         run_config_validate(args)

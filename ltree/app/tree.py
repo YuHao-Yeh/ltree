@@ -4,14 +4,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ltree.core.scanners.scanner import scan_tree
-from ltree.core.filters import get_default_filter_pipeline
-from ltree.renderers import registry
+from ltree.rendering import registry
+from ltree.tree.filters import get_default_filter_pipeline
+from ltree.tree.scan.scanner import scan_tree
 
 if TYPE_CHECKING:
-    from ltree.core.config import TreeConfig
-    from ltree.core.models import TreeNode
-    from ltree.renderers import BaseRenderer
+    from ltree.config.config import TreeConfig
+    from ltree.rendering import BaseRenderer
+    from ltree.tree.models import TreeNode
 
 
 @dataclass(slots=True)

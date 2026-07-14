@@ -4,8 +4,8 @@ import stat
 import pytest
 from unittest.mock import patch
 
-from ltree.core.models import TreeNode, NodeType
-from ltree.core.metadata.filesystem import FilesystemMetadataProvider
+from ltree.metadata.providers.filesystem import FilesystemMetadataProvider
+from ltree.tree.models import TreeNode, NodeType
 
 
 # ======================================================================= #
