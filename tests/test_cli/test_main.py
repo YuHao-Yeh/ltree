@@ -6,16 +6,19 @@ from unittest.mock import MagicMock, patch
 from ltree.cli.main import main
 
 
-cli_path = "ltree.cli.main"
+CLI = "ltree.cli.main"
 
 
+# ======================================================================= #
+# Tests: main()
+# ======================================================================= #
 def test_main_executes_func_on_subcommand():
     mock_func = MagicMock()
     mock_args = MagicMock()
     mock_args.func = mock_func
 
     with (
-        patch(f"{cli_path}.build_parser") as mock_build_parser,
+        patch(f"{CLI}.build_parser") as mock_build_parser,
         patch.object(sys, "argv", ["ltree"]),
     ):
         mock_parser = MagicMock()
@@ -29,7 +32,7 @@ def test_main_executes_func_on_subcommand():
 
 def test_main_prints_help_when_no_subcommand_selected():
     with (
-        patch(f"{cli_path}.build_parser") as mock_build_parser,
+        patch(f"{CLI}.build_parser") as mock_build_parser,
         patch.object(sys, "argv", ["ltree"]),
     ):
         mock_parser = MagicMock()
@@ -47,7 +50,7 @@ def test_main_sys_argv():
     test_argv = []
 
     with patch("sys.argv", test_argv):
-        with patch(f"{cli_path}.build_parser") as mock_build_parser:
+        with patch(f"{CLI}.build_parser") as mock_build_parser:
             mock_parser = MagicMock()
             mock_args = MagicMock()
 
@@ -62,7 +65,7 @@ def test_main_sys_argv():
     test_argv = ["ltree", "some/sandbox/dir"]
 
     with patch("sys.argv", test_argv):
-        with patch(f"{cli_path}.build_parser") as mock_build_parser:
+        with patch(f"{CLI}.build_parser") as mock_build_parser:
             mock_parser = MagicMock()
             mock_args = MagicMock()
             mock_parser.parse_args.return_value = mock_args
@@ -75,7 +78,7 @@ def test_main_sys_argv():
     # Case 3: no sys.argv attribute
     import sys
 
-    with patch(f"{cli_path}.build_parser") as mock_build_parser:
+    with patch(f"{CLI}.build_parser") as mock_build_parser:
         mock_parser = MagicMock()
         mock_args = MagicMock()
         mock_parser.parse_args.return_value = mock_args
@@ -105,7 +108,7 @@ def test_main_permission_error_handling(caplog):
     test_argv = ["ltree", "tree"]
 
     with patch("sys.argv", test_argv):
-        with patch(f"{cli_path}.build_parser") as mock_build_parser:
+        with patch(f"{CLI}.build_parser") as mock_build_parser:
             mock_parser = MagicMock()
             mock_parser.parse_args.return_value = mock_args
             mock_build_parser.return_value = mock_parser
@@ -127,7 +130,7 @@ def test_main_generic_exception_handling(caplog):
     test_argv = ["ltree", "tree"]
 
     with patch("sys.argv", test_argv):
-        with patch(f"{cli_path}.build_parser") as mock_build_parser:
+        with patch(f"{CLI}.build_parser") as mock_build_parser:
             mock_parser = MagicMock()
             mock_parser.parse_args.return_value = mock_args
             mock_build_parser.return_value = mock_parser

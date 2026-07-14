@@ -4,9 +4,9 @@ import subprocess
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from ltree.core.models import TreeNode, NodeType
-from ltree.core.metadata.git import GitMetadataProvider
-from ltree.core.metadata.models import GitStatus
+from ltree.metadata.models import GitStatus
+from ltree.metadata.providers.git import GitMetadataProvider
+from ltree.tree.models import TreeNode, NodeType
 
 
 # ======================================================================= #

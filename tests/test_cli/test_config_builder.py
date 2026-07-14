@@ -5,9 +5,12 @@ import re
 from unittest.mock import patch
 
 from ltree.cli.config_builder import build_config
-from ltree.core.config import TreeConfig
+from ltree.config.config import TreeConfig
 
 
+# ======================================================================= #
+# Tests: build_config()
+# ======================================================================= #
 def test_build_config_standard_args():
     compiled_pattern = re.compile(r"temp_\d+")
     raw_pattern_str = r"\.bak$"

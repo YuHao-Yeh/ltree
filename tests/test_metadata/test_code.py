@@ -1,8 +1,8 @@
 # tests/test_metadata/test_code.py
 import pytest
 
-from ltree.core.models import TreeNode, NodeType
-from ltree.core.metadata.code import CodeMetadataProvider
+from ltree.metadata.providers.code import CodeMetadataProvider
+from ltree.tree.models import TreeNode, NodeType
 
 
 # ======================================================================= #

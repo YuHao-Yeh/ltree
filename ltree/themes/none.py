@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from ltree.themes.base import BaseTheme
 
 if TYPE_CHECKING:
-    from ltree.serializers.types import SerializedNode
+    from ltree.serialization.types import SerializedNode
 
 
 class NoTheme(BaseTheme):

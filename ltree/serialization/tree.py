@@ -1,0 +1,81 @@
+# ltree/serialization/tree.py
+from __future__ import annotations
+
+from dataclasses import asdict
+from typing import TYPE_CHECKING
+
+from ltree.common.format import format_size_classic
+from ltree.serialization.base import Serializer
+from ltree.tree.models import NodeType
+
+if TYPE_CHECKING:
+    from ltree.config.config import TreeConfig
+    from ltree.metadata.models import MetadataContainer
+    from ltree.serialization.types import SerializedNode
+    from ltree.tree.models import TreeNode, Stats
+
+
+def _serialize_metadata(metadata: MetadataContainer, config: TreeConfig) -> dict:
+    result = {}
+
+    if metadata.fs:
+        result["fs"] = asdict(metadata.fs)
+        if config and config.human_readable:
+            size = result["fs"].get("size", 0)
+            result["fs"]["size_human"] = format_size_classic(size, True).strip()
+
+    if metadata.git:
+        git_data = asdict(metadata.git)
+
+        if metadata.git.status:
+            git_data["status"] = metadata.git.status.value
+
+        result["git"] = git_data
+
+    if metadata.code:
+        result["code"] = asdict(metadata.code)
+
+    if metadata.project:
+        result["project"] = asdict(metadata.project)
+
+    if metadata.time:
+        result["time"] = asdict(metadata.time)
+
+    return result
+
+
+def _serialize_stats(stats: Stats) -> dict[str, int]:
+    return {
+        "visible_dirs": stats.visible_dirs,
+        "visible_files": stats.visible_files,
+        "hidden_dirs": stats.hidden_dirs,
+        "hidden_files": stats.hidden_files,
+        "hidden_size": stats.hidden_size,
+        "total_dirs": stats.total_dirs,
+        "total_files": stats.total_files,
+    }
+
+
+class TreeSerializer(Serializer):
+    def __init__(self, config: TreeConfig | None = None):
+        super().__init__(config)
+
+    def serialize(self, node: TreeNode) -> SerializedNode:
+        if node.ntype == NodeType.DIR:
+            return {
+                "name": node.name,
+                "path": str(node.path),
+                "type": node.ntype.value,
+                "metadata": _serialize_metadata(node.metadata, self.config),
+                "stats": _serialize_stats(node.stats),
+                "is_truncated": node.is_truncated,
+                "children": [self.serialize(child) for child in node.children],
+            }
+        else:
+            return {
+                "name": node.name,
+                "path": str(node.path),
+                "type": node.ntype.value,
+                "metadata": _serialize_metadata(node.metadata, self.config),
+                "is_truncated": node.is_truncated,
+            }

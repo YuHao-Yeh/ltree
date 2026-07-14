@@ -2,8 +2,8 @@
 import pytest
 from unittest.mock import patch, mock_open
 
-from ltree.core.models import TreeNode, NodeType
-from ltree.core.metadata.project import ProjectMetadataProvider
+from ltree.metadata.providers.project import ProjectMetadataProvider
+from ltree.tree.models import TreeNode, NodeType
 
 
 # ======================================================================= #

@@ -6,7 +6,7 @@ import re
 import sys
 from typing import TYPE_CHECKING
 
-from ltree.core.config import TreeConfig
+from ltree.config.config import TreeConfig
 
 if TYPE_CHECKING:
     from argparse import Namespace

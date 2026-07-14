@@ -1,9 +1,9 @@
 # tests/test_metadata/test_registry.py
 from unittest.mock import MagicMock
 
-from ltree.core.models import TreeNode
-from ltree.core.config import TreeConfig
-from ltree.core.metadata import (
+from ltree.config.config import TreeConfig
+from ltree.tree.models import TreeNode
+from ltree.metadata import (
     MetadataProvider,
     MetadataPipeline,
     FilesystemMetadataProvider,

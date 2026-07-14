@@ -9,7 +9,7 @@ from ltree.app.logging import CliFormatter, configure_logging
 
 
 # ======================================================================= #
-# Fixture
+# Fixtures
 # ======================================================================= #
 @pytest.fixture(autouse=True)
 def reset_logger():

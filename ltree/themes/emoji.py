@@ -5,10 +5,10 @@ import os
 from typing import TYPE_CHECKING
 
 from ltree.themes.base import BaseTheme
-from ltree.core.models import NodeType
+from ltree.tree.models import NodeType
 
 if TYPE_CHECKING:
-    from ltree.serializers.types import SerializedNode
+    from ltree.serialization.types import SerializedNode
 
 
 class EmojiTheme(BaseTheme):

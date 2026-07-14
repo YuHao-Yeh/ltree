@@ -1,10 +1,10 @@
 # tests/test_themes/test_icons.py
 import os
 
-from ltree.core.models import TreeNode, NodeType
-from ltree.core.metadata.models import FilesystemMetadata
-from ltree.serializers.types import SerializedNode
-from ltree.serializers import TreeSerializer
+from ltree.tree.models import TreeNode, NodeType
+from ltree.metadata.models import FilesystemMetadata
+from ltree.serialization.types import SerializedNode
+from ltree.serialization import TreeSerializer
 from ltree.themes.manager import ThemeManager
 from ltree.themes.emoji import EmojiTheme
 from ltree.themes.nerd import NerdTheme
@@ -33,7 +33,7 @@ def make_node(
 
 
 # ======================================================================= #
-# Test: init and none
+# Tests: init and none
 # ======================================================================= #
 def test_theme_manager_none_theme():
     provider = ThemeManager("none")
@@ -50,7 +50,7 @@ def test_no_theme_style():
 
 
 # ======================================================================= #
-# Test: Emoji
+# Tests: Emoji
 # ======================================================================= #
 def test_get_icon_directories_emoji():
     provider = ThemeManager("emoji")
@@ -133,7 +133,7 @@ def test_icons_symlink_and_executable_emoji():
 
 
 # ======================================================================= #
-# Test: Nerd
+# Tests: Nerd
 # ======================================================================= #
 def test_get_icon_nerd_font():
     provider = ThemeManager("nerd")

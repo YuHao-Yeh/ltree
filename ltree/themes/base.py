@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ltree.serializers.types import SerializedNode
+    from ltree.serialization.types import SerializedNode
 
 
 class BaseTheme(ABC):

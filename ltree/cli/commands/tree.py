@@ -4,10 +4,10 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING
 
-from ltree.cli.validators import validate_tree_args
-from ltree.cli.config_builder import build_config
 from ltree.app.tree import TreeApplication
-from ltree.renderers.utils import print_stats
+from ltree.cli.config_builder import build_config
+from ltree.cli.validators import validate_tree_args
+from ltree.rendering.utils import print_stats
 
 if TYPE_CHECKING:
     from argparse import Namespace

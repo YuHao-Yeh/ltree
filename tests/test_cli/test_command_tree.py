@@ -38,7 +38,7 @@ def build_args(**kwargs):
 
 
 # ======================================================================= #
-# Tests: run_tree
+# Tests: run_tree()
 # ======================================================================= #
 def test_run_tree_console_serialized(tmp_path, capsys):
     (tmp_path / "foo.txt").write_text("sample content")
