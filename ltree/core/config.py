@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import logging
 import os
 import pathspec
 import sys
@@ -29,6 +30,8 @@ FORMATS: list[str] = [
     "graphviz",
 ]
 THEMES: list[str] = ["nerd", "emoji", "none"]
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -137,14 +140,13 @@ class TreeConfig:
                         self._apply_dict_config(data)
                         return
                 except Exception as e:
-                    print(f"Warning: Failed to parse .ltreerc: {e}", file=sys.stderr)
+                    logger.warning("Failed to parse .ltreerc: %s", e)
 
             # 2. pyproject.toml [tool.ltree]
             if os.path.exists(pyproject_path):
                 if tomllib is None:
-                    print(
-                        "Warning: pyproject.toml found but cannot be parsed because 'tomli' is not installed (required for Python < 3.11).",
-                        file=sys.stderr,
+                    logger.warning(
+                        "pyproject.toml found but cannot be parsed because 'tomli' is not installed (required for Python < 3.11).",
                     )
                 else:
                     try:
@@ -155,10 +157,7 @@ class TreeConfig:
                                 self._apply_dict_config(ltree_data)
                                 return
                     except Exception as e:
-                        print(
-                            f"Warning: Failed to parse pyproject.toml: {e}",
-                            file=sys.stderr,
-                        )
+                        logger.warning("Failed to parse pyproject.toml: %s", e)
 
             parent = os.path.dirname(search_path)
             if parent == search_path:
@@ -208,4 +207,4 @@ class TreeConfig:
                         "gitignore", f.readlines()
                     )
             except Exception as e:
-                print(f"Warning: Could not load .gitignore: {e}")
+                logger.warning("Could not load .gitignore: %s", e)

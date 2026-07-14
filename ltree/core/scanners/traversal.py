@@ -1,9 +1,9 @@
 # ltree/core/scanners/traversal.py
 from __future__ import annotations
 
+import logging
 import os
 import stat as stat_module
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -16,6 +16,9 @@ from ltree.core.scanners.subtree import count_subtree
 if TYPE_CHECKING:
     from ltree.core.config import TreeConfig
     from ltree.core.metadata import MetadataPipeline
+
+
+logger = logging.getLogger(__name__)
 
 
 def traverse_path(
@@ -34,7 +37,7 @@ def traverse_path(
         try:
             stat = path.lstat()
         except OSError as e:
-            print(f"Error: Failed to scan '{path}': {e}", file=sys.stderr)
+            logger.error("Failed to scan '%s': %s", path, e)
             return None
 
     ntype = NodeType.DIR if stat_module.S_ISDIR(stat.st_mode) else NodeType.FILE
@@ -57,10 +60,7 @@ def traverse_path(
                     entry_stat = entry.stat(follow_symlinks=False)
                     is_dir = stat_module.S_ISDIR(entry_stat.st_mode)
                 except OSError as e:
-                    print(
-                        f"Warning: Failed to stat '{entry.path}': {e}",
-                        file=sys.stderr,
-                    )
+                    logger.warning("Failed to stat '%s': %s", entry.path, e)
                     continue
 
                 entry_path = Path(entry.path)
@@ -113,10 +113,10 @@ def traverse_path(
                 if child:
                     node.children.append(child)
     except PermissionError:
-        print(f"Error: No permission for the path '{path}'", file=sys.stderr)
+        logger.error("No permission for the path '%s'", path)
         return None
     except OSError as e:
-        print(f"Error: Failed to scan '{path}': {e}", file=sys.stderr)
+        logger.error("Failed to scan '%s': %s", path, e)
         return None
 
     return node

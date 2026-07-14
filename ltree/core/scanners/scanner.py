@@ -1,7 +1,7 @@
 # ltree/core/scanners/scanner.py
 from __future__ import annotations
 
-import sys
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -13,6 +13,9 @@ from ltree.core.scanners.traversal import traverse_path
 if TYPE_CHECKING:
     from ltree.core.config import TreeConfig
     from ltree.core.models import TreeNode
+
+
+logger = logging.getLogger(__name__)
 
 
 class Scanner:
@@ -29,7 +32,7 @@ class Scanner:
     def scan(self, path: Path | str, max_depth: int | None = None) -> "TreeNode" | None:
         root_path = Path(path).resolve()
         if not root_path.exists():
-            print(f"Error: Path '{path}' does not exist.", file=sys.stderr)
+            logger.error("Path '%s' does not exist.", path)
             return None
 
         self.config.root_path = str(root_path)
@@ -54,5 +57,5 @@ def scan_tree(
     path: str | Path,
     config: TreeConfig,
     max_depth: int | None = None,
-) -> "TreeNode" | None:
+) -> TreeNode | None:
     return Scanner(config).scan(path, max_depth=max_depth)

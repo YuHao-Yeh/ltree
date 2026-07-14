@@ -1,10 +1,16 @@
 # ltree/cli/main.py
+import logging
 import sys
 
+from ltree.app.logging import configure_logging
 from ltree.cli.parser import build_parser
 
 
+logger = logging.getLogger(__name__)
+
+
 def main() -> int:
+    configure_logging()
     subcommands = {"tree", "theme", "config"}
 
     argv = getattr(sys, "argv", [])
@@ -30,10 +36,10 @@ def main() -> int:
             args.func(args)
             return 0
         except PermissionError as e:
-            print(f"Error: Permission denied. {e}", file=sys.stderr)
+            logger.error("Permission denied: %s", e)
             return 1
         except Exception as e:
-            print(f"Error: Unexpected failure. {e}", file=sys.stderr)
+            logger.error("Unexpected failure: %s", e)
             return 1
     else:
         parser.print_help()

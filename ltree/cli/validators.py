@@ -1,15 +1,15 @@
 # ltree/cli/validators.py
 import argparse
+import logging
 import re
-import sys
 from pathlib import Path
 
 
+logger = logging.getLogger(__name__)
+
+
 def _warn(message: str) -> None:
-    print(
-        f"Warning: {message}",
-        file=sys.stderr,
-    )
+    logger.warning(message)
 
 
 def validate_tree_args(args: argparse.Namespace) -> None:

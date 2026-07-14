@@ -1,4 +1,5 @@
 # tests/test_scanners/test_traversal.py
+import logging
 import os
 import pytest
 from unittest.mock import patch, MagicMock, ANY
@@ -46,7 +47,7 @@ def test_file(tmp_path):
 # =======================================================================#
 # Test: traverse_path()
 # =======================================================================#
-def test_traverse_path_single_file(test_file, capsys):
+def test_traverse_path_single_file(test_file, caplog):
     config = TreeConfig()
 
     # Case 1: scan single file
@@ -57,10 +58,10 @@ def test_traverse_path_single_file(test_file, capsys):
 
     # Case 2: OSError
     with patch("pathlib.Path.lstat", side_effect=OSError):
-        node_os_err = traverse_path(test_file, config)
-        assert node_os_err is None
-        captured = capsys.readouterr()
-        assert "Error: Failed to scan" in captured.err
+        with caplog.at_level(logging.ERROR):
+            node_os_err = traverse_path(test_file, config)
+            assert node_os_err is None
+            assert "Failed to scan" in caplog.text
 
 
 def test_traverse_path_with_pipeline(test_file):
@@ -130,18 +131,18 @@ def test_traverse_path_max_depth_truncation(test_dir):
     assert truncated_child.stats.hidden_size == 25
 
 
-def test_traverse_path_permission_error(tmp_path, capsys):
+def test_traverse_path_permission_error(tmp_path, caplog):
     config = TreeConfig()
 
     with patch("os.scandir", side_effect=PermissionError):
-        node = traverse_path(tmp_path, config)
+        with caplog.at_level(logging.ERROR):
+            node = traverse_path(tmp_path, config)
 
     assert node is None
-    captured = capsys.readouterr()
-    assert "Error: No permission for the path" in captured.err
+    assert "No permission for the path" in caplog.text
 
 
-def test_traverse_path_no_next_child(test_dir, capsys):
+def test_traverse_path_no_next_child(test_dir, caplog):
     config = TreeConfig()
     original_scandir = os.scandir
 
@@ -151,28 +152,28 @@ def test_traverse_path_no_next_child(test_dir, capsys):
         return original_scandir(path_str)
 
     with patch("os.scandir", side_effect=mock_scandir):
-        node = traverse_path(test_dir, config)
+        with caplog.at_level(logging.ERROR):
+            node = traverse_path(test_dir, config)
 
     child_names = [c.name for c in node.children]
     assert len(child_names) == 1
     assert "level1" not in child_names
 
-    captured = capsys.readouterr()
-    assert "Error: No permission for the path" in captured.err
+    assert "No permission for the path" in caplog.text
 
 
-def test_traverse_path_os_error(tmp_path, capsys):
+def test_traverse_path_os_error(tmp_path, caplog):
     config = TreeConfig()
 
     with patch("os.scandir", side_effect=OSError("Disk reading error")):
-        node = traverse_path(tmp_path, config)
+        with caplog.at_level(logging.ERROR):
+            node = traverse_path(tmp_path, config)
 
     assert node is None
-    captured = capsys.readouterr()
-    assert "Error: Failed to scan" in captured.err
+    assert "Failed to scan" in caplog.text
 
 
-def test_traverse_path_skip_entry_stat_error(tmp_path, capsys):
+def test_traverse_path_skip_entry_stat_error(tmp_path, caplog):
     config = TreeConfig()
 
     import stat
@@ -192,12 +193,11 @@ def test_traverse_path_skip_entry_stat_error(tmp_path, capsys):
         patch(f"{TRAV}.sort_entries", return_value=[bad, good]),
     ):
         scandir.return_value.__enter__.return_value = [bad, good]
-
-        node = traverse_path(tmp_path, config)
+        with caplog.at_level(logging.WARNING):
+            node = traverse_path(tmp_path, config)
 
     assert node is not None
     assert len(node.children) == 1
     assert node.children[0].name == "good.txt"
 
-    captured = capsys.readouterr()
-    assert "Warning: Failed to stat" in captured.err
+    assert "Failed to stat" in caplog.text
