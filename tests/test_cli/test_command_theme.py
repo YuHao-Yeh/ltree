@@ -36,19 +36,17 @@ def test_run_theme_with_unknown_fallback(monkeypatch, capsys):
 # Tests: run_theme_preview
 # ======================================================================= #
 def test_run_theme_preview_outputs(capsys):
-    # A. 測試 Emoji 主題預覽
+    # A. Emoji
     args_emoji = argparse.Namespace(theme_name="emoji")
     run_theme_preview(args_emoji)
 
     captured_emoji = capsys.readouterr()
-    print()
-    print(captured_emoji)
     assert "--- Previewing theme 'emoji' ---" in captured_emoji.out
     assert "Directory: 📦 src/" in captured_emoji.out
     assert "Python:    🐍 main.py" in captured_emoji.out
     assert "Symlink:   🔗 shortcut" in captured_emoji.out
 
-    # B. 測試 Nerd Font 主題預覽
+    # B. Nerd Font
     args_nerd = argparse.Namespace(theme_name="nerd")
     run_theme_preview(args_nerd)
 

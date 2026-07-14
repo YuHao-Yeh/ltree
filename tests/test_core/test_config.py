@@ -1,6 +1,7 @@
 # tests/test_config.py
 import argparse
 import json
+import logging
 import pytest
 from unittest.mock import patch
 
@@ -193,42 +194,42 @@ def test_load_config_file_climbing_traversal(tmp_path):
     assert config.theme == "nerd"
 
 
-def test_load_config_file_corrupted_json_warning(tmp_path, capsys):
+def test_load_config_file_corrupted_json_warning(tmp_path, caplog):
     ltreerc = tmp_path / ".ltreerc"
     ltreerc.write_text("{invalid json", encoding="utf-8")
 
-    config = TreeConfig()
-    config.load_config_file(str(tmp_path))
+    with caplog.at_level(logging.WARNING):
+        config = TreeConfig()
+        config.load_config_file(str(tmp_path))
 
-    captured = capsys.readouterr()
-    assert "Warning: Failed to parse .ltreerc" in captured.err
+    assert "Failed to parse .ltreerc" in caplog.text
 
 
-def test_load_config_file_corrupted_toml_warning(tmp_path, capsys):
+def test_load_config_file_corrupted_toml_warning(tmp_path, caplog):
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[tool.ltree]\ninvalid_toml = = =", encoding="utf-8")
 
-    config = TreeConfig()
-    config.load_config_file(str(tmp_path))
+    with caplog.at_level(logging.WARNING):
+        config = TreeConfig()
+        config.load_config_file(str(tmp_path))
 
-    captured = capsys.readouterr()
-    assert "Warning: Failed to parse pyproject.toml" in captured.err
+    assert "Failed to parse pyproject.toml" in caplog.text
 
 
-def test_load_config_file_no_tomllib_warning(tmp_path, capsys):
+def test_load_config_file_no_tomllib_warning(tmp_path, caplog):
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[tool.ltree]\ntheme = 'nerd'", encoding="utf-8")
 
     with patch("ltree.core.config.tomllib", None):
         from ltree.core.config import TreeConfig
 
-        config = TreeConfig()
-        config.load_config_file(str(tmp_path))
+        with caplog.at_level(logging.WARNING):
+            config = TreeConfig()
+            config.load_config_file(str(tmp_path))
 
-    captured = capsys.readouterr()
     assert (
-        "Warning: pyproject.toml found but cannot be parsed because 'tomli' is not installed"
-        in captured.err
+        "pyproject.toml found but cannot be parsed because 'tomli' is not installed"
+        in caplog.text
     )
 
 
@@ -272,20 +273,18 @@ def test_disable_gitignore(tmp_path):
     assert config.gitignore_spec is None
 
 
-def test_load_gitignore_open_error(capsys):
+def test_load_gitignore_open_error(caplog):
     config = TreeConfig()
 
     with patch("os.path.exists", return_value=True):
         with patch("builtins.open", side_effect=PermissionError("Permission denied")):
             config.load_gitignore("/dummy/path")
 
-    captured = capsys.readouterr()
-
-    assert "Warning: Could not load .gitignore: Permission denied" in captured.out
+    assert "Could not load .gitignore: Permission denied" in caplog.text
     assert config.gitignore_spec is None
 
 
-def test_load_gitignore_parse_error(tmp_path, capsys):
+def test_load_gitignore_parse_error(tmp_path, caplog):
     gitignore = tmp_path / ".gitignore"
     gitignore.write_text("*.log")
 
@@ -294,9 +293,8 @@ def test_load_gitignore_parse_error(tmp_path, capsys):
     with patch(
         "pathspec.PathSpec.from_lines", side_effect=Exception("Unexpected Parser Error")
     ):
-        config.load_gitignore(str(tmp_path))
+        with caplog.at_level(logging.WARNING):
+            config.load_gitignore(str(tmp_path))
 
-    captured = capsys.readouterr()
-
-    assert "Warning: Could not load .gitignore: Unexpected Parser Error" in captured.out
+    assert "Could not load .gitignore: Unexpected Parser Error" in caplog.text
     assert config.gitignore_spec is None

@@ -1,6 +1,8 @@
 # tests/test_cli/test_main.py
+import logging
 import sys
 from unittest.mock import MagicMock, patch
+
 from ltree.cli.main import main
 
 
@@ -45,7 +47,7 @@ def test_main_sys_argv():
     test_argv = []
 
     with patch("sys.argv", test_argv):
-        with patch("ltree.cli.main.build_parser") as mock_build_parser:
+        with patch(f"{cli_path}.build_parser") as mock_build_parser:
             mock_parser = MagicMock()
             mock_args = MagicMock()
 
@@ -60,7 +62,7 @@ def test_main_sys_argv():
     test_argv = ["ltree", "some/sandbox/dir"]
 
     with patch("sys.argv", test_argv):
-        with patch("ltree.cli.main.build_parser") as mock_build_parser:
+        with patch(f"{cli_path}.build_parser") as mock_build_parser:
             mock_parser = MagicMock()
             mock_args = MagicMock()
             mock_parser.parse_args.return_value = mock_args
@@ -73,7 +75,7 @@ def test_main_sys_argv():
     # Case 3: no sys.argv attribute
     import sys
 
-    with patch("ltree.cli.main.build_parser") as mock_build_parser:
+    with patch(f"{cli_path}.build_parser") as mock_build_parser:
         mock_parser = MagicMock()
         mock_args = MagicMock()
         mock_parser.parse_args.return_value = mock_args
@@ -93,7 +95,7 @@ def test_main_sys_argv():
         mock_build_parser.assert_called_once()
 
 
-def test_main_permission_error_handling(capsys):
+def test_main_permission_error_handling(caplog):
     mock_func = MagicMock()
     mock_func.side_effect = PermissionError("Access denied to target files")
 
@@ -103,23 +105,19 @@ def test_main_permission_error_handling(capsys):
     test_argv = ["ltree", "tree"]
 
     with patch("sys.argv", test_argv):
-        with patch("ltree.cli.main.build_parser") as mock_build_parser:
+        with patch(f"{cli_path}.build_parser") as mock_build_parser:
             mock_parser = MagicMock()
             mock_parser.parse_args.return_value = mock_args
             mock_build_parser.return_value = mock_parser
 
-            exit_code = main()
+            with caplog.at_level(logging.WARNING):
+                exit_code = main()
 
-            assert exit_code == 1
-
-            captured = capsys.readouterr()
-            assert (
-                "Error: Permission denied. Access denied to target files"
-                in captured.err
-            )
+                assert exit_code == 1
+                assert "Permission denied: Access denied to target files" in caplog.text
 
 
-def test_main_generic_exception_handling(capsys):
+def test_main_generic_exception_handling(caplog):
     mock_func = MagicMock()
     mock_func.side_effect = ValueError("Some unexpected value error")
 
@@ -129,16 +127,13 @@ def test_main_generic_exception_handling(capsys):
     test_argv = ["ltree", "tree"]
 
     with patch("sys.argv", test_argv):
-        with patch("ltree.cli.main.build_parser") as mock_build_parser:
+        with patch(f"{cli_path}.build_parser") as mock_build_parser:
             mock_parser = MagicMock()
             mock_parser.parse_args.return_value = mock_args
             mock_build_parser.return_value = mock_parser
 
-            exit_code = main()
+            with caplog.at_level(logging.WARNING):
+                exit_code = main()
 
-            assert exit_code == 1
-
-            captured = capsys.readouterr()
-            assert (
-                "Error: Unexpected failure. Some unexpected value error" in captured.err
-            )
+                assert exit_code == 1
+                assert "Unexpected failure: Some unexpected value error" in caplog.text

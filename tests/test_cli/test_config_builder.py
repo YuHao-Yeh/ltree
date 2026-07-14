@@ -1,5 +1,6 @@
 # tests/test_cli/test_config_builder.py
 import argparse
+import logging
 import re
 from unittest.mock import patch
 
@@ -85,7 +86,7 @@ def test_build_config_standard_args():
     assert not config.use_color
 
 
-def test_build_config_with_invalid_regex(capsys):
+def test_build_config_with_invalid_regex(caplog):
     args = argparse.Namespace(
         start_path="-",
         output="-",
@@ -108,8 +109,8 @@ def test_build_config_with_invalid_regex(capsys):
         regex_exclude=["[invalid-regex+"],
     )
 
-    config = build_config(args)
-    captured = capsys.readouterr()
+    with caplog.at_level(logging.WARNING):
+        config = build_config(args)
 
-    assert "Warning: Invalid regex" in captured.err
+    assert "Invalid regex" in caplog.text
     assert len(config.regex_exclude_patterns) == 0

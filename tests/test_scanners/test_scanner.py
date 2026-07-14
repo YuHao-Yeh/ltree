@@ -1,4 +1,5 @@
 # tests/test_scanners/test_scanner.py
+import logging
 from unittest.mock import patch
 
 from ltree.core.config import TreeConfig
@@ -12,15 +13,14 @@ scanner_path = "ltree.core.scanners.scanner"
 # =======================================================================#
 # Tests: Scanner
 # =======================================================================#
-def test_scanner_non_existent_path(capsys):
+def test_scanner_non_existent_path(caplog):
     config = TreeConfig()
     scanner = Scanner(config)
 
-    res = scanner.scan("non_existent_path_999")
+    with caplog.at_level(logging.ERROR):
+        res = scanner.scan("non_existent_path_999")
     assert res is None
-
-    captured = capsys.readouterr()
-    assert "Error: Path 'non_existent_path_999' does not exist." in captured.err
+    assert "Path 'non_existent_path_999' does not exist." in caplog.text
 
 
 @patch(f"{scanner_path}.traverse_path")
@@ -40,16 +40,15 @@ def test_scanner_success_flow(mock_aggregate, mock_traverse, tmp_path):
     assert config.root_path == str(tmp_path.resolve())
 
 
-def test_scanner_no_root_node(tmp_path, capsys):
+def test_scanner_no_root_node(tmp_path, caplog):
     config = TreeConfig()
     scanner = Scanner(config)
 
     with patch("os.scandir", side_effect=OSError):
-        res = scanner.scan(tmp_path)
+        with caplog.at_level(logging.ERROR):
+            res = scanner.scan(tmp_path)
 
-    captured = capsys.readouterr()
-    assert "Error: Failed to scan" in captured.err
-
+    assert "Failed to scan" in caplog.text
     assert res is None
 
 

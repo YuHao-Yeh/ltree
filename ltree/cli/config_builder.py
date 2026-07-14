@@ -1,6 +1,7 @@
 # ltree/cli/config_builder.py
 from __future__ import annotations
 
+import logging
 import re
 import sys
 from typing import TYPE_CHECKING
@@ -9,6 +10,8 @@ from ltree.core.config import TreeConfig
 
 if TYPE_CHECKING:
     from argparse import Namespace
+
+logger = logging.getLogger(__name__)
 
 
 def build_config(args: Namespace) -> TreeConfig:
@@ -68,7 +71,7 @@ def build_config(args: Namespace) -> TreeConfig:
             try:
                 config.regex_exclude_patterns.append(re.compile(pattern))
             except re.error as e:
-                print(f"Warning: Invalid regex '{pattern}': {e}", file=sys.stderr)
+                logger.warning("Invalid regex '%s': %s", pattern, e)
 
     # 5. include & exclude
     for pattern in getattr(args, "exclude", []):

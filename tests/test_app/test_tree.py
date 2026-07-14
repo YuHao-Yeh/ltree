@@ -1,4 +1,5 @@
 # tests/test_cli/test_tree.py
+import logging
 import pytest
 
 from ltree.core.config import TreeConfig
@@ -24,14 +25,14 @@ def test_tree_application_generate_success(tmp_path):
     assert json_result.show_stats is False
 
 
-def test_tree_application_generate_non_existent_path(capsys):
+def test_tree_application_generate_non_existent_path(caplog):
     config = TreeConfig()
     app = TreeApplication(config)
 
-    result = app.generate("non_existent_path_999")
+    with caplog.at_level(logging.ERROR):
+        result = app.generate("non_existent_path_999")
 
-    captured = capsys.readouterr()
-    assert "Path 'non_existent_path_999' does not exist." in captured.err
+    assert "Path 'non_existent_path_999' does not exist." in caplog.text
     assert isinstance(result, RenderResult)
     assert result.content == ""
     assert result.show_stats is False
